@@ -1,6 +1,5 @@
-streamlit
 ollama
-langchain
+langchain_community
+pypdf
 faiss-cpu
 sentence-transformers
-pypdf
