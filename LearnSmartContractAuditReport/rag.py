@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import argparse
-from pypdf import PdfReader  # Thêm dòng import này
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from pypdf import PdfReader
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import ollama
@@ -94,19 +94,30 @@ def query_command():
         - Tham chiếu audit report liên quan
         """
         
-        # Gọi LLM
-        response = ollama.generate(model="codellama", prompt=prompt)
-        print("\n💡 Trả lời:")
-        print(response["response"])
-        
-        # Sinh test cases cho fuzzing
-        fuzz_prompt = f"""
-        Dựa trên câu trả lời trước, hãy đề xuất 3 test case cho công cụ fuzzing:
-        {response["response"]}
-        """
-        fuzz_response = ollama.generate(model="codellama", prompt=fuzz_prompt)
-        print("\n🔧 Đề xuất test cases cho fuzzing:")
-        print(fuzz_response["response"])
+        try:
+            # Gọi LLM với timeout
+            response = ollama.generate(
+                model="codellama",
+                prompt=prompt,
+                options={"timeout": 60}  # Thêm timeout 60 giây
+            )
+            print("\n💡 Trả lời:")
+            print(response["response"])
+            
+            # Sinh test cases cho fuzzing
+            fuzz_prompt = f"""
+            Dựa trên câu trả lời trước, hãy đề xuất 3 test case cho công cụ fuzzing:
+            {response["response"]}
+            """
+            fuzz_response = ollama.generate(
+                model="codellama",
+                prompt=fuzz_prompt,
+                options={"timeout": 60}  # Thêm timeout 60 giây
+            )
+            print("\n🔧 Đề xuất test cases cho fuzzing:")
+            print(fuzz_response["response"])
+        except Exception as e:
+            print(f"❌ Lỗi khi gọi Ollama: {str(e)}")
 
 def main():
     parser = argparse.ArgumentParser(description="Smart Contract Audit Expert System")
