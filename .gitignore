@@ -35,4 +35,5 @@ Thumbs.db
 
 # Custom ignored directories
 projects/unifuzz/
-LearnSmartContractAuditReport/audits/
+RAG/audit_reports
+RAG/audit_reports2

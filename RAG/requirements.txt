@@ -1,0 +1,8 @@
+PyPDF2l
+langchain
+langchain_community
+langchain-core
+langchain-google-genai
+google-ai-generativelanguage
+faiss-cpu
+sentence-transformers
