@@ -1,0 +1,22 @@
+[
+    {
+        "instruction": "Generate fuzzing inputs for this vulnerable contract",
+        "input": "contract InsecureERC20 { mapping(address => uint) balances; function transfer(address to, uint value) public { balances[msg.sender] -= value; balances[to] += value; }}",
+        "output": {
+            "detected_vulnerabilities": [
+                {
+                    "vulnerability_type": "Reentrancy",
+                    "fuzzing_inputs": [
+                        "to: contractAddress, value: 1e18",
+                        "to: attacker, value: type(uint).max",
+                        "to: address(this), value: 1000",
+                        "to: msg.sender, value: 0",
+                        "to: burnAddress, value: 1"
+                    ],
+                    "attack_scenario": "Reentrant call during balance update"
+                }
+            ],
+            "confidence_level": 0.95
+        }
+    }
+]

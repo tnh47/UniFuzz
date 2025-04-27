@@ -1,0 +1,17 @@
+[
+    {
+      "instruction": "Parse contract and return JSON security errors",
+      "input": "contract Vulnerable { ... }",
+      "output": {
+        "detected_vulnerabilities": [
+          {
+            "vulnerability_type": "Reentrancy",
+            "severity": "High",
+            "location": "Line 42-45",
+            "recommendation": "Use Checks-Effects-Interactions pattern"
+          }
+        ],
+        "confidence_score": 0.92
+      }
+    }
+  ]

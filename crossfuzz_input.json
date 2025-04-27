@@ -1,0 +1,7 @@
+{
+    "c_name": "E",
+    "solc_version": "0.4.26",
+    "max_trans_length": 10,
+    "fuzz_time": 60,
+    "trans_duplication": "0"
+}

@@ -7,7 +7,14 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGener
 from langchain_community.vectorstores import FAISS
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
-
+import pytesseract
+from pdf2image import convert_from_path
+from PIL import Image
+import tempfile
+from langchain.retrievers import ContextualCompressionRetriever
+from langchain.retrievers.document_compressors import LLMChainExtractor
+from langchain.chains import LLMChain
+from func_timeout import func_timeout, FunctionTimedOut
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 class RAG:
@@ -22,7 +29,37 @@ class RAG:
             chunk_overlap=512
         )
         self.vector_db_path = "./RAG/data/vector_db"
-    
+    def extract_text_from_image(self, image):
+        """Extract text from image using Tesseract OCR with error handling"""
+        try:
+            return pytesseract.image_to_string(image)
+        except Exception as e:
+            logging.error(f"OCR Error: {e}")
+            return ""
+    def process_pdf_page(self, page, pdf_path, page_num):
+        """Process PDF page combining text extraction and OCR for image-based pages"""
+        text = page.extract_text() or ""
+        
+        # If text is empty or seems incomplete, try OCR
+        if len(text.strip()) < 50:  # Threshold for considering as image page
+            try:
+                # Convert specific PDF page to image
+                # Modified: Use tempfile to handle Windows path issues
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    images = convert_from_path(
+                        pdf_path,
+                        first_page=page_num,
+                        last_page=page_num,
+                        output_folder=temp_dir,
+                        fmt="jpeg"
+                    )
+                    
+                    for img in images:
+                        text += "\n" + self.extract_text_from_image(img)
+            except Exception as e:
+                logging.error(f"PDF to image conversion error: {e}")
+        
+        return text   
     def ingest(self, pdf_dir="./RAG/data/audit_reports"):
         """Read PDF and store vector."""
         all_text = ""
@@ -37,27 +74,31 @@ class RAG:
             try:
                 with open(file_path, "rb") as f:
                     pdf_reader = PdfReader(f)
-                    for i, page in enumerate(pdf_reader.pages):
+                    for page_num, page in enumerate(pdf_reader.pages):
                         try:
-                            page_text = page.extract_text()
-                            if page_text:
-                                all_text += page_text + "\n"
+                            # PDF pages are 1-indexed in convert_from_path
+                            processed_text = self.process_pdf_page(
+                                page, 
+                                file_path, 
+                                page_num + 1  # convert_from_path uses 1-based page numbers
+                            )
+                            all_text += processed_text + "\n"
                         except Exception as e:
-                            logging.error(f"Error while read the page {i} in file {filename}: {e}")
+                            logging.error(f"Error processing page {page_num+1} in {filename}: {e}")
             except Exception as e:
-                logging.error(f"Open error{filename}: {e}")
+                logging.error(f"Error opening {filename}: {e}")
 
-        if not all_text:
-            logging.error("Cant read anything from PDF!")
+        if not all_text.strip():
+            logging.error("No text could be extracted from PDFs")
             return
 
-        chunks = self.text_splitter.split_text(all_text)
         try:
+            chunks = self.text_splitter.split_text(all_text)
             vector_store = FAISS.from_texts(chunks, self.embeddings)
             vector_store.save_local(self.vector_db_path)
-            print(f"Vector were store with {len(chunks)} chunks.")
+            logging.info(f"Vector store updated with {len(chunks)} chunks")
         except Exception as e:
-            logging.error(f"Error while store vector: {e}")
+            logging.error(f"Vector store error: {e}")
 
     def ask(self, question):
         """Chat with RAG."""
@@ -66,15 +107,35 @@ class RAG:
         except Exception as e:
             logging.error(f"Error while loading database{self.vector_db_path}: {e}")
             return
-
+        compressor = LLMChainExtractor.from_llm(
+            ChatGoogleGenerativeAI(model="gemini-2.0-flash-lite",temperature=0, google_api_key=self.api_key)
+        )
+        compression_retriever = ContextualCompressionRetriever(
+            base_compressor=compressor,
+            base_retriever=vector_store.as_retriever(search_kwargs={"k": 3})
+        )
+        decompose_template = """Phân tách "{question}" thành 3 câu hỏi con theo thứ tự:"""
+        
         try:
-            docs = vector_store.similarity_search(question)
+            sub_questions = ChatGoogleGenerativeAI(
+                temperature=0,
+                google_api_key=self.api_key
+            ).invoke(decompose_template.format(question=question)).content.split("\n")
         except Exception as e:
-            logging.error(f"Error while similarity searching: {e}")
-            return
+            logging.error(f"Lỗi phân tách câu hỏi: {e}")
+            sub_questions = [question]
+
+        all_docs = []
+        for q in sub_questions:
+            if q.strip():
+                try:
+                    docs = compression_retriever.get_relevant_documents(q.strip())
+                    all_docs.extend(docs)
+                except Exception as e:
+                    logging.error(f"Lỗi tìm kiếm cho '{q}': {e}")
 
         prompt_template = (
-            "Answer the question as detailed as possible from the provided context.\n"
+            "Answer the question base on the provided context. If dont have enough information, just say 'Dont have matched information'\n"
             "Context:\n{context}\n\n"
             "{question}\n"
             "Answer:"
@@ -97,7 +158,11 @@ class RAG:
         )
 
         try:
-            response = chain({"input_documents": docs, "question": question})
+            response = func_timeout(
+                30, 
+                chain.invoke, 
+                args=({"input_documents": all_docs, "question": question},)
+            )
             print("\n Respone from AI:")
             print(response["output_text"])
         except Exception as e:

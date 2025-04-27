@@ -1,15 +1,17 @@
 import subprocess
 import os
 import logging
+import json
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def run_analysis(api_key, contract_path):
-    """Chạy Analysis.py để phân tích hợp đồng thông minh."""
+    """Step 1: Chạy Analysis.py để phân tích hợp đồng thông minh."""
     analysis_cmd = [
         "python", "./SmartSemanticAnalyzer/Analysis.py",
         "--api-key", api_key,
-        "--contract-path", contract_path
+        "--contract-path", contract_path,
+        "--output", "analysis_output.txt"
     ]
     result = subprocess.run(analysis_cmd, capture_output=True, text=True)
     if result.returncode != 0:
@@ -19,7 +21,7 @@ def run_analysis(api_key, contract_path):
     return os.path.exists("analysis_output.txt")
 
 def run_rag_ask(api_key, question):
-    """Chạy rag_googleapi.py ask để tạo seed fuzzing."""
+    """Gửi câu hỏi tới rag_googleapi.py để nhận phản hồi."""
     ask_cmd = [
         "python", "./RAG/rag_googleapi.py", "ask",
         "--api-key", api_key,
@@ -28,60 +30,181 @@ def run_rag_ask(api_key, question):
     result = subprocess.run(ask_cmd, capture_output=True, text=True)
     if result.returncode != 0:
         logging.error(f"RAG ask failed: {result.stderr}")
-        return False
+        return None
     logging.info("RAG ask completed successfully.")
-    print("RAG Response:")
-    print(result.stdout)
+    return result.stdout
+
+def generate_constructor_params(api_key, analysis_file="analysis_output.txt", save_path="constructor_params.txt"):
+    if not os.path.exists(analysis_file):
+        logging.error("Analysis output file does not exist.")
+        return None
+
+    try:
+        with open(analysis_file, "r", encoding="utf-8") as f:
+            analysis_output = f.read()
+        print(analysis_output)
+        logging.info("Successfully read analysis output from file.")
+    except Exception as e:
+        logging.error(f"Failed to read analysis output: {e}")
+        return None
+
+    prompt = (
+        f"Below is the analysis result of a Solidity smart contract:\n\n"
+        f"{analysis_output}\n\n"
+        "Based on the constructor(s) of the main contract and this analysis, generate a valid constructor_params.json has type and random value for fuzzing smart contract base on your audit report"
+        "file content in the following format, matching the structure and types of the constructor parameters:\n\n"
+        "{\n"
+        '  "_sub": {\n'
+        '    "type": "contract",\n'
+        '    "value": "Sub"\n'
+        '  },\n'
+        '  "_p": {\n'
+        '    "type": "uint256",\n'
+        '    "value": 12\n'
+        '  }\n'
+        "}\n\n"
+        "Return ONLY this JSON object. Do not include any other text or explanation."
+    )
+
+
+    response = run_rag_ask(api_key, prompt)
+    if not response:
+        logging.error("Failed to get response from RAG for constructor params.")
+        return None
+    try:
+        # json_start = response.find("{")
+        # json_end = response.rfind("}") + 1
+        # if json_start == -1 or json_end == -1:
+        #     raise ValueError("JSON array not found in response.")
+        # json_str = response[json_start:json_end]
+        # constructor_params = json.loads(json_str)
+        # logging.info("Successfully parsed constructor params JSON.")
+
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump(response, f, indent=4)
+        logging.info(f"Saved constructor parameters to {save_path}")
+        return save_path
+
+    except Exception as e:
+        logging.error(f"Failed to parse RAG response for constructor params: {e}")
+        return None
+
+def generate_crossfuzz_input(api_key, output_file="analysis_output.txt", save_path="crossfuzz_input.json"):
+    """Step 2: Đọc báo cáo kiểm toán và tạo đầu vào CrossFuzz bằng RAG."""    
+    if not os.path.exists(output_file):
+        logging.error("Analysis output file does not exist.")
+        return None
+
+    try:
+        with open(output_file, "r", encoding="utf-8") as f:
+            analysis_output = f.read()
+        logging.info("Successfully read analysis output from file.")
+    except Exception as e:
+        logging.error(f"Failed to read analysis output: {e}")
+        return None
+
+    prompt = (
+        f"Below is the analysis for the smart contract written in Solidity:\n\n"
+        f"{analysis_output}\n\n"
+        "Based on this analysis and your security audit, generate optimized input arguments for running CrossFuzz.py.\n"
+
+        "The required arguments are:\n"
+        # "- sol file path (`p`): assume it's available and named in your output as `contract.sol`\n"
+        "- contract name (`c_name`)\n"
+        "- solc_version \n"
+        "- max_trans_length (a reasonable integer > 0, not null)\n"
+        "- fuzz_time (integer > 0, in seconds, not null)\n"
+        # "- constructor_params_path (return `auto` if constructor has no complex parameters, or provide a JSON-style param path if needed)\n"
+        "- trans_duplication (0 or 1, depending on whether transaction duplication is needed for fuzzing)\n\n"
+        "Return ONLY the result in pure JSON format with exactly these fields:\n"
+        "{\n"
+        '  "c_name": "...",\n'
+        '  "solc_version": "...",\n'
+        '  "max_trans_length": ..., \n'
+        '  "fuzz_time": ..., \n'
+        # '  "constructor_params_path": "./constructor_params.json",\n'
+        '  "trans_duplication": ...\n'
+        "}\n"
+        "Do not add explanations or comments. Return only valid JSON."
+    )
+
+    response = run_rag_ask(api_key, prompt)
+    if not response:
+        logging.error("Failed to get response from RAG.")
+        return None
+    try:
+        json_start = response.find("{")
+        json_end = response.rfind("}") + 1
+        if json_start == -1 or json_end == -1:
+            raise ValueError("JSON object not found in response.")
+        json_str = response[json_start:json_end]
+        crossfuzz_input = json.loads(json_str)
+        logging.info("Successfully parsed CrossFuzz input JSON.")
+
+        with open(save_path, "w", encoding="utf-8") as f:
+            json.dump(crossfuzz_input, f, indent=4)
+        logging.info(f"Saved CrossFuzz input to {save_path}")
+        return save_path
+
+    except Exception as e:
+        logging.error(f"Failed to parse RAG response as JSON: {e}")
+        return None
+
+def run_crossfuzz_with_shell_script(input_json_path, contract_path, solc_path):
+    import subprocess, logging
+
+    cmd = ["bash", "run_crossfuzz.sh", input_json_path, contract_path, solc_path]
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+
+    for line in iter(process.stdout.readline, ''):
+        print(line.strip())
+
+    process.stdout.close()
+    return_code = process.wait()
+    
+    if return_code != 0:
+        logging.error(f"CrossFuzz shell script failed with return code {return_code}")
+        return False
+
+    logging.info("CrossFuzz executed successfully via shell script.")
     return True
 
-def run_integration(api_key, contract_path):
-    """Tích hợp toàn bộ quy trình."""
-    # Bước 1: Chạy Analysis.py
-    logging.info("Step 1: Running smart contract analysis...")
+def run_integration(api_key, contract_path, solc_path):
+    logging.info("Step 1: Running Analysis.py...")
     if not run_analysis(api_key, contract_path):
-        logging.error("Aborting due to analysis failure.")
+        logging.error("Aborting: analysis failed.")
         return
 
-    # Đọc output từ bước 1
-    output_file = "analysis_output.txt"
-    if os.path.exists(output_file):
-        try:
-            with open(output_file, "r", encoding="utf-8") as f:
-                analysis_output = f.read()
-            logging.info("Successfully read analysis output from file.")
-        except Exception as e:
-            logging.error(f"Failed to read analysis output: {e}")
-            return
-    else:
-        logging.error(f"Analysis output file not found: {output_file}")
+    logging.info("Step 2: Generating CrossFuzz input via RAG...")
+    constructor_params_path = generate_constructor_params(api_key)
+    if not constructor_params_path:
+        logging.error("Aborting: failed to generate CrossFuzz constructor params.")
+        return   
+    input_json_path = generate_crossfuzz_input(api_key)
+    if not input_json_path:
+        logging.error("Aborting: failed to generate CrossFuzz input.")
         return
 
-    # Bước 2: Hỏi RAG với câu hỏi tích hợp output từ bước 1
-    question_base = "Based on the following analysis, generate fuzzing seeds for the identified vulnerable functions:\n\n"
-    question = question_base + analysis_output
-    logging.info("Step 2: Querying RAG for fuzzing seeds with analysis output...")
-    if not run_rag_ask(api_key, question):
-        logging.error("Aborting due to ask failure.")
+    logging.info("Step 3: Running CrossFuzz via shell script...")
+    if not run_crossfuzz_with_shell_script(input_json_path, contract_path, solc_path):
+        logging.error("CrossFuzz failed.")
         return
 
-    logging.info("Integration completed successfully.")
+    logging.info("=== Integration completed successfully ===")
 
 if __name__ == "__main__":
     import argparse
 
-    # Thiết lập đối số dòng lệnh
-    parser = argparse.ArgumentParser(description="Integrate smart contract analysis and RAG for fuzzing seeds")
+    parser = argparse.ArgumentParser(description="RAG + CrossFuzz Integration")
     parser.add_argument("--api-key", required=True, help="Google API Key")
-    parser.add_argument("--contract-path", required=True, help="Path to the smart contract file")
+    parser.add_argument("--contract-path", required=True, help="Path to Solidity contract")
+    parser.add_argument("--solc-path", required=True, help="Path to solc binary")
 
     args = parser.parse_args()
 
-    # Lấy API key và contract path từ đối số
-    api_key = args.api_key
-    contract_path = args.contract_path
-
-    # Kiểm tra file hợp đồng có tồn tại không
-    if not os.path.exists(contract_path):
-        logging.error(f"Smart contract file not found: {contract_path}")
+    if not os.path.exists(args.contract_path):
+        logging.error(f"Contract file not found: {args.contract_path}")
+    elif not os.path.exists(args.solc_path):
+        logging.error(f"solc not found: {args.solc_path}")
     else:
-        run_integration(api_key, contract_path)
+        run_integration(args.api_key, args.contract_path, args.solc_path)
