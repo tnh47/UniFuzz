@@ -2,7 +2,7 @@ import subprocess
 import os
 import logging
 import json
-
+from fuzzer.engine.components.agent_generator import create_agent_enhanced_generator, generate_test_cases_with_agent
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def run_analysis(api_key, contract_path):
@@ -175,18 +175,23 @@ def run_integration(api_key, contract_path, solc_path):
         logging.error("Aborting: analysis failed.")
         return
 
-    logging.info("Step 2: Generating CrossFuzz input via RAG...")
-    constructor_params_path = generate_constructor_params(api_key)
-    if not constructor_params_path:
-        logging.error("Aborting: failed to generate CrossFuzz constructor params.")
-        return   
-    input_json_path = generate_crossfuzz_input(api_key)
-    if not input_json_path:
-        logging.error("Aborting: failed to generate CrossFuzz input.")
-        return
+    logging.info("Step 2: Creating enhanced generator with agent...")
+    # Tạo generator được tăng cường
+    generator = create_agent_enhanced_generator(
+        contract_path=contract_path,
+        api_key=api_key,
+        interface=interface,  # Lấy từ analysis
+        bytecode=bytecode,    # Lấy từ analysis
+        accounts=accounts,    # Lấy từ analysis
+        contract=contract,    # Lấy từ analysis
+        solc_path=solc_path
+    )
 
-    logging.info("Step 3: Running CrossFuzz via shell script...")
-    if not run_crossfuzz_with_shell_script(input_json_path, contract_path, solc_path):
+    logging.info("Step 3: Generating test cases with agent...")
+    test_cases = generate_test_cases_with_agent(generator)
+
+    logging.info("Step 4: Running CrossFuzz with enhanced test cases...")
+    if not run_crossfuzz_with_shell_script(test_cases, contract_path, solc_path):
         logging.error("CrossFuzz failed.")
         return
 
