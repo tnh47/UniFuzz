@@ -4,7 +4,7 @@ import subprocess
 import logging
 import os
 import argparse
-from google import genai  # Gemini API
+import google.generativeai as genai
 
 from slither.slither import Slither
 from slither.core.expressions import Identifier, TypeConversion, AssignmentOperation

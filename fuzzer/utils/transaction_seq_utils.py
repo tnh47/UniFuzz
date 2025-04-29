@@ -87,6 +87,12 @@ def deep_find_inner_call(_func, _contract):
 def init_func(sol_path):
     global sv_prepare, use_table, define_table, has_data_info_func, init, function_can_not_call
     solc_path = settings.SOLC_PATH_CROSS
+    
+    # Kiểm tra solc_path là None
+    if solc_path is None:
+        print("SOLC_PATH_CROSS không được cấu hình. Vui lòng sử dụng --solc-path-cross để đặt đường dẫn của solc")
+        solc_path = "/usr/bin/solc"  # Sử dụng đường dẫn mặc định nếu không được cung cấp
+        
     g = nx.MultiDiGraph()
     sl = Slither(sol_path, solc=solc_path)
     storage_slot_id_2_var_name(sl)

@@ -5,7 +5,12 @@ import os
 import json
 import logging
 from typing import Dict, List, Any, Optional
-from google import genai
+try:
+    # Thử import theo cách mới
+    from google import generativeai as genai
+except ImportError:
+    # Fallback sang import theo cách cũ
+    import google.generativeai as genai
 from slither.slither import Slither
 from fuzzer.engine.components.generator import Generator
 from fuzzer.engine.components.individual import Individual
@@ -20,7 +25,9 @@ class AgentAnalyzer:
         self.analysis_result = None
         self.constructor_params = None
         self.function_inputs = {}
-        self.llm_client = genai.Client(api_key=api_key)
+        
+        # Cấu hình API theo cách tương thích với mọi phiên bản
+        genai.configure(api_key=api_key)
         
     def analyze_contract(self) -> Dict:
         """Phân tích hợp đồng sử dụng Slither và LLM"""
@@ -92,15 +99,17 @@ class AgentAnalyzer:
             3. Potential security issues to focus on
             """
             
-            llm_response = self.llm_client.models.generate_content(
-                model="gemini-2.0-flash-lite",
-                contents=prompt
-            )
+            # Gọi LLM API theo cách tương thích với mọi phiên bản
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
+            
+            # Lấy text từ response (tương thích với các phiên bản khác nhau)
+            response_text = response.text if hasattr(response, 'text') else response.parts[0].text
             
             # Lưu kết quả phân tích
             self.analysis_result = {
                 "contract_info": contract_info,
-                "llm_analysis": llm_response.text
+                "llm_analysis": response_text
             }
             
             return self.analysis_result
@@ -132,13 +141,15 @@ class AgentAnalyzer:
             Focus on values that might trigger edge cases or security issues.
             """
             
-            llm_response = self.llm_client.models.generate_content(
-                model="gemini-2.0-flash-lite",
-                contents=prompt
-            )
+            # Gọi LLM API theo cách tương thích với mọi phiên bản
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
+            
+            # Lấy text từ response (tương thích với các phiên bản khác nhau)
+            response_text = response.text if hasattr(response, 'text') else response.parts[0].text
             
             # Parse response và lưu constructor params
-            self.constructor_params = json.loads(llm_response.text)
+            self.constructor_params = json.loads(response_text)
             return self.constructor_params
             
         except Exception as e:
@@ -175,13 +186,15 @@ class AgentAnalyzer:
             Focus on values that might trigger edge cases or security issues.
             """
             
-            llm_response = self.llm_client.models.generate_content(
-                model="gemini-2.0-flash-lite",
-                contents=prompt
-            )
+            # Gọi LLM API theo cách tương thích với mọi phiên bản
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
+            
+            # Lấy text từ response (tương thích với các phiên bản khác nhau)
+            response_text = response.text if hasattr(response, 'text') else response.parts[0].text
             
             # Parse response và lưu function inputs
-            inputs = json.loads(llm_response.text)
+            inputs = json.loads(response_text)
             self.function_inputs[function_name] = inputs
             return inputs
             

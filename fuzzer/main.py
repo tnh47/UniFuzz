@@ -200,14 +200,42 @@ class Fuzzer:
 
         self.instrumented_evm.create_snapshot()  # 部署所有合约后, 创建快照
 
-        generator = Generator(interface=self.interface,
-                              bytecode=self.deployement_bytecode,
-                              accounts=self.instrumented_evm.accounts,
-                              contract=contract_address,
-                              other_generators=generators,
-                              interface_mapper=self.interface_mapper,
-                              contract_name=self.contract_name,
-                              sol_path=self.args.source)
+        # Tạo generator (thông thường hoặc tăng cường LLM)
+        if self.args.use_llm and self.args.api_key:
+            logger.info("Using LLM-enhanced generator with API key")
+            # Đọc báo cáo audit nếu có
+            audit_report = None
+            if self.args.audit_file and os.path.exists(self.args.audit_file):
+                with open(self.args.audit_file, 'r', encoding='utf-8') as f:
+                    audit_report = f.read()
+                    logger.info(f"Loaded audit report from {self.args.audit_file}, length: {len(audit_report)} chars")
+            
+            # Sử dụng LLMEnhancedGenerator
+            from fuzzer.engine.components import create_llm_enhanced_generator
+            generator = create_llm_enhanced_generator(
+                interface=self.interface,
+                bytecode=self.deployement_bytecode,
+                accounts=self.instrumented_evm.accounts,
+                contract=contract_address,
+                api_key=self.args.api_key,
+                audit_report=audit_report,
+                contract_name=self.contract_name,
+                sol_path=self.args.source,
+                other_generators=generators,
+                interface_mapper=self.interface_mapper
+            )
+        else:
+            # Sử dụng Generator thông thường
+            generator = Generator(
+                interface=self.interface,
+                bytecode=self.deployement_bytecode,
+                accounts=self.instrumented_evm.accounts,
+                contract=contract_address,
+                other_generators=generators,
+                interface_mapper=self.interface_mapper,
+                contract_name=self.contract_name,
+                sol_path=self.args.source
+            )
 
         # update the generator with the interface of the other contracts
         all_generators = [generator] + generators
@@ -377,6 +405,9 @@ def launch_argument_parser():
     parser.add_argument("--cfg", help="Build control-flow graph and highlight code coverage.", action="store_true")
     parser.add_argument("--rpc-host", help="Ethereum client RPC hostname.", action="store", dest="rpc_host", type=str)
     parser.add_argument("--rpc-port", help="Ethereum client RPC port.", action="store", dest="rpc_port", type=int)
+    parser.add_argument("--api-key", help="Google API Key for LLM-enhanced fuzzing.", action="store", dest="api_key", type=str)
+    parser.add_argument("--use-llm", help="Enable LLM-enhanced fuzzing (requires --api-key).", action="store_true", dest="use_llm")
+    parser.add_argument("--audit-file", help="Path to audit report for context-aware LLM fuzzing.", action="store", dest="audit_file", type=str)
 
     parser.add_argument("--data-dependency",
                         help="Disable/Enable data dependency analysis: 0 - Disable, 1 - Enable (default: 1)",
@@ -521,7 +552,7 @@ def launch_argument_parser():
         settings.DUPLICATION = True
     else:
         settings.DUPLICATION = False
-    if settings.SOLC_PATH_CROSS is None:
+    if args.cross_contract == 1 and settings.SOLC_PATH_CROSS is None:
         print('\033[42;31m!!!!!!you need specify a solc path!!!!!!\033[0m')
         sys.exit(-1)
 

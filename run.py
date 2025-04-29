@@ -169,41 +169,99 @@ def run_crossfuzz_with_shell_script(input_json_path, contract_path, solc_path):
     logging.info("CrossFuzz executed successfully via shell script.")
     return True
 
-def run_integration(api_key, contract_path, solc_path):
+def run_llm_enhanced_fuzzing(api_key, contract_path, solc_path, audit_file=None):
+    """Chạy fuzzing với LLM enhancement trực tiếp từ main.py"""
+    logging.info("Running LLM-enhanced fuzzing...")
+    
+    # Đọc báo cáo audit nếu có
+    audit_param = []
+    if audit_file and os.path.exists(audit_file):
+        audit_param = ["--audit-file", audit_file]
+        
+    # Lấy tên contract từ đường dẫn file
+    contract_name = os.path.basename(contract_path).split('.')[0]
+    
+    # Thêm các hợp đồng phụ thuộc dựa trên tên hợp đồng
+    depend_contracts = []
+    if contract_name == "BECToken" or contract_name == "BecToken":
+        depend_contracts = ["SafeMath", "ERC20Basic", "BasicToken", "ERC20", 
+                           "StandardToken", "Ownable", "Pausable", "PausableToken"]
+    
+    # Cấu hình và chạy fuzzer
+    cmd = [
+        "python", "fuzzer/main.py",
+        "--source", contract_path,
+        "--contract", contract_name,  # Sử dụng tên contract đã lấy
+        "--solc", "v0.4.16",  # Chỉ định phiên bản solc
+        "--solc-path-cross", solc_path,  # Thêm đường dẫn solc cho cross contract fuzzing
+        "--cross-contract", "1",  # Kích hoạt cross contract fuzzing
+        "--depend-contracts"
+    ] + depend_contracts + [  # Thêm danh sách hợp đồng phụ thuộc
+        "--api-key", api_key,
+        "--use-llm",
+        "--constructor-args", "auto"  # Tự động phát hiện các tham số constructor
+    ] + audit_param
+    
+    logging.info(f"Running command: {' '.join(cmd)}")
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    
+    for line in iter(process.stdout.readline, ''):
+        print(line.strip())
+    
+    process.stdout.close()
+    return_code = process.wait()
+    
+    if return_code != 0:
+        logging.error(f"LLM-enhanced fuzzing failed with return code {return_code}")
+        return False
+    
+    logging.info("LLM-enhanced fuzzing completed successfully")
+    return True
+
+def run_integration(api_key, contract_path, solc_path, audit_file=None, use_crossfuzz=False):
     logging.info("Step 1: Running Analysis.py...")
     if not run_analysis(api_key, contract_path):
         logging.error("Aborting: analysis failed.")
         return
-
-    logging.info("Step 2: Creating enhanced generator with agent...")
-    # Tạo generator được tăng cường
-    generator = create_agent_enhanced_generator(
-        contract_path=contract_path,
-        api_key=api_key,
-        interface=interface,  # Lấy từ analysis
-        bytecode=bytecode,    # Lấy từ analysis
-        accounts=accounts,    # Lấy từ analysis
-        contract=contract,    # Lấy từ analysis
-        solc_path=solc_path
-    )
-
-    logging.info("Step 3: Generating test cases with agent...")
-    test_cases = generate_test_cases_with_agent(generator)
-
-    logging.info("Step 4: Running CrossFuzz with enhanced test cases...")
-    if not run_crossfuzz_with_shell_script(test_cases, contract_path, solc_path):
-        logging.error("CrossFuzz failed.")
-        return
+        
+    # Nếu bước phân tích thành công, có thể sử dụng phân tích làm báo cáo audit
+    if audit_file is None and os.path.exists("analysis_output.txt"):
+        audit_file = "analysis_output.txt"
+        logging.info("Using analysis output as audit report for LLM context")
+    
+    if use_crossfuzz:
+        # Phương pháp cũ: sử dụng CrossFuzz
+        logging.info("Step 2: Generating constructor params with RAG...")
+        constructor_params_path = generate_constructor_params(api_key)
+        if not constructor_params_path:
+            logging.error("Failed to generate constructor params.")
+            
+        logging.info("Step 3: Generating CrossFuzz input...")
+        crossfuzz_input_path = generate_crossfuzz_input(api_key)
+        if not crossfuzz_input_path:
+            logging.error("Failed to generate CrossFuzz input.")
+            
+        logging.info("Step 4: Running CrossFuzz...")
+        if not run_crossfuzz_with_shell_script(crossfuzz_input_path, contract_path, solc_path):
+            logging.error("CrossFuzz failed.")
+            return
+    else:
+        # Phương pháp mới: sử dụng LLM-enhanced fuzzing
+        if not run_llm_enhanced_fuzzing(api_key, contract_path, solc_path, audit_file):
+            logging.error("LLM-enhanced fuzzing failed.")
+            return
 
     logging.info("=== Integration completed successfully ===")
 
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="RAG + CrossFuzz Integration")
+    parser = argparse.ArgumentParser(description="RAG + Fuzzing Integration")
     parser.add_argument("--api-key", required=True, help="Google API Key")
     parser.add_argument("--contract-path", required=True, help="Path to Solidity contract")
     parser.add_argument("--solc-path", required=True, help="Path to solc binary")
+    parser.add_argument("--audit-file", help="Path to audit report for additional context")
+    parser.add_argument("--use-crossfuzz", action="store_true", help="Use CrossFuzz method instead of direct LLM-enhanced fuzzing")
 
     args = parser.parse_args()
 
@@ -212,4 +270,4 @@ if __name__ == "__main__":
     elif not os.path.exists(args.solc_path):
         logging.error(f"solc not found: {args.solc_path}")
     else:
-        run_integration(args.api_key, args.contract_path, args.solc_path)
+        run_integration(args.api_key, args.contract_path, args.solc_path, args.audit_file, args.use_crossfuzz)

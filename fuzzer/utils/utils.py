@@ -83,7 +83,7 @@ def compile(solc_version, evm_version, source_code_file):
         source_code = file.read()
     try:
         if not str(solc_version).startswith("v"):
-            solc_version = "v" + str(solc_version.truncate())
+            solc_version = "v" + str(solc_version)
         solc_version = _convert_and_validate_version(solc_version)
         if not solc_version in solcx.get_installed_solc_versions():
             solcx.install_solc(solc_version)
@@ -112,7 +112,7 @@ def compile(solc_version, evm_version, source_code_file):
         }, allow_paths='.')
     except Exception as e:
         print("Error: Solidity compilation failed!")
-        print(e.message)
+        print(str(e))
     return out
 
 
