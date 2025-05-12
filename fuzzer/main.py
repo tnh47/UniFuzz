@@ -286,7 +286,7 @@ class Fuzzer:
 
 def main():
     args = launch_argument_parser()
-
+    # import pdb; pdb.set_trace()
     logger = initialize_logger("Main    ")
 
     # Check if contract has already been analyzed
@@ -560,4 +560,5 @@ def launch_argument_parser():
 
 
 if '__main__' == __name__:
+    
     main()

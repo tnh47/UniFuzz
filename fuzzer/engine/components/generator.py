@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import random
+import logging
 import collections
 from typing import List
 from typing import Tuple
@@ -276,6 +277,26 @@ class Generator:
 
         address, value = self.get_random_returndatasize_and_address(function)
         individual[-1]["returndatasize"] = {address: value}
+        # args_values = []  # Lưu giá trị để hiển thị
+        
+        # # Sinh các tham số
+        # for index in range(len(argument_types)):
+        #     arg_value = self.get_random_argument(argument_types[index], function, index)
+        #     arguments.append(arg_value)
+        #     args_values.append(f"{argument_types[index]}:{arg_value}")
+        
+        # # Lấy tên hàm từ interface_mapper nếu có
+        # function_name = "unknown"
+        # if self.interface_mapper:
+        #     for fname, fhash in self.interface_mapper.items():
+        #         if fhash == function:
+        #             function_name = fname
+        #             break
+        
+        # # In ra thông tin giao dịch
+        # print(f"🚀 CALLING: {function_name} ({function}) with args: {', '.join(args_values)}")
+        # self.logger.info(f"FUNCTION CALL: {function_name} with arguments: {args_values}")
+
         return individual
 
     def generate_randon_individual_without_constructor(self, func_hash=None, func_args_types=None, default_value=False):

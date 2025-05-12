@@ -16,7 +16,7 @@ logger = logging.getLogger("LLMEnhancedGenerator")
 
 class LLMEnhancedGenerator(Generator):
     """
-    Generator được cải tiến với LLM để sinh các giá trị tối ưu
+    Generator được cải tiến với RAG để sinh các giá trị tối ưu
     """
     
     def __init__(self, interface: Dict, 
@@ -30,13 +30,13 @@ class LLMEnhancedGenerator(Generator):
                  other_generators=None, 
                  interface_mapper=None):
         """
-        Khởi tạo generator với LLM
+        Khởi tạo generator với RAG
         
         :param interface: Giao diện hợp đồng
         :param bytecode: Bytecode hợp đồng
         :param accounts: Danh sách tài khoản
         :param contract: Địa chỉ hợp đồng
-        :param api_key: Google API Key cho LLM
+        :param api_key: Google API Key cho RAG
         :param audit_report: Báo cáo audit (tuỳ chọn)
         :param contract_name: Tên hợp đồng
         :param sol_path: Đường dẫn tới file Solidity
@@ -49,26 +49,24 @@ class LLMEnhancedGenerator(Generator):
                         contract_name=contract_name, 
                         sol_path=sol_path)
         
-        # Khởi tạo LLM Agent
+        # Khởi tạo LLM Agent với RAG
         self.llm_agent = LLMAgent(api_key=api_key)
         self.audit_report = audit_report
         logger.info(f"LLMEnhancedGenerator initialized for contract: {contract_name}")
     
     def get_random_argument(self, type_str: str, function: str, argument_index: int) -> Any:
         """
-        Override phương thức get_random_argument để sử dụng LLM
+        Override phương thức get_random_argument để sử dụng RAG
         với logging chi tiết và fallback về random generation.
         """
-        # Logging đầy đủ thông tin đầu vào
-        logger.info(f"LLM GENERATOR INPUT: function={function}, arg_index={argument_index}, type={type_str}")
+        logger.info(f"RAG GENERATOR INPUT: function={function}, arg_index={argument_index}, type={type_str}")
         
-        # Xây dựng context cho LLM
+        # Xây dựng context cho RAG
         context: Dict[str, Any] = {}
         if self.audit_report:
             context["audit_report"] = self.audit_report
             logger.debug(f"Using audit report for context in {function}.{argument_index}")
         
-        # Nếu có file source, thêm vào context
         if hasattr(self, 'sol_path') and self.sol_path and os.path.exists(self.sol_path):
             try:
                 with open(self.sol_path, 'r') as f:
@@ -77,31 +75,12 @@ class LLMEnhancedGenerator(Generator):
             except Exception as e:
                 logger.warning(f"Could not read sol file {self.sol_path}: {e}")
         
-        # Tham số tên
         arg_name = f"arg{argument_index}"
         
-        # Cố gắng sử dụng giá trị từ audit report trước
-        known_values = None
-        if self.audit_report:
-            known_values = self._extract_known_values_from_audit(
-                function=function,
-                arg_index=argument_index,
-                arg_type=type_str
-            )
-            if known_values:
-                logger.debug(f"Known audit-derived values for {function}.{arg_name}: {known_values}")
-        
-        # 50% chance dùng giá trị audit-derived nếu có
-        if known_values and random.random() < 0.5:
-            value = random.choice(known_values)
-            self.add_argument_to_pool(function, argument_index, value)
-            logger.info(f"LLM AUDIT VALUE: Using audit-derived value for {function}.{arg_name}: {value}")
-            return value
-        
-        # Cố gắng lấy giá trị từ LLM agent
+        # Cố gắng lấy giá trị từ RAG
         try:
-            logger.info(f"Attempting to generate value for {function}.{arg_name} ({type_str}) using LLM")
-            llm_value = self.llm_agent.get_argument_suggestion(
+            logger.info(f"Attempting to generate value for {function}.{arg_name} ({type_str}) using RAG")
+            rag_value = self.llm_agent.get_argument_suggestion(
                 type_str=type_str,
                 function_name=function,
                 arg_name=arg_name,
@@ -109,14 +88,14 @@ class LLMEnhancedGenerator(Generator):
                 context=context
             )
             
-            if llm_value is not None:
-                self.add_argument_to_pool(function, argument_index, llm_value)
-                logger.info(f"LLM SUCCESS: Generated value for {function}.{arg_name}: {llm_value}")
-                return llm_value
+            if rag_value is not None:
+                self.add_argument_to_pool(function, argument_index, rag_value)
+                logger.info(f"RAG SUCCESS: Generated value for {function}.{arg_name}: {rag_value}")
+                return rag_value
             else:
-                logger.warning(f"LLM FAILED: Returned None for {function}.{arg_name} ({type_str})")
+                logger.warning(f"RAG FAILED: Returned None for {function}.{arg_name} ({type_str})")
         except Exception as e:
-            logger.error(f"LLM ERROR: {e}", exc_info=True)
+            logger.error(f"RAG ERROR: {e}", exc_info=True)
         
         # Fallback về random generator
         logger.info(f"FALLBACK: Using random generation for {function}.{arg_name} ({type_str})")
@@ -126,9 +105,8 @@ class LLMEnhancedGenerator(Generator):
             return random_value
         except Exception as e:
             logger.error(f"Error in random generation fallback: {e}", exc_info=True)
-            # Nếu super() cũng lỗi, trả về None hoặc ném tiếp exception
             return None
-        
+    
     def _extract_known_values_from_audit(self, function, arg_index, arg_type):
         """
         Trích xuất các giá trị đã biết từ báo cáo audit
@@ -140,7 +118,6 @@ class LLMEnhancedGenerator(Generator):
         
         # Tìm các giá trị số dựa trên kiểu
         if arg_type.startswith("uint") or arg_type.startswith("int"):
-            # Tìm các số trong báo cáo audit gần với tên hàm
             pattern = re.compile(rf"{function}[^.]*?(\d+)")
             matches = pattern.findall(self.audit_report)
             if matches:
@@ -157,18 +134,86 @@ class LLMEnhancedGenerator(Generator):
             values.extend(matches)
         
         return values if values else None
+    def generate_individual(self, function, argument_types, default_value=False):
+        """Sinh một giao dịch với tham số và hiển thị chi tiết"""
+        individual = []
+        arguments = [function]  # Function selector là tham số đầu tiên
+        args_values = []
+        
+        # Sinh các tham số
+        for index in range(len(argument_types)):
+            arg_value = self.get_random_argument(argument_types[index], function, index)
+            arguments.append(arg_value)
+            args_values.append(f"{argument_types[index]}:{arg_value}")
+        
+        # Lấy tên hàm nếu có
+        function_name = "unknown"
+        if self.interface_mapper:
+            for fname, fhash in self.interface_mapper.items():
+                if fhash == function:
+                    function_name = fname
+                    break
+        
+        # Tạo transaction
+        account = self.get_random_account(function)
+        amount = self.get_random_amount(function)
+        gas_limit = self.get_random_gaslimit(function)
+        
+        # In thông tin transaction
+        print(f"-----------------------------------------------------")
+        print(f"Transaction - {function_name}:")
+        print(f"-----------------------------------------------------")
+        print(f"From:      {account}")
+        print(f"To:        {self.contract}")
+        print(f"Value:     {amount} Wei")
+        print(f"Gas Limit: {gas_limit}")
+        print(f"Input:     {function}{' '.join([str(arg) for arg in arguments[1:]])}")
+        print(f"-----------------------------------------------------")
+        
+        # Log với logger
+        logger.info(f"Transaction - {function_name}:")
+        logger.info(f"From: {account}, To: {self.contract}")
+        logger.info(f"Args: {', '.join(args_values)}")
+        
+        # Thêm vào individual
+        individual.append({
+            "account": account,
+            "contract": self.contract,
+            "amount": amount,
+            "arguments": arguments,
+            "blocknumber": self.get_random_blocknumber(function),
+            "timestamp": self.get_random_timestamp(function),
+            "gaslimit": gas_limit,
+            "call_return": dict(),
+            "extcodesize": dict(),
+            "returndatasize": dict()
+        })
+        
+        # Phần còn lại của hàm không thay đổi
+        address, call_return_value = self.get_random_callresult_and_address(function)
+        individual[-1]["call_return"] = {address: call_return_value}
+        
+        address, extcodesize_value = self.get_random_extcodesize_and_address(function)
+        individual[-1]["extcodesize"] = {address: extcodesize_value}
+        
+        address, value = self.get_random_returndatasize_and_address(function)
+        individual[-1]["returndatasize"] = {address: value}
+        
+        return individual
+
+
     def generate_constructor(self) -> List[Dict[str, Any]]:
         """
-        Override phương thức generate_constructor để sử dụng LLM với logging chi tiết
-        và fallback về random generator khi LLM không trả về giá trị.
+        Override phương thức generate_constructor để sử dụng RAG với logging chi tiết
+        và fallback về random generator khi RAG không trả về giá trị.
         """
         individual = []
 
         if "constructor" in self.interface and self.bytecode:
-            logger.info("LLM CONSTRUCTOR: Generating constructor with LLM enhancement")
+            logger.info("RAG CONSTRUCTOR: Generating constructor with RAG enhancement")
             arguments = ["constructor"]
 
-            # Tạo metadata cho tất cả tham số để gửi cho LLM
+            # Tạo metadata cho tất cả tham số để gửi cho RAG
             constructor_params = []
             for index, arg_type in enumerate(self.interface["constructor"]):
                 constructor_params.append({
@@ -176,9 +221,9 @@ class LLMEnhancedGenerator(Generator):
                     "type": arg_type,
                     "name": f"arg{index}"
                 })
-            logger.debug(f"LLM CONSTRUCTOR ANALYSIS: Params metadata = {constructor_params}")
+            logger.debug(f"RAG CONSTRUCTOR ANALYSIS: Params metadata = {constructor_params}")
 
-            # Xây dựng context phong phú cho LLM
+            # Xây dựng context phong phú cho RAG
             context: Dict[str, Any] = {
                 "audit_report": self.audit_report,
                 "contract_name": self.contract_name
@@ -191,40 +236,35 @@ class LLMEnhancedGenerator(Generator):
                 except Exception as e:
                     logger.warning(f"Could not read Solidity file {self.sol_path}: {e}")
 
-            # Gọi LLM để phân tích constructor
-            try:
-                constructor_analysis = self.llm_agent.analyze_constructor(
-                    constructor_params=constructor_params,
-                    context=context
-                )
-                logger.info(f"LLM CONSTRUCTOR RESULT: {constructor_analysis}")
-            except Exception as e:
-                logger.error(f"LLM ERROR during constructor analysis: {e}", exc_info=True)
-                constructor_analysis = None
-
             # Sinh giá trị cho từng tham số
             for index, arg_type in enumerate(self.interface["constructor"]):
                 arg_name = f"arg{index}"
-                use_llm = False
-
-                # Nếu có kết quả phân tích từ LLM và giá trị hợp lệ, dùng nó
-                if constructor_analysis and index < len(constructor_analysis):
-                    suggested = constructor_analysis[index].get("value")
-                    if suggested is not None:
-                        logger.info(f"LLM CONSTRUCTOR USING: {arg_name} = {suggested}")
-                        arguments.append(suggested)
-                        use_llm = True
-
-                # Fallback về random nếu LLM không trả về giá trị
-                if not use_llm:
-                    logger.info(f"LLM CONSTRUCTOR FALLBACK: Generating random value for {arg_name} ({arg_type})")
-                    try:
-                        rnd = self.get_random_argument(arg_type, "constructor", index)
-                        logger.info(f"RANDOM CONSTRUCTOR VALUE: {arg_name} = {rnd}")
-                        arguments.append(rnd)
-                    except Exception as e:
-                        logger.error(f"Error generating random constructor argument for {arg_name}: {e}", exc_info=True)
-                        arguments.append(None)
+                logger.info(f"RAG CONSTRUCTOR: Generating value for {arg_name} ({arg_type})")
+                
+                try:
+                    rag_value = self.llm_agent.get_argument_suggestion(
+                        type_str=arg_type,
+                        function_name="constructor",
+                        arg_name=arg_name,
+                        arg_index=index,
+                        context=context
+                    )
+                    if rag_value is not None:
+                        logger.info(f"RAG CONSTRUCTOR USING: {arg_name} = {rag_value}")
+                        arguments.append(rag_value)
+                        continue
+                except Exception as e:
+                    logger.error(f"RAG ERROR for {arg_name}: {e}", exc_info=True)
+                
+                # Fallback về random nếu RAG không trả về giá trị
+                logger.info(f"RAG CONSTRUCTOR FALLBACK: Generating random value for {arg_name} ({arg_type})")
+                try:
+                    rnd = self.get_random_argument(arg_type, "constructor", index)
+                    logger.info(f"RANDOM CONSTRUCTOR VALUE: {arg_name} = {rnd}")
+                    arguments.append(rnd)
+                except Exception as e:
+                    logger.error(f"Error generating random constructor argument for {arg_name}: {e}", exc_info=True)
+                    arguments.append(None)
 
             logger.debug(f"FINAL CONSTRUCTOR ARGUMENTS: {arguments}")
 
@@ -268,4 +308,3 @@ def create_llm_enhanced_generator(
         other_generators=other_generators,
         interface_mapper=interface_mapper
     )
- 

@@ -157,7 +157,7 @@ def init_func(sol_path):
                 base_pairs.append((func, sv_func_write & sv_other_func_read, other_func))
     print("========base_pairs========")
     for pair in base_pairs:
-        print(pair)
+       print(pair)
     for setter, sv_set, getter in base_pairs:
         setter_set = define_table.get(setter, set())
         setter_set.update(sv_set)
@@ -165,15 +165,15 @@ def init_func(sol_path):
         getter_set = use_table.get(getter, set())
         getter_set.update(sv_set)
         use_table[getter] = getter_set
-    print("========setter_table========")
-    for setter in define_table:
-        print(setter, define_table[setter])
-    print("========getter_table========")
-    for getter in use_table:
-        print(getter, use_table[getter])
-    print("========sv_prepare========")
-    for sv in sv_prepare:
-        print(sv)
+    # print("========setter_table========")
+    # for setter in define_table:
+    #     print(setter, define_table[setter])
+    # print("========getter_table========")
+    # for getter in use_table:
+    #     print(getter, use_table[getter])
+    # print("========sv_prepare========")
+    # for sv in sv_prepare:
+    #     print(sv)
     init = True
 
 

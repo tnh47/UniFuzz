@@ -1,8 +1,11 @@
 # UniFuzz
-![UniFuzz drawio-1](https://github.com/user-attachments/assets/25a69a22-1ffb-4b45-8df9-7eadfec9151b)
-python -m venv venv
-source venv/bin/activate  # Trên Linux/MacOS
-venv\Scripts\activate  # Trên Windows
+source venv3.8/bin/activate  # Trên Linux/MacOS
 pip install -r requirements.txt
-python main.py learn data/raw_pdfs/your_contract.pdf
-python main.py query "Làm thế nào phát hiện lỗi reentrancy?"
+## De su dung python 3.12
+source .venv/bin/activate  # Python 3.12
+## Fuzzing binh thuong
+python fuzzer/main.py --source ./SmartContract/ABC.sol --solc-path-cross /home/ngonhat/Desktop/UniFuzz/venv3.8/bin/solc --contract ABC --solc v0.8.26 --api-key "AIzaSyB3P2COlotMu-3RR-ehwZXZk60wOWJvfEA"
+## Su dung llm
+python fuzzer/main.py --source ./SmartContract/ABC.sol --solc-path-cross /home/ngonhat/Desktop/UniFuzz/venv3.8/bin/solc --contract ABC --solc v0.8.26 --api-key "AIzaSyB3P2COlotMu-3RR-ehwZXZk60wOWJvfEA" --use-llm
+### file generator.py la cua CrossFuzz
+### 2 file llm_agent va llm_enhanced_generator la 2 file them vao 
