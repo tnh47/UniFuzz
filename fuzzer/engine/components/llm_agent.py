@@ -49,7 +49,7 @@ class LLMAgent:
     
     def fetch_rag_suggestion(self, prompt: str) -> Optional[str]:
         """
-        Gọi API Flask để lấy gợi ý từ RAG với retry
+        Gọi API Flask để lấy gợi ý từ RAG với retry và fallback
         
         :param prompt: Câu hỏi hoặc prompt gửi tới RAG
         :return: Kết quả từ RAG hoặc None nếu lỗi
@@ -62,31 +62,69 @@ class LLMAgent:
                 response = requests.post(
                     self.api_endpoint,
                     json={"prompt": prompt},
-                    timeout=130  # Timeout lớn hơn server timeout
+                    timeout=30  # Giảm timeout để tránh treo
                 )
                 
                 if response.status_code == 200:
                     result = response.json()
                     logger.info(f"RAG raw response: {result}")
-                    return result['response']
-                elif response.status_code >= 500:
-                    # Server error, thử lại
-                    retry_count += 1
-                    logger.warning(f"Server error ({response.status_code}), retrying {retry_count}/{max_retries}")
-                    time.sleep(1)  # Đợi 1 giây trước khi thử lại
-                else:
-                    # Các lỗi khác không retry (400, etc.)
-                    logger.error(f"RAG request error: {response.status_code} - {response.text}")
-                    return None
                     
-            except (requests.RequestException, json.JSONDecodeError) as e:
-                retry_count += 1
-                logger.error(f"Error fetching RAG suggestion (attempt {retry_count}/{max_retries}): {e}")
-                if retry_count > max_retries:
-                    return None
-                time.sleep(1)  # Đợi 1 giây trước khi thử lại
+                    if "response" in result:
+                        return result["response"]
+                    else:
+                        logger.warning(f"RAG response missing 'response' field: {result}")
+                else:
+                    logger.warning(f"RAG server returned status code {response.status_code}")
+                
+            except requests.ConnectionError:
+                logger.warning(f"Connection error to RAG server (retry {retry_count+1}/{max_retries+1})")
+            except requests.Timeout:
+                logger.warning(f"Timeout connecting to RAG server (retry {retry_count+1}/{max_retries+1})")
+            except Exception as e:
+                logger.warning(f"Error fetching RAG suggestion: {str(e)} (retry {retry_count+1}/{max_retries+1})")
+            
+            retry_count += 1
+            if retry_count <= max_retries:
+                # Đợi một chút trước khi thử lại (backoff)
+                time.sleep(1 * retry_count)
         
-        return None
+        # Không thể kết nối đến RAG server, thử lấy giá trị từ prompt
+        logger.warning("Failed to connect to RAG server, trying fallback from prompt")
+        return self._get_fallback_from_prompt(prompt)
+        
+    def _get_fallback_from_prompt(self, prompt: str) -> Optional[str]:
+        """
+        Phân tích prompt để trả về giá trị mặc định phù hợp với kiểu dữ liệu
+        
+        :param prompt: Prompt gốc được gửi cho RAG
+        :return: Giá trị mặc định phù hợp với kiểu
+        """
+        try:
+            # Trích xuất kiểu dữ liệu từ prompt
+            type_match = re.search(r"Parameter type: ([a-zA-Z0-9\[\]]+)", prompt)
+            if not type_match:
+                return None
+                
+            param_type = type_match.group(1)
+            
+            # Trả về giá trị mặc định dựa trên kiểu
+            if param_type.startswith("uint"):
+                return "0"  # Giá trị uint an toàn
+            elif param_type.startswith("int"):
+                return "0"  # Giá trị int an toàn
+            elif param_type == "address":
+                return "0x0000000000000000000000000000000000000000"  # zero address
+            elif param_type == "bool":
+                return "false"
+            elif param_type.startswith("bytes"):
+                return "0x00"
+            elif param_type == "string":
+                return ""
+            else:
+                return None
+        except Exception as e:
+            logger.error(f"Error in fallback generation: {e}")
+            return None
 
     
     def get_argument_suggestion(self, 
@@ -319,10 +357,76 @@ The value MUST match the specified format for the type and be a SINGLE value.
         
         # Trả về giá trị thô cho các kiểu khác
         return value
+
+    def report_vulnerability_to_rag(self, 
+                            transaction_id: str, 
+                            function_name: str, 
+                            vulnerability_type: str,
+                            args: List[Any],
+                            source: str = "rag",
+                            description: str = "") -> bool:
+        """
+        Báo cáo lỗi về server RAG để theo dõi hiệu quả
+        
+        :param transaction_id: ID của transaction phát hiện lỗi
+        :param function_name: Tên hàm gây ra lỗi
+        :param vulnerability_type: Loại lỗi (overflow, reentrancy, etc.)
+        :param args: Các tham số của hàm gây lỗi
+        :param source: Nguồn tạo ra giá trị (rag/random)
+        :param description: Mô tả chi tiết về lỗi
+        :return: True nếu báo cáo thành công
+        """
+        try:
+            payload = {
+                "transaction_id": transaction_id,
+                "function_name": function_name,
+                "vulnerability_type": vulnerability_type,
+                "args": args,
+                "source": source,
+                "description": description
+            }
+            
+            # Extract host and port from API endpoint
+            url_parts = self.api_endpoint.split("/")
+            base_url = "/".join(url_parts[:-1])  # Remove last part ("request")
+            report_url = f"{base_url}/report_vulnerability"
+            
+            response = requests.post(
+                report_url,
+                json=payload,
+                timeout=5  # Short timeout for reporting
+            )
+            
+            if response.status_code == 200:
+                logger.info(f"Successfully reported vulnerability: {vulnerability_type} in {function_name}")
+                return True
+            else:
+                logger.warning(f"Failed to report vulnerability. Status code: {response.status_code}")
+                return False
+        except Exception as e:
+            logger.warning(f"Error reporting vulnerability to RAG server: {e}")
+            return False
+    
     def _get_default_for_function_selector(self, selector: str, arg_index: int, type_str: str) -> Any:
         """
         Trả về giá trị mặc định cho tham số dựa trên function selector
         """
+        # Tạo các giá trị đặc biệt có khả năng gây lỗi tràn số
+        UINT_MAX = (2**256) - 1
+        UINT_MAX_MINUS_1 = UINT_MAX - 1
+        UINT_LARGE = 2**255
+        UINT_HALF = 2**128
+        KNOWN_OVERFLOW_VALUES = [
+            UINT_MAX, 
+            UINT_MAX_MINUS_1,
+            UINT_LARGE,
+            UINT_HALF,
+            UINT_MAX - 10,
+            2**250,
+            2**200,
+            2**100 + 1
+        ]
+        
         # balanceOf(address)
         if selector == "0x70a08231" and arg_index == 0 and type_str == "address":
             special_addresses = [
@@ -337,21 +441,56 @@ The value MUST match the specified format for the type and be a SINGLE value.
             if arg_index == 0 and type_str == "address":
                 return "0x0000000000000000000000000000000000000001"  # địa chỉ nhận
             elif arg_index == 1 and type_str.startswith("uint"):
-                return 2**255  # Số lượng lớn để test overflow
+                # Chọn ngẫu nhiên giữa các giá trị có khả năng gây overflow
+                return random.choice(KNOWN_OVERFLOW_VALUES)
         
         # approve(address,uint256)
         if selector == "0x095ea7b3":
             if arg_index == 0 and type_str == "address":
                 return "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF"  # spender
             elif arg_index == 1 and type_str.startswith("uint"):
-                return 2**256 - 1  # Giá trị tối đa
+                return UINT_MAX  # Giá trị tối đa
+        
+        # transferFrom(address,address,uint256)
         if selector == "0x23b872dd":
             if arg_index == 0 and type_str == "address":
                 return "0x0000000000000000000000000000000000000000"  # from (owner)
             elif arg_index == 1 and type_str == "address":  # arg1 - địa chỉ đang gây lỗi
                 return "0x0000000000000000000000000000000000000001"  # to (recipient)
             elif arg_index == 2 and type_str.startswith("uint"):
-                return 1000000
+                return random.choice([UINT_MAX, UINT_LARGE, 1000000])
+        
+        # decreaseAllowance(address,uint256)
+        if selector == "0xa457c2d7":
+            if arg_index == 0 and type_str == "address":
+                return "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+            elif arg_index == 1 and type_str.startswith("uint"):
+                # Thử gọi decrease với giá trị lớn hơn allowance
+                return UINT_MAX_MINUS_1
+        
+        # increaseAllowance(address,uint256)
+        if selector == "0x39509351":
+            if arg_index == 0 and type_str == "address":
+                return "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+            elif arg_index == 1 and type_str.startswith("uint"):
+                # Thử tăng allowance với giá trị gây overflow
+                return random.choice([2, UINT_MAX, UINT_LARGE])
+        
+        # Fallback: các giá trị thông thường theo kiểu
+        if type_str.startswith("uint") or type_str.startswith("int"):
+            # Có 20% xác suất trả về giá trị đặc biệt gây overflow
+            if random.random() < 0.2:
+                return random.choice(KNOWN_OVERFLOW_VALUES)
+            # 10% xác suất sẽ trả về 0
+            elif random.random() < 0.1:
+                return 0
+            # 10% xác suất trả về giá trị âm (cho int)
+            elif random.random() < 0.1 and type_str.startswith("int"):
+                return -1
+            # 60% còn lại trả về giá trị ngẫu nhiên trong phạm vi hợp lý
+            else:
+                return random.randint(1, 1000000)
+                
         return None
 
     

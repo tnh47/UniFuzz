@@ -229,6 +229,56 @@ def run_integration(api_key, contract_path, solc_path, audit_file=None, use_cros
         audit_file = "analysis_output.txt"
         logging.info("Using analysis output as audit report for LLM context")
     
+    # Khởi động RAG server trong background
+    if not use_crossfuzz:
+        try:
+            # Kiểm tra xem server đã chạy chưa
+            import requests
+            import subprocess
+            import time
+            import threading
+            
+            def is_server_running():
+                try:
+                    response = requests.get("http://localhost:5000/health", timeout=2)
+                    return response.status_code == 200
+                except:
+                    return False
+            
+            if not is_server_running():
+                logging.info("Starting RAG server...")
+                
+                def start_server():
+                    env = os.environ.copy()
+                    env["GOOGLE_API_KEY"] = api_key
+                    try:
+                        subprocess.Popen(["python", "RAG/server.py"], 
+                                        env=env, 
+                                        stdout=subprocess.PIPE, 
+                                        stderr=subprocess.PIPE)
+                    except Exception as e:
+                        logging.error(f"Failed to start RAG server: {e}")
+                
+                server_thread = threading.Thread(target=start_server)
+                server_thread.daemon = True
+                server_thread.start()
+                
+                # Đợi server khởi động
+                max_retries = 5
+                for i in range(max_retries):
+                    logging.info(f"Waiting for RAG server to start... ({i+1}/{max_retries})")
+                    if is_server_running():
+                        logging.info("RAG server is running!")
+                        break
+                    time.sleep(2)
+                else:
+                    logging.warning("Could not verify if RAG server is running. Will continue anyway.")
+            else:
+                logging.info("RAG server is already running.")
+        except Exception as e:
+            logging.error(f"Error while checking/starting RAG server: {e}")
+            logging.warning("Will continue without verifying RAG server status.")
+    
     if use_crossfuzz:
         # Phương pháp cũ: sử dụng CrossFuzz
         logging.info("Step 2: Generating constructor params with RAG...")

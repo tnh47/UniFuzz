@@ -155,9 +155,9 @@ def init_func(sol_path):
             sv_other_func_read = has_data_info_func[other_func].get("read", set())
             if len(sv_func_write & sv_other_func_read) > 0:
                 base_pairs.append((func, sv_func_write & sv_other_func_read, other_func))
-    print("========base_pairs========")
-    for pair in base_pairs:
-       print(pair)
+    # print("========base_pairs========")
+    # for pair in base_pairs:
+    #    print(pair)
     for setter, sv_set, getter in base_pairs:
         setter_set = define_table.get(setter, set())
         setter_set.update(sv_set)
