@@ -53,6 +53,10 @@ class ExecutionTraceAnalyzer(OnTheFlyAnalysis):
     def register_step(self, g, population, engine):
         self.execute(population, engine)
 
+        # Hiển thị thông tin về thế hệ hiện tại theo định dạng dễ đọc
+        self.logger.info(f"\n===== Generation {g+1} =====")
+        
+        # Tính toán độ bao phủ
         code_coverage_percentage = 0
         if len(self.env.overall_pcs) > 0:
             code_coverage_percentage = (len(self.env.code_coverage) / len(self.env.overall_pcs)) * 100
@@ -64,14 +68,12 @@ class ExecutionTraceAnalyzer(OnTheFlyAnalysis):
         if len(self.env.overall_jumpis) > 0:
             branch_coverage_percentage = (branch_coverage / (len(self.env.overall_jumpis) * 2)) * 100
 
-        msg = 'Generation number {} \t Code coverage: {:.2f}% ({}/{}) \t Branch coverage: {:.2f}% ({}/{}) \t ' \
-              'Transactions: {} ({} unique, {} from cross)   \t Time: {}'.format(
-            g + 1, code_coverage_percentage, len(self.env.code_coverage), len(self.env.overall_pcs),
-            branch_coverage_percentage, branch_coverage, len(self.env.overall_jumpis) * 2, self.env.nr_of_transactions,
-            len(self.env.unique_individuals), settings.CROSS_TRANS_EXEC_COUNT,
-            time.time() - self.env.execution_begin)
-        self.logger.title(msg)
-
+        # Thông tin về độ bao phủ
+        self.logger.info(f"Code Coverage: {code_coverage_percentage:.2f}%")
+        self.logger.info(f"Branch Coverage: {branch_coverage_percentage:.2f}%")
+        self.logger.info(f"Total Transactions: {self.env.nr_of_transactions}")
+        self.logger.info(f"Unique Transactions: {len(self.env.unique_individuals)}")
+        
         # Save to results
         if "generations" not in self.env.results:
             self.env.results["generations"] = []
@@ -154,7 +156,7 @@ class ExecutionTraceAnalyzer(OnTheFlyAnalysis):
             sha3 = {}
 
             for i, instruction in enumerate(result.trace):
-                if settings.MAIN_CONTRACT_NAME != "" and settings.TRANS_INFO[settings.MAIN_CONTRACT_NAME] != \
+                if settings.MAIN_CONTRACT_NAME != "" and settings.MAIN_CONTRACT_NAME in settings.TRANS_INFO and settings.TRANS_INFO[settings.MAIN_CONTRACT_NAME] != \
                         test["transaction"]["to"]:
                     # 对于跨合约的情况, 暂时不统计其他合约
                     continue

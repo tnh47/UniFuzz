@@ -209,6 +209,12 @@ class Generator:
             for supply_func in ret:
                 if supply_func is None:
                     break
+                
+                # Thêm kiểm tra xem supply_func có chứa dấu chấm không
+                if "." not in supply_func:
+                    self.logger.warning(f"Invalid function format: {supply_func}, expected format: contract_name.function_name")
+                    continue
+                    
                 c_name, f_name = supply_func.split(".")
                 if c_name == self.contract_name:
                     function, argument_types = self.get_specific_function_with_argument_types_without_arg_support(
@@ -323,6 +329,24 @@ class Generator:
         individual.extend(
             self.generate_randon_individual_without_constructor(func_hash, func_args_types, default_value))
 
+        # Chỉ log thông tin ngắn gọn về sequence được tạo ra
+        logger = initialize_logger("Generator")
+        logger.info("\n===== New Transaction Sequence Generated =====")
+        logger.info(f"Number of transactions: {len(individual)}")
+        
+        # Hiển thị thông tin chi tiết về các giao dịch trong sequence
+        for i, tx in enumerate(individual):
+            func_name = "constructor" if i == 0 else tx["arguments"][0] if "arguments" in tx and len(tx["arguments"]) > 0 else "unknown"
+            
+            # Hiển thị tham số nếu có
+            params = ""
+            if "arguments" in tx and len(tx["arguments"]) > 1:
+                params = " (" + ", ".join([str(arg)[:20] + ("..." if len(str(arg)) > 20 else "") for arg in tx["arguments"][1:4]]) + ")"
+            
+            logger.info(f"Transaction {i+1} - {func_name}{params}")
+        
+        logger.info("")  # Thêm dòng trống
+        
         return individual
 
     def generate_random_input(self):

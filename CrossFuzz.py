@@ -48,6 +48,15 @@ def run(_file_path: str, _main_contract, solc_version: str, evm_version: str, ti
            f" --duplication {_duplication}")
     print(cmd)
     os.popen(cmd).readlines()  # run CrossFuzz.py
+
+    # Thêm trong CrossFuzz.py sau khi gọi analysis_depend_contract
+    logger.info("Kết quả phân tích phụ thuộc:")
+    logger.info(f"Các hợp đồng phụ thuộc: {_depend_contracts}")
+
+    # Thêm trong CrossFuzz.py sau khi gọi analysis_main_contract_constructor
+    logger.info("Kết quả phân tích constructor:")
+    logger.info(f"Các tham số constructor: {_constructor_args}")
+
     return "fuzzer/result/res.json"
 
 

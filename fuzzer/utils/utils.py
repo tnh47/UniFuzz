@@ -220,38 +220,44 @@ def split_len(seq, length):
 
 
 def print_individual_solution_as_transaction(logger, individual_solution, color="", function_signature_mapping={}, transaction_index=None):
+    """
+    Hiển thị các giao dịch trong một sequence đang được fuzzing theo định dạng dễ đọc
+    """
+    logger.info(f"\n===== Transaction sequence with {len(individual_solution)} transactions =====")
+    
     for index, input in enumerate(individual_solution):
         transaction = input["transaction"]
-        if not transaction["to"] == None:
-            if transaction["data"].startswith("0x"):
-                hash = transaction["data"][0:10]
-            else:
-                hash = transaction["data"][0:8]
-            if len(individual_solution) == 1 or (transaction_index != None and transaction_index == 0):
-                if hash in function_signature_mapping:
-                    logger.title(color + "Transaction - " + function_signature_mapping[hash] + ":")
-                else:
-                    logger.title(color + "Transaction:")
-            else:
-                if hash in function_signature_mapping:
-                    logger.title(color + "Transaction " + str(index + 1) + " - " + function_signature_mapping[hash] + ":")
-                else:
-                    logger.title(color + "Transaction " + str(index + 1) + ":")
-            logger.title(color + "-----------------------------------------------------")
-            logger.title(color + "From:      " + transaction["from"])
-            logger.title(color + "To:        " + str(transaction["to"]))
-            logger.title(color + "Value:     " + str(transaction["value"]) + " Wei")
-            logger.title(color + "Gas Limit: " + str(transaction["gaslimit"]))
-            i = 0
-            for data in split_len("0x" + transaction["data"].replace("0x", ""), 42):
-                if i == 0:
-                    logger.title(color + "Input:     " + str(data))
-                else:
-                    logger.title(color + "           " + str(data))
-                i += 1
-            logger.title(color + "-----------------------------------------------------")
-            if transaction_index != None and index + 1 > transaction_index:
-                break
+        if transaction["to"] is None:
+            continue
+            
+        # Lấy function hash hoặc tên hàm nếu có
+        if transaction["data"].startswith("0x"):
+            hash = transaction["data"][0:10]
+        else:
+            hash = transaction["data"][0:8]
+        
+        function_name = function_signature_mapping.get(hash, hash)
+        
+        # Hiển thị thông tin giao dịch theo định dạng dễ đọc
+        logger.info(color + f"Transaction {index+1} - {function_name}")
+        
+        # Hiển thị các tham số nếu có
+        if len(transaction["data"]) > 10 and hash != "constructor":
+            # Nếu có data, hiển thị các tham số
+            params = transaction["data"][10:]
+            params_chunks = [params[i:i+64] for i in range(0, len(params), 64)]
+            for i, param in enumerate(params_chunks):
+                if param:
+                    logger.info(color + f"    Param {i+1}: 0x{param}")
+        
+        # Hiển thị thông tin chi tiết về giao dịch
+        logger.info(color + f"    From: {transaction['from']}")
+        logger.info(color + f"    To: {transaction['to']}")
+        logger.info(color + f"    Value: {transaction['value']} Wei")
+        logger.info("")
+        
+        if transaction_index is not None and index + 1 > transaction_index:
+            break
 
 
 def normalize_32_byte_hex_address(value):

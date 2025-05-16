@@ -1,0 +1,47 @@
+{
+  "dataflow_graph": {},
+  "analysis_result": {
+    "critical_paths": [
+      [
+        "transferOwnership",
+        "name"
+      ],
+      [
+        "transfer",
+        "symbol"
+      ],
+      [
+        "transferFrom",
+        "decimals"
+      ]
+    ],
+    "test_sequences": [
+      [
+        "transferOwnership",
+        "name"
+      ],
+      [
+        "transfer",
+        "symbol"
+      ],
+      [
+        "transferFrom",
+        "decimals"
+      ]
+    ],
+    "vulnerabilities": [
+      {
+        "type": "reentrancy",
+        "functions": [
+          "transfer"
+        ]
+      },
+      {
+        "type": "front-running",
+        "functions": [
+          "approve"
+        ]
+      }
+    ]
+  }
+}

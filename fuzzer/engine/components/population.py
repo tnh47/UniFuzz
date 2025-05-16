@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import random
+import logging
+from fuzzer.utils.utils import initialize_logger
 
 from fuzzer.utils import settings
 
@@ -146,6 +148,10 @@ class Population(object):
 
         self._updated = True
         self.size = len(self.individuals)
+
+        # Log thông tin về quần thể được khởi tạo
+        log_population_info(self.individuals)
+        
         return self
 
     def update_flag(self):
@@ -220,3 +226,35 @@ class Population(object):
         Get all fitness values in population.
         '''
         return [fitness(indv) for indv in self.individuals]
+
+def log_population_info(individuals):
+    """
+    Log thông tin về quần thể một cách ngắn gọn
+    """
+    logger = initialize_logger("Population")
+    
+    # Log số lượng cá thể (sequence)
+    logger.info(f"\n===== Population: {len(individuals)} sequences =====")
+    
+    # Log thông tin về các sequence đã tạo
+    max_sequences_to_show = min(3, len(individuals))
+    for i, indv in enumerate(individuals[:max_sequences_to_show]):
+        logger.info(f"Sequence {i+1}: {len(indv.chromosome)} transactions")
+        
+        # Log chi tiết về các giao dịch trong sequence
+        for j, tx in enumerate(indv.chromosome):
+            if "arguments" in tx and len(tx["arguments"]) > 0:
+                func_hash = tx["arguments"][0] if tx["arguments"][0] != "constructor" else "constructor"
+                contract = tx["contract_name"] if "contract_name" in tx else "Unknown"
+                
+                # Hiển thị tham số nếu có
+                params = ""
+                if len(tx["arguments"]) > 1:
+                    params = " (" + ", ".join([str(arg)[:20] + ("..." if len(str(arg)) > 20 else "") for arg in tx["arguments"][1:4]]) + ")"
+                
+                logger.info(f"    Transaction {j+1} - {func_hash}{params}")
+        
+        logger.info("") # Thêm dòng trống để ngăn cách giữa các sequence
+    
+    if len(individuals) > max_sequences_to_show:
+        logger.info(f"... và {len(individuals) - max_sequences_to_show} sequence khác")

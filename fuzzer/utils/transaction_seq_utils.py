@@ -67,10 +67,19 @@ def change_sha3_to_name(_sh3, _interface_mapper, func_address):
         if deploy_add == func_address:
             contract_invoked = c_name
             break
+    
+    # Thêm kiểm tra contract_invoked trước khi truy cập _interface_mapper
+    if not contract_invoked or contract_invoked not in _interface_mapper:
+        # Nếu không tìm thấy contract_invoked, trả về _sh3 nguyên bản
+        return _sh3
+        
     for f_name, sha3 in _interface_mapper[contract_invoked].items():
         if sha3 == _sh3:
             # 去掉括号
             return contract_invoked + "." + f_name[:f_name.find("(")]
+    
+    # Nếu không tìm thấy sha3 trong _interface_mapper, trả về _sh3 nguyên bản
+    return _sh3
 
 
 def deep_find_inner_call(_func, _contract):

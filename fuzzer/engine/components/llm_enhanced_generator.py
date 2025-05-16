@@ -15,6 +15,9 @@ from .llm_agent import LLMAgent
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 logger = logging.getLogger("LLMEnhancedGenerator")
 
+# Đảm bảo LLMEnhancedGenerator được export
+__all__ = ['LLMEnhancedGenerator', 'create_llm_enhanced_generator']
+
 class LLMEnhancedGenerator(Generator):
     """
     Generator được cải tiến với RAG để sinh các giá trị tối ưu

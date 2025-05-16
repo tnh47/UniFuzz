@@ -2,7 +2,6 @@ import subprocess
 import os
 import logging
 import json
-from fuzzer.engine.components.agent_generator import create_agent_enhanced_generator, generate_test_cases_with_agent
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 def run_analysis(api_key, contract_path):
@@ -169,6 +168,104 @@ def run_crossfuzz_with_shell_script(input_json_path, contract_path, solc_path):
     logging.info("CrossFuzz executed successfully via shell script.")
     return True
 
+def run_rag_enhanced_fuzzing(api_key, contract_path, solc_path, audit_file=None):
+    """Chạy fuzzing với RAG + Dataflow enhancement từ main.py"""
+    logging.info("Running RAG + Dataflow enhanced fuzzing...")
+    
+    # Kiểm tra và khởi động RAG server nếu chưa chạy
+    try:
+        import requests
+        import subprocess
+        import time
+        import threading
+        import os
+        
+        def is_server_running():
+            try:
+                response = requests.get("http://localhost:5000/health", timeout=2)
+                return response.status_code == 200
+            except:
+                return False
+        
+        if not is_server_running():
+            logging.info("Starting RAG server...")
+            
+            def start_server():
+                env = os.environ.copy()
+                env["GOOGLE_API_KEY"] = api_key
+                try:
+                    subprocess.Popen(["python", "RAG/server.py"], 
+                                    env=env, 
+                                    stdout=subprocess.PIPE, 
+                                    stderr=subprocess.PIPE)
+                except Exception as e:
+                    logging.error(f"Failed to start RAG server: {e}")
+            
+            server_thread = threading.Thread(target=start_server)
+            server_thread.daemon = True
+            server_thread.start()
+            
+            # Đợi server khởi động
+            max_retries = 10
+            for i in range(max_retries):
+                logging.info(f"Waiting for RAG server to start... ({i+1}/{max_retries})")
+                if is_server_running():
+                    logging.info("RAG server is running!")
+                    break
+                time.sleep(2)
+            else:
+                logging.warning("Could not verify if RAG server is running. Will continue anyway.")
+        else:
+            logging.info("RAG server is already running.")
+    except Exception as e:
+        logging.error(f"Error while checking/starting RAG server: {e}")
+        logging.warning("Will continue without verifying RAG server status.")
+    
+    # Đọc báo cáo audit nếu có
+    audit_param = []
+    if audit_file and os.path.exists(audit_file):
+        audit_param = ["--audit-file", audit_file]
+        
+    # Lấy tên contract từ đường dẫn file
+    contract_name = os.path.basename(contract_path).split('.')[0]
+    
+    # Thêm các hợp đồng phụ thuộc dựa trên tên hợp đồng
+    depend_contracts = []
+    if contract_name == "BECToken" or contract_name == "BecToken":
+        depend_contracts = ["SafeMath", "ERC20Basic", "BasicToken", "ERC20", 
+                           "StandardToken", "Ownable", "Pausable", "PausableToken"]
+    
+    # Cấu hình và chạy fuzzer với RAG + Dataflow
+    cmd = [
+        "python", "fuzzer/main.py",
+        "--source", contract_path,
+        "--contract", contract_name,  # Sử dụng tên contract đã lấy
+        "--solc", "v0.8.26",  # Chỉ định phiên bản solc
+        "--solc-path-cross", solc_path,  # Thêm đường dẫn solc cho cross contract fuzzing
+        "--cross-contract", "1",  # Kích hoạt cross contract fuzzing
+        "--depend-contracts"
+    ] + depend_contracts + [  # Thêm danh sách hợp đồng phụ thuộc
+        "--api-key", api_key,
+        "--use-rag",  # Sử dụng RAG thay vì LLM
+        "--constructor-args", "auto"  # Tự động phát hiện các tham số constructor
+    ] + audit_param
+    
+    logging.info(f"Running command: {' '.join(cmd)}")
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+    
+    for line in iter(process.stdout.readline, ''):
+        print(line.strip())
+    
+    process.stdout.close()
+    return_code = process.wait()
+    
+    if return_code != 0:
+        logging.error(f"RAG-enhanced fuzzing failed with return code {return_code}")
+        return False
+    
+    logging.info("RAG-enhanced fuzzing completed successfully")
+    return True
+
 def run_llm_enhanced_fuzzing(api_key, contract_path, solc_path, audit_file=None):
     """Chạy fuzzing với LLM enhancement trực tiếp từ main.py"""
     logging.info("Running LLM-enhanced fuzzing...")
@@ -192,7 +289,7 @@ def run_llm_enhanced_fuzzing(api_key, contract_path, solc_path, audit_file=None)
         "python", "fuzzer/main.py",
         "--source", contract_path,
         "--contract", contract_name,  # Sử dụng tên contract đã lấy
-        "--solc", "v0.4.16",  # Chỉ định phiên bản solc
+        "--solc", "v0.8.26",  # Chỉ định phiên bản solc
         "--solc-path-cross", solc_path,  # Thêm đường dẫn solc cho cross contract fuzzing
         "--cross-contract", "1",  # Kích hoạt cross contract fuzzing
         "--depend-contracts"
@@ -218,7 +315,7 @@ def run_llm_enhanced_fuzzing(api_key, contract_path, solc_path, audit_file=None)
     logging.info("LLM-enhanced fuzzing completed successfully")
     return True
 
-def run_integration(api_key, contract_path, solc_path, audit_file=None, use_crossfuzz=False):
+def run_integration(api_key, contract_path, solc_path, audit_file=None, use_crossfuzz=False, use_rag=False):
     logging.info("Step 1: Running Analysis.py...")
     if not run_analysis(api_key, contract_path):
         logging.error("Aborting: analysis failed.")
@@ -228,56 +325,6 @@ def run_integration(api_key, contract_path, solc_path, audit_file=None, use_cros
     if audit_file is None and os.path.exists("analysis_output.txt"):
         audit_file = "analysis_output.txt"
         logging.info("Using analysis output as audit report for LLM context")
-    
-    # Khởi động RAG server trong background
-    if not use_crossfuzz:
-        try:
-            # Kiểm tra xem server đã chạy chưa
-            import requests
-            import subprocess
-            import time
-            import threading
-            
-            def is_server_running():
-                try:
-                    response = requests.get("http://localhost:5000/health", timeout=2)
-                    return response.status_code == 200
-                except:
-                    return False
-            
-            if not is_server_running():
-                logging.info("Starting RAG server...")
-                
-                def start_server():
-                    env = os.environ.copy()
-                    env["GOOGLE_API_KEY"] = api_key
-                    try:
-                        subprocess.Popen(["python", "RAG/server.py"], 
-                                        env=env, 
-                                        stdout=subprocess.PIPE, 
-                                        stderr=subprocess.PIPE)
-                    except Exception as e:
-                        logging.error(f"Failed to start RAG server: {e}")
-                
-                server_thread = threading.Thread(target=start_server)
-                server_thread.daemon = True
-                server_thread.start()
-                
-                # Đợi server khởi động
-                max_retries = 5
-                for i in range(max_retries):
-                    logging.info(f"Waiting for RAG server to start... ({i+1}/{max_retries})")
-                    if is_server_running():
-                        logging.info("RAG server is running!")
-                        break
-                    time.sleep(2)
-                else:
-                    logging.warning("Could not verify if RAG server is running. Will continue anyway.")
-            else:
-                logging.info("RAG server is already running.")
-        except Exception as e:
-            logging.error(f"Error while checking/starting RAG server: {e}")
-            logging.warning("Will continue without verifying RAG server status.")
     
     if use_crossfuzz:
         # Phương pháp cũ: sử dụng CrossFuzz
@@ -295,8 +342,15 @@ def run_integration(api_key, contract_path, solc_path, audit_file=None, use_cros
         if not run_crossfuzz_with_shell_script(crossfuzz_input_path, contract_path, solc_path):
             logging.error("CrossFuzz failed.")
             return
+    elif use_rag:
+        # Phương pháp mới với RAG + Dataflow
+        logging.info("Step 2: Running RAG + Dataflow enhanced fuzzing...")
+        if not run_rag_enhanced_fuzzing(api_key, contract_path, solc_path, audit_file):
+            logging.error("RAG-enhanced fuzzing failed.")
+            return
     else:
-        # Phương pháp mới: sử dụng LLM-enhanced fuzzing
+        # Phương pháp với LLM
+        logging.info("Step 2: Running LLM-enhanced fuzzing...")
         if not run_llm_enhanced_fuzzing(api_key, contract_path, solc_path, audit_file):
             logging.error("LLM-enhanced fuzzing failed.")
             return
@@ -311,7 +365,8 @@ if __name__ == "__main__":
     parser.add_argument("--contract-path", required=True, help="Path to Solidity contract")
     parser.add_argument("--solc-path", required=True, help="Path to solc binary")
     parser.add_argument("--audit-file", help="Path to audit report for additional context")
-    parser.add_argument("--use-crossfuzz", action="store_true", help="Use CrossFuzz method instead of direct LLM-enhanced fuzzing")
+    parser.add_argument("--use-crossfuzz", action="store_true", help="Use CrossFuzz method instead of direct fuzzing")
+    parser.add_argument("--use-rag", action="store_true", help="Use RAG + Dataflow enhanced fuzzing (default is LLM-enhanced)")
 
     args = parser.parse_args()
 
@@ -320,4 +375,4 @@ if __name__ == "__main__":
     elif not os.path.exists(args.solc_path):
         logging.error(f"solc not found: {args.solc_path}")
     else:
-        run_integration(args.api_key, args.contract_path, args.solc_path, args.audit_file, args.use_crossfuzz)
+        run_integration(args.api_key, args.contract_path, args.solc_path, args.audit_file, args.use_crossfuzz, args.use_rag)
