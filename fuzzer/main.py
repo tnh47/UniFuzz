@@ -18,7 +18,8 @@ from eth.db.account import Account
 from evm import InstrumentedEVM
 from detectors import DetectorExecutor
 from engine import EvolutionaryFuzzingEngine
-from engine.components import Generator, Individual, Population
+from engine.components.generator import Generator
+from engine.components import Individual, Population
 from engine.analysis import SymbolicTaintAnalyzer
 from engine.analysis import ExecutionTraceAnalyzer
 from engine.environment import FuzzingEnvironment
@@ -42,15 +43,23 @@ from utils.utils import initialize_logger, compile, get_interface_from_abi, get_
     get_function_signature_mapping
 from utils.control_flow_graph import ControlFlowGraph
 
+# Import RAG components safely
 try:
-    # Thêm import mới
     from engine.analyzers.dataflow_analyzer import SmartContractAnalyzer
-    from engine.components.rag_enhanced_generator import create_rag_enhanced_generator, RAGEnhancedGenerator
+    from engine.components.generator import Generator
+    # Import RAG components
+    from engine.components.rag_enhanced_generator import RAGEnhancedGenerator, create_rag_enhanced_generator
     from engine.components.rag_enhanced_population import RAGEnhancedPopulation
-    from engine.components.llm_enhanced_generator import create_llm_enhanced_generator
-except ImportError:
-    # Đảm bảo chương trình vẫn chạy nếu không tìm thấy modules mới
-    pass
+    from engine.components.llm_enhanced_generator import LLMEnhancedGenerator, create_llm_enhanced_generator
+    rag_available = True
+except ImportError as e:
+    import logging
+    logging.warning(f"Could not import RAG components: {e}")
+    logging.warning("Will use standard generator if RAG is requested")
+    rag_available = False
+    # Để xử lý isinstance(), định nghĩa RAGEnhancedGenerator như một class trống
+    class RAGEnhancedGenerator:
+        pass
 
 
 class Fuzzer:
@@ -108,65 +117,81 @@ class Fuzzer:
         if self.whole_compile_info is None:
             logger.error("没有找到编译信息, 退出程序!")
             sys.exit(-1)
-        if self.args.source and len(self.depend_contracts) != 0:  # 如果要部署依赖合约
+            
+        if self.args.source and len(self.depend_contracts) != 0:  # Nếu cần deploy dependent contracts
             for contract_name in self.depend_contracts:
                 if contract_name == self.contract_name:
-                    logger.error(contract_name +
-                                 " is the same as the contract to be fuzzed!")
+                    logger.error(contract_name + " is the same as the contract to be fuzzed!")
                     sys.exit(-1)
 
                 contract = self.whole_compile_info[contract_name]
                 if contract['abi'] and contract['evm']['bytecode']['object']:
-                    interface, interface_mapper = get_interface_from_abi(
-                        contract['abi'])
-                    # contract的abi, bytecode, 该智能合约被部署后的地址
-                    contract_bytecode = contract['evm']['bytecode']['object']
-
-                    # Đảm bảo tài khoản triển khai có đủ ETH
-                    deploy_account = "0x1000000000000000000000000000000000000000"
-                    if not self.instrumented_evm.has_account(deploy_account):
-                        self.instrumented_evm.create_fake_account(
-                            deploy_account, balance=settings.ACCOUNT_BALANCE)
-                    else:
-                        # Cập nhật số dư nếu tài khoản đã tồn tại
-                        address = to_canonical_address(deploy_account)
-                        account = Account(
-                            nonce=0, balance=settings.ACCOUNT_BALANCE)
-                        self.instrumented_evm.vm.state._account_db._set_account(
-                            address, account)
-
-                    constructor_args_list = []
-                    deploy_result = self.instrumented_evm.deploy_contract(deploy_account,
-                                                                   contract_bytecode + "".join(
-                                                                   constructor_args_list) if len(
-                                                                   constructor_args_list) > 0 else contract_bytecode,
-                                                                   0, 5000000, 1)
-
-                    if deploy_result.is_error:
-                        logger.error("Problem while deploying contract %s. Error message: %s",
-                                   contract_name, deploy_result._error)
-                        sys.exit(-2)
-
-                    contract_address = deploy_result.msg.storage_address.hex()
-                    self.instrumented_evm.accounts.append(contract_address)
-                    self.env.nr_of_transactions += 1
-                    logger.debug("Contract deployed at %s", contract_address)
-                    self.env.other_contracts.append(
-                        to_canonical_address(contract_address))
-                    cc, _ = get_pcs_and_jumpis(
-                        self.instrumented_evm.get_code(to_canonical_address(contract_address)).hex())
-                    self.env.len_overall_pcs_with_children += len(cc)
-
-                    # Add this generator to the list of other generators
-                    generator = Generator(
-                        interface=interface,
-                        bytecode=contract_bytecode,
-                        accounts=self.instrumented_evm.accounts,
-                        contract=contract_address,
-                        contract_name=contract_name,
-                        interface_mapper=interface_mapper
-                    )
-                    generators.append(generator)
+                    # Lấy interface và bytecode của contract
+                    interface, interface_mapper = get_interface_from_abi(contract['abi'])
+                    deployement_bytecode = contract['evm']['bytecode']['object']
+                    
+                    # Xóa constructor từ interface nếu có
+                    if "constructor" in interface:
+                        del interface['constructor']
+                    
+                    # Deploy contract phụ thuộc
+                    if "constructor" not in interface:
+                        # Tạo deploy_args phù hợp với hợp đồng phụ thuộc
+                        deploy_args = []
+                        
+                        # Kiểm tra xem hợp đồng có cần tham số constructor đặc biệt không
+                        if contract_name == "SafeMath" or contract_name == "BasicToken" or contract_name == "ERC20Basic":
+                            # Những hợp đồng này thường không cần tham số
+                            logger.info(f"No constructor args needed for {contract_name}")
+                        elif contract_name == "ERC20" or contract_name == "StandardToken":
+                            # Nếu cần tham số, phải đúng định dạng [name, type, value]
+                            deploy_args = [
+                                "name_", "string", f"{contract_name} Token",
+                                "symbol_", "string", f"{contract_name[0:3]}"
+                            ]
+                            logger.info(f"Using constructor args for {contract_name}: {deploy_args}")
+                        
+                        # Sử dụng tài khoản đầu tiên để deploy
+                        result = self.instrumented_evm.deploy_contract(
+                            self.instrumented_evm.accounts[0],
+                            deployement_bytecode,
+                            deploy_args=deploy_args,
+                            deploy_mode=settings.CROSS_INIT_MODE
+                        )
+                        
+                        if result.is_error:
+                            logger.error(f"Problem while deploying dependent contract {contract_name} using account {self.instrumented_evm.accounts[0]}. Error message: {result._error}")
+                            # Không exit nếu deploy thất bại, chỉ log lỗi
+                        else:
+                            # Lưu địa chỉ contract đã deploy
+                            contract_address = encode_hex(result.msg.storage_address)
+                            self.instrumented_evm.accounts.append(contract_address)
+                            self.env.nr_of_transactions += 1
+                            logger.info(f"Dependent contract {contract_name} deployed at {contract_address}, by {self.instrumented_evm.accounts[0]}")
+                            
+                            # Lưu thông tin deploy
+                            settings.TRANS_INFO[contract_name] = contract_address
+                            settings.DEPLOYED_CONTRACT_ADDRESS[contract_name] = contract_address
+                            
+                            # Thêm contract vào other_contracts
+                            self.env.other_contracts.append(to_canonical_address(contract_address))
+                            cc, _ = get_pcs_and_jumpis(
+                                self.instrumented_evm.get_code(to_canonical_address(contract_address)).hex()
+                            )
+                            self.env.len_overall_pcs_with_children += len(cc)
+                            
+                            # Tạo generator cho contract này
+                            generator = Generator(
+                                interface=interface, 
+                                bytecode=deployement_bytecode,
+                                accounts=self.instrumented_evm.accounts, 
+                                contract=contract_address,
+                                interface_mapper=interface_mapper, 
+                                contract_name=contract_name,
+                                sol_path=self.args.source
+                            )
+                            generators.append(generator)
+                            
         return generators
 
     def run(self):
@@ -174,7 +199,15 @@ class Fuzzer:
         settings.TRANS_INFO["source_path"] = self.args.source
         settings.TRANS_INFO["start_time"] = str(datetime.now())
         settings.MAIN_CONTRACT_NAME = self.contract_name
-        generators = self.deploy_depend_contracts()  # Tiên triển khai các hợp đồng phụ thuộc
+        
+        # Tạo fake accounts (từ CrossFuzz gốc)
+        self.instrumented_evm.create_fake_accounts()
+        
+        # Triển khai các hợp đồng phụ thuộc
+        if self.args.cross_contract == 1:  # Nếu bật chế độ cross-contract
+            generators = self.deploy_depend_contracts() 
+        else:
+            generators = []
 
         contract_address = None
         if self.args.source:
@@ -192,15 +225,16 @@ class Fuzzer:
                         logger.error("Problem while deploying contract %s using account %s. Error message: %s",
                                     self.contract_name, transaction['from'], result._error)
                         sys.exit(-2)
-                    contract_address = encode_hex(result.msg.storage_address)
-                    self.instrumented_evm.accounts.append(contract_address)
-                    self.env.nr_of_transactions += 1
-                    logger.debug("Contract deployed at %s", contract_address)
-                    self.env.other_contracts.append(
-                        to_canonical_address(contract_address))
-                    cc, _ = get_pcs_and_jumpis(
-                        self.instrumented_evm.get_code(to_canonical_address(contract_address)).hex())
-                    self.env.len_overall_pcs_with_children += len(cc)
+                    else:
+                        contract_address = encode_hex(result.msg.storage_address)
+                        self.instrumented_evm.accounts.append(contract_address)
+                        self.env.nr_of_transactions += 1
+                        logger.debug("Contract deployed at %s", contract_address)
+                        self.env.other_contracts.append(
+                            to_canonical_address(contract_address))
+                        cc, _ = get_pcs_and_jumpis(
+                            self.instrumented_evm.get_code(to_canonical_address(contract_address)).hex())
+                        self.env.len_overall_pcs_with_children += len(cc)
                 else:
                     input = {}
                     input["block"] = {}
@@ -218,51 +252,70 @@ class Fuzzer:
             if "constructor" in self.interface:
                 del self.interface["constructor"]
 
+            # Nếu contract chưa được deploy, deploy nó
             if not contract_address:
-                # Đảm bảo tài khoản triển khai có đủ ETH
-                deploy_account = "0x1000000000000000000000000000000000000000"
-                if not self.instrumented_evm.has_account(deploy_account):
-                    self.instrumented_evm.create_fake_account(deploy_account, balance=settings.ACCOUNT_BALANCE)
-                else:
-                    # Cập nhật số dư nếu tài khoản đã tồn tại
-                    address = to_canonical_address(deploy_account)
-                    account = Account(nonce=0, balance=settings.ACCOUNT_BALANCE)
-                    self.instrumented_evm.vm.state._account_db._set_account(address, account)
-                    
                 if "constructor" not in self.interface:
+                    # Sử dụng cách triển khai từ CrossFuzz gốc
+                    deploy_args = self.args.constructor_args
+                    
+                    # Đảm bảo deploy_args có định dạng đúng [name, type, value, name, type, value, ...]
+                    if deploy_args and deploy_args[0] == "auto":
+                        # Tự động tạo deploy_args với giá trị mặc định
+                        deploy_args = []
+                        
+                        # Tìm contract name để tạo params phù hợp
+                        if self.contract_name == "ABE":
+                            # ABE constructor cần 2 tham số: name_ và symbol_
+                            deploy_args = [
+                                "name_", "string", "Advanced Blockchain Token",
+                                "symbol_", "string", "ABE"
+                            ]
+                            logger.info(f"Auto-generated constructor args for {self.contract_name}: {deploy_args}")
+                        else:
+                            # Constructor thường không cần tham số
+                            logger.info(f"No specific constructor args needed for {self.contract_name}")
+                    elif deploy_args and len(deploy_args) > 0:
+                        # Kiểm tra xem deploy_args có đủ bội số của 3 không
+                        if len(deploy_args) % 3 != 0:
+                            logger.warning(f"Constructor args not in multiples of 3: {deploy_args}")
+                            logger.warning("Format should be: [name1, type1, value1, name2, type2, value2, ...]")
+                            # Điều chỉnh để đảm bảo đủ bội số của 3
+                            while len(deploy_args) % 3 != 0:
+                                deploy_args.append("YA_DO_NOT_KNOW")  # Thêm giá trị mặc định
+                    
+                    logger.info(f"Deploying contract {self.contract_name} with deploy_args: {deploy_args}")
                     result = self.instrumented_evm.deploy_contract(
-                        deploy_account, self.deployement_bytecode, 0, 5000000, 1)
-                else:
-                    if self.args.constructor_args and self.args.constructor_args[0] == "auto":
-                        logger.info("Using auto constructor parameters")
-                        result = self.instrumented_evm.deploy_contract(
-                            deploy_account, self.deployement_bytecode, 0, 5000000, 1)
+                        self.instrumented_evm.accounts[0],
+                        self.deployement_bytecode,
+                        deploy_args=deploy_args,
+                        deploy_mode=settings.CROSS_INIT_MODE
+                    )
+                    
+                    if result.is_error:
+                        logger.error("Problem while deploying contract %s using account %s. Error message: %s",
+                                    self.contract_name, self.instrumented_evm.accounts[0], result._error)
+                        sys.exit(-2)
                     else:
-                        logger.info("Using user-specified constructor parameters")
-                        constructor_args_list = []
-                        if self.args.constructor_args is not None:
-                            for arg in self.args.constructor_args:
-                                constructor_args_list.append(arg)
-                        result = self.instrumented_evm.deploy_contract(
-                            deploy_account,
-                            self.deployement_bytecode + "".join(constructor_args_list) if len(
-                                constructor_args_list) > 0 else self.deployement_bytecode,
-                            0, 5000000, 1)
-
-                if result.is_error:
-                    logger.error("Problem while deploying contract %s. Error message: %s",
-                                self.contract_name, result._error)
-                    sys.exit(-2)
-
-                contract_address = result.msg.storage_address.hex()
-                self.instrumented_evm.accounts.append(contract_address)
-                self.env.nr_of_transactions += 1
-                logger.debug("Contract deployed at %s", contract_address)
-        else:
+                        contract_address = encode_hex(result.msg.storage_address)
+                        self.instrumented_evm.accounts.append(contract_address)
+                        self.env.nr_of_transactions += 1
+                        logger.info("Contract deployed at %s", contract_address)
+                        # Lưu thông tin về contract đã deploy
+                        settings.TRANS_INFO[self.contract_name] = contract_address
+                        settings.DEPLOYED_CONTRACT_ADDRESS[self.contract_name] = contract_address
+            
+            # Xóa địa chỉ contract khỏi accounts để tránh gửi transactions từ hợp đồng
+            if contract_address in self.instrumented_evm.accounts:
+                self.instrumented_evm.accounts.remove(contract_address)
+            
+            # Cập nhật overall_pcs và overall_jumpis từ deployed bytecode
+            self.env.overall_pcs, self.env.overall_jumpis = get_pcs_and_jumpis(
+                self.instrumented_evm.get_code(to_canonical_address(contract_address)).hex())
+                
+        elif self.args.abi:
             contract_address = self.args.contract
-            self.instrumented_evm.accounts.append(contract_address)
 
-        self.instrumented_evm.create_snapshot()  # 部署所有合约后, 创建快照
+        self.instrumented_evm.create_snapshot()  # Tạo snapshot sau khi deploy tất cả contracts
 
         # Thêm phân tích dataflow nếu sử dụng RAG
         analysis_result = None
@@ -279,25 +332,41 @@ class Fuzzer:
                 analysis_result = None
 
         # Tạo generator (thông thường, LLM hoặc RAG + Dataflow)
+        rag_generator = None  # Biến để theo dõi RAG generator nếu được sử dụng
+        
         if hasattr(self.args, 'use_rag') and self.args.use_rag and self.args.api_key and analysis_result:
-            logger.info("Using RAG-enhanced generator with dataflow analysis")
-            # Sử dụng RAGEnhancedGenerator
-            try:
-                generator = create_rag_enhanced_generator(
-                    interface=self.interface,
-                    bytecode=self.deployement_bytecode,
-                    accounts=self.instrumented_evm.accounts,
-                    contract=contract_address,
-                    api_key=self.args.api_key,
-                    analysis_result=analysis_result,
-                    contract_name=self.contract_name,
-                    sol_path=self.args.source,
-                    other_generators=generators,
-                    interface_mapper=self.interface_mapper
-                )
-            except Exception as e:
-                logger.error(f"Error creating RAG-enhanced generator: {e}")
-                logger.warning("Falling back to standard generator")
+            if rag_available:
+                logger.info("Using RAG-enhanced generator with dataflow analysis")
+                try:
+                    generator = create_rag_enhanced_generator(
+                        interface=self.interface,
+                        bytecode=self.deployement_bytecode,
+                        accounts=self.instrumented_evm.accounts,
+                        contract=contract_address,
+                        api_key=self.args.api_key,
+                        analysis_result=analysis_result,
+                        contract_name=self.contract_name,
+                        sol_path=self.args.source,
+                        other_generators=generators,
+                        interface_mapper=self.interface_mapper
+                    )
+                    logger.info("RAG-enhanced generator created successfully")
+                    rag_generator = generator  # Lưu lại để sử dụng later
+                except Exception as e:
+                    logger.error(f"Error creating RAG-enhanced generator: {e}")
+                    logger.warning("Falling back to standard generator")
+                    generator = Generator(
+                        interface=self.interface,
+                        bytecode=self.deployement_bytecode,
+                        accounts=self.instrumented_evm.accounts,
+                        contract=contract_address,
+                        other_generators=generators,
+                        interface_mapper=self.interface_mapper,
+                        contract_name=self.contract_name,
+                        sol_path=self.args.source
+                    )
+            else:
+                logger.warning("RAG components not available, falling back to standard generator")
                 generator = Generator(
                     interface=self.interface,
                     bytecode=self.deployement_bytecode,
@@ -308,28 +377,6 @@ class Fuzzer:
                     contract_name=self.contract_name,
                     sol_path=self.args.source
                 )
-        elif self.args.use_llm and self.args.api_key:
-            logger.info("Using LLM-enhanced generator with API key")
-            # Đọc báo cáo audit nếu có
-            audit_report = None
-            if self.args.audit_file and os.path.exists(self.args.audit_file):
-                with open(self.args.audit_file, 'r', encoding='utf-8') as f:
-                    audit_report = f.read()
-                    logger.info(f"Loaded audit report from {self.args.audit_file}, length: {len(audit_report)} chars")
-            
-            # Sử dụng LLMEnhancedGenerator
-            generator = create_llm_enhanced_generator(
-                interface=self.interface,
-                bytecode=self.deployement_bytecode,
-                accounts=self.instrumented_evm.accounts,
-                contract=contract_address,
-                api_key=self.args.api_key,
-                audit_report=audit_report,
-                contract_name=self.contract_name,
-                sol_path=self.args.source,
-                other_generators=generators,
-                interface_mapper=self.interface_mapper
-            )
         else:
             # Sử dụng Generator thông thường
             generator = Generator(
@@ -350,7 +397,7 @@ class Fuzzer:
 
         # Tạo population (RAGEnhancedPopulation nếu sử dụng RAG)
         size = 2 * len(self.interface)
-        if hasattr(self.args, 'use_rag') and self.args.use_rag and self.args.api_key and analysis_result and isinstance(generator, RAGEnhancedGenerator):
+        if hasattr(self.args, 'use_rag') and self.args.use_rag and self.args.api_key and analysis_result and rag_available:
             logger.info("Using RAG-enhanced population")
             try:
                 population = RAGEnhancedPopulation(
@@ -396,6 +443,36 @@ class Fuzzer:
         settings.GLOBAL_ENV = self.env
 
         engine.run(ng=settings.GENERATIONS)
+
+        # Tính toán kết quả và hoàn thiện quá trình fuzzing
+        execution_time = time.time() - self.env.execution_begin
+        
+        # Chuẩn bị kết quả chi tiết
+        detailed_results = {
+            "code_coverage": self.env.code_coverage * 100,
+            "branch_coverage": self.env.branch_coverage * 100,
+            "total_transactions": self.env.nr_of_transactions,
+            "unique_transactions": len(self.env.unique_transactions),
+            "execution_time": execution_time,
+            "memory_usage": self.env.memory_consumption,
+            "errors": self.results["errors"],
+        }
+        
+        # Nếu sử dụng RAG, hoàn thiện quá trình với tổng kết và lưu kết quả
+        if rag_generator:
+            try:
+                # Định nghĩa thư mục kết quả
+                output_dir = "./fuzzing_results"
+                if self.args.results:
+                    output_dir = os.path.dirname(self.args.results)
+                
+                # Lưu kết quả chi tiết
+                rag_generator.finalize_fuzzing(detailed_results, output_dir)
+                
+                # Log khi generator đã tổng kết xong
+                logger.info("RAG-enhanced fuzzing results saved to %s", output_dir)
+            except Exception as e:
+                logger.error(f"Error finalizing RAG-enhanced fuzzing: {e}")
 
         if self.env.args.cfg:
             if self.env.args.source:
@@ -476,7 +553,7 @@ def main():
         with open(args.abi) as json_file:
             abi = json.load(json_file)
             runtime_bytecode = instrumented_evm.get_code(to_canonical_address(args.contract)).hex()
-            Fuzzer(args.contract, abi, None, runtime_bytecode, instrumented_evm, blockchain_state, solver, args,
+            Fuzzer(args.contract, abi, None, runtime_bytecode, instrumented_evm, solver, args,
                    seed).run()
 
 
@@ -544,7 +621,7 @@ def launch_argument_parser():
     parser.add_argument("--data-dependency",
                         help="Disable/Enable data dependency analysis: 0 - Disable, 1 - Enable (default: 1)",
                         action="store",
-                        dest="data_dependency", type=int)
+                        dest="data_dependency", type=int, default=1)
     parser.add_argument("--constraint-solving",
                         help="Disable/Enable constraint solving: 0 - Disable, 1 - Enable (default: 1)", action="store",
                         dest="constraint_solving", type=int)

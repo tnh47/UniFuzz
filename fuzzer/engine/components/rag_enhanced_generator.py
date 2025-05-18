@@ -9,6 +9,7 @@ import requests
 import time
 import re
 from typing import Dict, List, Any, Optional, Union
+from datetime import datetime
 
 from fuzzer.utils.utils import initialize_logger
 from fuzzer.utils import settings
@@ -29,6 +30,9 @@ class RAGEnhancedGenerator(Generator):
                  sol_path: Optional[str] = None,
                  other_generators=None, 
                  interface_mapper=None):
+        """
+        Khởi tạo RAGEnhancedGenerator với các tham số bổ sung
+        """
         super().__init__(interface, bytecode, accounts, contract, 
                         other_generators=other_generators, 
                         interface_mapper=interface_mapper,
@@ -38,7 +42,7 @@ class RAGEnhancedGenerator(Generator):
         self.api_key = api_key
         self.logger = initialize_logger("RAGEnhancedGenerator")
         
-        # Lưu kết quả phân tích dataflow
+        # Lưu kết quả phân tích
         self.analysis_result = analysis_result or {
             "critical_paths": [],
             "test_sequences": [],
@@ -54,18 +58,18 @@ class RAGEnhancedGenerator(Generator):
         # Thông tin về lỗ hổng tiềm ẩn
         self.potential_vulnerabilities = self.analysis_result.get("vulnerabilities", [])
         
-        # Theo dõi transaction sequences đã được tạo
-        self.generated_sequences = []
-        
         # Cache cho các giá trị tham số
         self.arg_cache = {}
         
-        # Cấu hình kết nối đến Flask RAG Server
+        # Danh sách các sequence tốt đã tìm thấy
+        self.good_sequences = []
+        
+        # Cấu hình RAG server
         self.rag_api_endpoint = "http://localhost:5000/request"
         self.rag_timeout = 60  # seconds
-        self.rag_max_retries = 3  # Số lần thử lại tối đa
+        self.rag_max_retries = 3
         
-        # Thống kê hiệu suất RAG
+        # Thống kê hiệu suất
         self.rag_requests = 0
         self.rag_successes = 0
         self.rag_failures = 0
@@ -188,43 +192,85 @@ class RAGEnhancedGenerator(Generator):
                         dataflow_context = contract_info["functions"][function_name]
                         break
             
-            # Xây dựng prompt cho RAG
+            # Xây dựng prompt cải tiến cho RAG với ví dụ rõ ràng hơn
             prompt = f"""
-Analyze my smart contract and help me generate test values that might trigger vulnerabilities.
+Phân tích hợp đồng thông minh và tạo các giá trị tham số tối ưu cho fuzzing.
 
+Contract: {self.contract_name}
 Function: {function_name}
 Parameter types: {argument_types}
 
-I need VALUES ONLY that would be good for fuzzing this function, focusing on potential security issues.
-For each parameter type, return a suitable value that could expose vulnerabilities:
+CONTEXT PHÂN TÍCH:
+{json.dumps(dataflow_context, indent=2) if dataflow_context else ""}
 
-1. For uint/int: return numbers that might cause overflows or underflows 
-2. For address: return specific addresses that might cause issues
-3. For bool: return true or false based on which is more likely to cause issues
-4. For bytes/string: return values that might cause issues
+TÌM HIỂU CHỨC NĂNG HÀM: 
+Hãy phân tích hàm {function_name} để hiểu:
+- Chức năng chính của hàm này là gì?
+- Các ràng buộc và điều kiện kiểm tra nào trong hàm?
+- Các biến state nào bị ảnh hưởng bởi hàm này?
+- Các hàm khác nào thường được gọi trước/sau hàm này?
 
-Return ONLY a JSON array containing appropriate values, one for each parameter.
-Example: ["0xabc123...", 1000000]
+PHÂN TÍCH ĐIỂM YẾU TIỀM ẨN:
+Dựa trên các lỗ hổng phổ biến trong smart contract, xác định:
+- Có khả năng xảy ra integer overflow/underflow không?
+- Có ràng buộc access control nào có thể bị bypass không?
+- Có thể xảy ra reentrancy không?
+- Có vấn đề về logic trong điều kiện không?
 
-Do not include explanations, types, or other text.
-            """
+SINH GIÁ TRỊ THAM SỐ:
+Đối với mỗi tham số trong {argument_types}, hãy sinh giá trị đặc biệt dựa trên loại dữ liệu và chức năng của hàm:
+
+- Đối với uint/int: Tìm giá trị biên, giá trị có thể bypass điều kiện, hoặc gây tràn số
+- Đối với address: Tìm địa chỉ đặc biệt liên quan đến quyền hạn, tương tác với hợp đồng
+- Đối với bool: Xác định giá trị có thể tác động đến control flow
+- Đối với bytes/string: Xác định độ dài và nội dung có thể gây vấn đề
+
+PHÂN TÍCH TRANSACTION SEQUENCE:
+Dựa trên dataflow và critical paths, xác định:
+- Các hàm nên được gọi trước {function_name}
+- Các hàm nên được gọi sau {function_name}
+- Trạng thái contract cần thiết trước khi gọi hàm này
+
+CHỈ TRẢ VỀ:
+Một mảng JSON đơn giản chỉ chứa các giá trị tham số, không có cấu trúc lồng nhau, không có tên trường. Ví dụ:
+[
+  "0x1234567890123456789012345678901234567890",  // địa chỉ
+  1000000000  // số lượng
+]
+
+KHÔNG bao gồm giải thích hoặc metadata, chỉ trả về mảng JSON với các giá trị.
+"""
             
-            # Thêm thông tin về lỗ hổng nếu có
+            # Thêm thông tin về các lỗ hổng tiềm ẩn nếu có
             if related_vulnerabilities:
-                vuln_info = json.dumps(related_vulnerabilities, indent=2)
                 prompt += f"""
-Potential vulnerabilities:
-{vuln_info}
-                """
+
+THÔNG TIN LỖ HỔNG LIÊN QUAN:
+{json.dumps(related_vulnerabilities, indent=2)}
+
+Tập trung vào việc sinh các giá trị tham số có thể kích hoạt các lỗ hổng trên.
+"""
             
-            # Thêm thông tin dataflow nếu có
-            if dataflow_context:
-                flow_info = json.dumps(dataflow_context, indent=2)
+            # Thêm thông tin về critical paths
+            if self.critical_paths:
                 prompt += f"""
-Dataflow context:
-{flow_info}
-                """
-                
+
+CRITICAL PATHS:
+{json.dumps(self.critical_paths, indent=2)}
+
+Các paths này chỉ ra các chuỗi hàm có liên quan chặt chẽ với nhau. Sinh giá trị tham số phù hợp với các paths này.
+"""
+            
+            # Thêm thông tin về các sequence tối ưu đã phát hiện
+            if self.optimal_sequences:
+                prompt += f"""
+
+SEQUENCES TỐI ƯU ĐÃ PHÁT HIỆN:
+{json.dumps(self.optimal_sequences, indent=2)}
+
+Tham khảo các sequences tối ưu này khi sinh giá trị tham số.
+"""
+            
             # Thêm thông tin từ mã nguồn nếu có
             if hasattr(self, 'sol_path') and self.sol_path and os.path.exists(self.sol_path):
                 try:
@@ -235,11 +281,26 @@ Dataflow context:
                     function_matches = function_pattern.findall(code)
                     if function_matches:
                         prompt += f"""
-Function code:
+
+MÃ NGUỒN CỦA HÀM:
 {function_matches[0]}
-                        """
+
+Phân tích mã nguồn để hiểu chính xác các ràng buộc, điều kiện và logic của hàm, từ đó sinh giá trị tham số phù hợp.
+"""
                 except Exception as e:
                     self.logger.warning(f"Could not read sol file: {e}")
+            
+            # Nhấn mạnh định dạng trả về để tránh lỗi JSON
+            prompt += """
+QUAN TRỌNG: Trả về mảng JSON đơn giản, ví dụ:
+[
+  "0x1234567890123456789012345678901234567890",
+  1000000000
+]
+
+KHÔNG bao gồm cấu trúc phức tạp hoặc metadata như "parameter_name", "description", "function", "parameters",...
+CHỈ trả về một mảng chứa các giá trị theo thứ tự tham số.
+"""
             
             self.logger.info(f"Requesting argument values from RAG for {function_name}")
             
@@ -253,35 +314,118 @@ Function code:
                 
             # Xử lý phản hồi
             try:
-                # Làm sạch chuỗi JSON - xóa các format code blocks nếu có
-                clean_response = re.sub(r"```json\s*|\s*```", "", rag_response).strip()
+                # Làm sạch chuỗi JSON - xóa các format code blocks và comments
+                clean_response = rag_response.strip()
                 
-                # Xử lý trường hợp phản hồi có text bên ngoài JSON array
+                # Loại bỏ code blocks
+                clean_response = re.sub(r"```json\s*|\s*```", "", clean_response)
+                
+                # Loại bỏ comments
+                clean_response = re.sub(r"//.*?$", "", clean_response, flags=re.MULTILINE)
+                clean_response = re.sub(r"/\*.*?\*/", "", clean_response, flags=re.DOTALL)
+                
+                # Tìm mảng JSON trong phản hồi
                 json_array_match = re.search(r"\[\s*.*?\s*\]", clean_response, re.DOTALL)
                 if json_array_match:
                     clean_response = json_array_match.group(0)
                 
-                args = json.loads(clean_response)
+                # Xử lý chuỗi đặc biệt như 2**256-1
+                clean_response = re.sub(r'(\d+)\s*\*\*\s*(\d+)\s*-\s*(\d+)', lambda m: str((int(m.group(1)) ** int(m.group(2))) - int(m.group(3))), clean_response)
+                clean_response = re.sub(r'(\d+)\s*\*\*\s*(\d+)', lambda m: str(int(m.group(1)) ** int(m.group(2))), clean_response)
+                
+                # Thử parse JSON
+                args = None
+                try:
+                    args = json.loads(clean_response)
+                except json.JSONDecodeError:
+                    # Nếu không parse được, thử trích xuất các giá trị theo mẫu dựa trên kiểu dữ liệu
+                    self.logger.warning(f"Could not parse as JSON, trying to extract values manually: {clean_response}")
+                    
+                    # Sinh giá trị mặc định dựa trên kiểu tham số
+                    args = []
+                    for arg_type in argument_types:
+                        args.append(self._get_interesting_value_for_type(arg_type))
+                    
+                # Kiểm tra xem args có phải là cấu trúc lồng nhau không
+                if isinstance(args, list) and any(isinstance(item, dict) for item in args):
+                    self.logger.warning(f"RAG returned nested structure, extracting values")
+                    
+                    # Trích xuất giá trị từ cấu trúc lồng nhau
+                    processed_args = []
+                    for i, arg_type in enumerate(argument_types):
+                        if i < len(args):
+                            # Trích xuất giá trị dựa trên cấu trúc
+                            item = args[i]
+                            if isinstance(item, dict):
+                                # Tìm kiếm giá trị trong các trường phổ biến
+                                if "value" in item:
+                                    processed_args.append(item["value"])
+                                elif "parameters" in item and isinstance(item["parameters"], dict):
+                                    # Lấy giá trị đầu tiên từ parameters
+                                    param_values = list(item["parameters"].values())
+                                    if param_values:
+                                        processed_args.append(param_values[0])
+                                    else:
+                                        processed_args.append(self._get_interesting_value_for_type(arg_type))
+                                else:
+                                    # Lấy giá trị đầu tiên từ dict
+                                    values = list(item.values())
+                                    if values:
+                                        processed_args.append(values[0])
+                                    else:
+                                        processed_args.append(self._get_interesting_value_for_type(arg_type))
+                            else:
+                                processed_args.append(item)
+                        else:
+                            processed_args.append(self._get_interesting_value_for_type(arg_type))
+                    
+                    args = processed_args
                 
                 # Đảm bảo args là list
                 if not isinstance(args, list):
-                    raise ValueError(f"Expected list response, got {type(args)}")
+                    self.logger.warning(f"Expected list response, got {type(args)}")
+                    args = [args]
                 
-                # Xử lý đặc biệt cho các giá trị lồng nhau
+                # Đảm bảo đủ số lượng tham số
+                while len(args) < len(argument_types):
+                    args.append(self._get_interesting_value_for_type(argument_types[len(args)]))
+                
+                # Chuyển đổi các giá trị trong args sang định dạng hợp lệ
                 processed_args = []
                 for i, arg in enumerate(args):
-                    # Nếu arg là list (nested list), lấy phần tử đầu tiên
-                    if isinstance(arg, list):
-                        if len(arg) > 0:
-                            processed_args.append(arg[0])
-                        else:
-                            # Fallback nếu list rỗng
-                            if i < len(argument_types):
-                                processed_args.append(self._get_default_value_for_type(argument_types[i]))
+                    if i < len(argument_types):
+                        # Xử lý dựa trên kiểu dữ liệu mong đợi
+                        if argument_types[i].startswith(("uint", "int")):
+                            # Xử lý số nguyên
+                            if isinstance(arg, str):
+                                try:
+                                    if arg.startswith("0x"):
+                                        processed_args.append(int(arg, 16))
+                                    else:
+                                        # Xử lý các biểu thức như 2**256-1 (nếu còn sót)
+                                        if "**" in arg or "-" in arg or "+" in arg or "*" in arg:
+                                            try:
+                                                processed_args.append(eval(arg))
+                                            except:
+                                                processed_args.append(int(arg) if arg.isdigit() else 0)
+                                        else:
+                                            processed_args.append(int(arg) if arg.isdigit() else 0)
+                                except ValueError:
+                                    processed_args.append(0)
                             else:
-                                processed_args.append(None)
-                    else:
-                        processed_args.append(arg)
+                                processed_args.append(arg if isinstance(arg, int) else 0)
+                        elif argument_types[i] == "address":
+                            # Xử lý địa chỉ
+                            if isinstance(arg, str) and arg.startswith("0x") and len(arg) == 42:
+                                processed_args.append(arg)
+                            else:
+                                # Nếu không phải địa chỉ hợp lệ, dùng địa chỉ từ accounts
+                                if len(self.accounts) > 0:
+                                    processed_args.append(random.choice(self.accounts))
+                                else:
+                                    processed_args.append("0x0000000000000000000000000000000000000000")
+                        else:
+                            processed_args.append(arg)
                 
                 self.logger.info(f"RAG suggested args for {function_name}: {processed_args}")
                 
@@ -291,19 +435,74 @@ Function code:
                 
                 return processed_args
                 
-            except json.JSONDecodeError as e:
+            except Exception as e:
                 self.rag_failures += 1
                 self.logger.error(f"JSON parse error for {function_name}: {e}")
                 self.logger.error(f"RAG response: {rag_response}")
-                return None
-            except Exception as e:
-                self.rag_failures += 1
-                self.logger.error(f"Error processing RAG response for {function_name}: {e}")
-                return None
+                # Trả về giá trị mặc định
+                return [self._get_interesting_value_for_type(arg_type) for arg_type in argument_types]
             
         except Exception as e:
             self.rag_failures += 1
             self.logger.error(f"Error getting function args from RAG: {e}")
+            return None
+    
+    def _get_interesting_value_for_type(self, type_str: str) -> Any:
+        """
+        Trả về một giá trị thú vị (không phải mặc định) cho một kiểu dữ liệu để cải thiện fuzzing
+        """
+        if type_str.startswith("uint"):
+            # Trả về một giá trị thú vị cho uint
+            interesting_values = [
+                0,                    # Zero
+                1,                    # One
+                2**256 - 1,           # MAX_UINT
+                2**128 - 1,           # Big number
+                2**64 - 1,            # Another big number
+                1000000,              # Medium number
+                10                    # Small number
+            ]
+            return random.choice(interesting_values)
+        elif type_str.startswith("int"):
+            # Trả về một giá trị thú vị cho int
+            interesting_values = [
+                0,                    # Zero
+                1,                    # One
+                -1,                   # Negative one
+                2**127 - 1,           # MAX_INT
+                -(2**127),            # MIN_INT
+                1000000,              # Medium positive
+                -1000000              # Medium negative
+            ]
+            return random.choice(interesting_values)
+        elif type_str == "address":
+            # Trả về một địa chỉ thú vị
+            interesting_addresses = [
+                "0x0000000000000000000000000000000000000000",  # Zero address
+                "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",  # Max address
+                "0x1000000000000000000000000000000000000000",  # Special address 1
+                "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"   # A common address used in DeFi
+            ]
+            return random.choice(interesting_addresses)
+        elif type_str == "bool":
+            return random.choice([True, False])
+        elif type_str.startswith("bytes"):
+            interesting_bytes = [
+                "0x00",                               # Empty bytes
+                "0xFFFFFFFF",                         # All Fs
+                "0x1234567890ABCDEF",                 # Random hex
+                "0x" + "00" * 32                      # Long zeros
+            ]
+            return random.choice(interesting_bytes)
+        elif type_str == "string":
+            interesting_strings = [
+                "",                                  # Empty string
+                "Hello",                             # Normal string
+                "A" * 100,                           # Long string
+                "Special@#$%^&*()Characters"         # Special characters
+            ]
+            return random.choice(interesting_strings)
+        else:
             return None
     
     def _get_default_value_for_type(self, type_str: str) -> Any:
@@ -321,339 +520,316 @@ Function code:
         else:
             return None
     
-    def get_random_argument(self, type_str: str, function: str, argument_index: int) -> Any:
-        """Override để sinh tham số tối ưu từ RAG khi có thể"""
-        # Tìm tên hàm từ hash
-        function_name = None
-        for fname, fhash in self.interface_mapper.items() if self.interface_mapper else {}:
-            if fhash == function:
-                function_name = fname.split("(")[0]  # Lấy tên không có tham số
-                break
-        
-        if function_name:
-            # Thử lấy tham số từ RAG
-            rag_args = self._get_function_args_from_rag(
-                function_name, 
-                function, 
-                [type_str]
-            )
-            
-            if rag_args and len(rag_args) > argument_index:
-                arg_value = rag_args[argument_index]
-                self.logger.info(f"Using RAG value for {function_name}.arg{argument_index}: {arg_value}")
-                
-                # Đảm bảo giá trị được chuyển đổi sang định dạng hợp lệ
-                if type_str.startswith(("uint", "int")) and isinstance(arg_value, str):
-                    # Chuyển đổi chuỗi số hoặc biểu thức thành số nguyên
-                    try:
-                        if arg_value.startswith("0x"):
-                            return int(arg_value, 16)
-                        else:
-                            # Xử lý các biểu thức như 2**256-1
-                            if "**" in arg_value or "-" in arg_value or "+" in arg_value or "*" in arg_value:
-                                # Cẩn thận với eval() - chỉ dùng cho biểu thức số học đơn giản
-                                cleaned_expr = re.sub(r"[^0-9\s\+\-\*\/\(\)\^]", "", arg_value.replace("**", "^"))
-                                cleaned_expr = cleaned_expr.replace("^", "**")
-                                if cleaned_expr:
-                                    return eval(cleaned_expr)
-                            return int(arg_value)
-                    except Exception as e:
-                        self.logger.warning(f"Error converting RAG value '{arg_value}' to int: {e}")
-                
-                return arg_value
-        
-        # Fallback sang phương thức mặc định
-        return super().get_random_argument(type_str, function, argument_index)
-    
     def generate_individual(self, function: str, argument_types: List[str], 
                            vuln_type: Optional[str] = None, default_value: bool = False) -> List[Dict]:
-        """Override để sinh tham số tối ưu từ RAG"""
-        # Tìm tên hàm từ hash
-        function_name = None
-        for fname, fhash in self.interface_mapper.items() if self.interface_mapper else {}:
-            if fhash == function:
-                function_name = fname.split("(")[0]  # Lấy tên không có tham số
-                break
-        
-        # Nếu có tên hàm, thử lấy tham số từ RAG
-        if function_name:
-            rag_args = self._get_function_args_from_rag(
-                function_name, 
-                function, 
-                argument_types,
-                vuln_type
-            )
-            
-            if rag_args:
-                individual = []
-                
-                arguments = [function]  # Function selector là tham số đầu tiên
-                for index, arg_type in enumerate(argument_types):
-                    # Dùng giá trị từ RAG nếu có
-                    if index < len(rag_args):
-                        # Chuyển đổi giá trị RAG sang định dạng phù hợp
-                        arg_value = rag_args[index]
-                        
-                        # Kiểm tra xem arg_value có phải là list không
-                        if isinstance(arg_value, list):
-                            self.logger.warning(f"Nested list detected for {function_name}, arg {index}: {arg_value}")
-                            # Lấy phần tử đầu tiên nếu arg_value là list
-                            arg_value = arg_value[0] if arg_value else None
-                        
-                        if arg_value is None:
-                            arguments.append(self.get_random_argument(arg_type, function, index))
-                        elif arg_type == "address" and isinstance(arg_value, str):
-                            # Xử lý đặc biệt cho địa chỉ để tránh lỗi AddressEncoder
-                            try:
-                                if arg_value.startswith("0x"):
-                                    # Kiểm tra độ dài địa chỉ
-                                    if len(arg_value) == 42:  # Địa chỉ Ethereum đầy đủ (0x + 40 ký tự hex)
-                                        # Chuyển địa chỉ thành dạng chuẩn để tránh lỗi AddressEncoder
-                                        from eth_utils import to_checksum_address
-                                        try:
-                                            checksum_address = to_checksum_address(arg_value)
-                                            arguments.append(checksum_address)
-                                        except Exception:
-                                            # Nếu không thể chuyển đổi, sử dụng một địa chỉ từ accounts pool
-                                            if len(self.accounts) > 0:
-                                                arguments.append(random.choice(self.accounts))
-                                            else:
-                                                arguments.append(self.get_random_argument(arg_type, function, index))
-                                    else:
-                                        # Địa chỉ không đúng định dạng, sử dụng một địa chỉ từ accounts pool
-                                        if len(self.accounts) > 0:
-                                            arguments.append(random.choice(self.accounts))
-                                        else:
-                                            arguments.append(self.get_random_argument(arg_type, function, index))
-                                else:
-                                    # Không phải địa chỉ hex, sử dụng một địa chỉ từ accounts pool
-                                    if len(self.accounts) > 0:
-                                        arguments.append(random.choice(self.accounts))
-                                    else:
-                                        arguments.append(self.get_random_argument(arg_type, function, index))
-                            except Exception as e:
-                                self.logger.warning(f"Error processing address: {e}")
-                                # Fallback an toàn
-                                if len(self.accounts) > 0:
-                                    arguments.append(random.choice(self.accounts))
-                                else:
-                                    arguments.append(self.get_random_argument(arg_type, function, index))
-                        elif arg_type.startswith(("uint", "int")) and isinstance(arg_value, str):
-                            try:
-                                if arg_value.startswith("0x"):
-                                    arguments.append(int(arg_value, 16))
-                                else:
-                                    # Xử lý các biểu thức như 2**256-1
-                                    if "**" in arg_value or "-" in arg_value or "+" in arg_value or "*" in arg_value:
-                                        cleaned_expr = re.sub(r"[^0-9\s\+\-\*\/\(\)\^]", "", arg_value.replace("**", "^"))
-                                        cleaned_expr = cleaned_expr.replace("^", "**")
-                                        if cleaned_expr:
-                                            arguments.append(eval(cleaned_expr))
-                                        else:
-                                            arguments.append(int(arg_value) if arg_value.isdigit() else self.get_random_argument(arg_type, function, index))
-                                    else:
-                                        arguments.append(int(arg_value) if arg_value.isdigit() else arg_value)
-                            except Exception as e:
-                                self.logger.warning(f"Error converting RAG value '{arg_value}' to int: {e}")
-                                arguments.append(self.get_random_argument(arg_type, function, index))
-                        else:
-                            arguments.append(arg_value)
-                    else:
-                        arguments.append(self.get_random_argument(arg_type, function, index))
-                
-                try:
-                    # Tạo giao dịch và thêm các thông tin khác
-                    individual.append({
-                        "account": self.get_random_account(function),
-                        "contract": self.contract,
-                        "amount": self.get_random_amount(function),
-                        "arguments": arguments,
-                        "blocknumber": self.get_random_blocknumber(function),
-                        "timestamp": self.get_random_timestamp(function),
-                        "gaslimit": self.get_random_gaslimit(function),
-                        "call_return": dict(),
-                        "extcodesize": dict(),
-                        "returndatasize": dict()
-                    })
-                    
-                    # Thêm các thông tin khác
-                    address, call_return_value = self.get_random_callresult_and_address(function)
-                    individual[-1]["call_return"] = {address: call_return_value}
-                    
-                    address, extcodesize_value = self.get_random_extcodesize_and_address(function)
-                    individual[-1]["extcodesize"] = {address: extcodesize_value}
-                    
-                    address, value = self.get_random_returndatasize_and_address(function)
-                    individual[-1]["returndatasize"] = {address: value}
-                    
-                    return individual
-                except Exception as e:
-                    self.logger.error(f"Error creating transaction: {e}")
-        
-        # Nếu không có thông tin từ RAG, dùng phương thức mặc định
+        """
+        Sinh transaction dùng sequence thông minh từ RAG nhưng giá trị từ generator gốc
+        để tối ưu độ phủ code
+        """
+        # Sử dụng trực tiếp hàm gốc từ lớp cha để tạo ra các giá trị tham số
+        # Điều này giúp tăng cường độ phủ code và đảm bảo tính đúng đắn của tham số
         return super().generate_individual(function, argument_types, default_value)
     
+    def _get_suggested_sequence_from_rag(self) -> Optional[List[str]]:
+        """Lấy gợi ý sequence từ RAG."""
+        prompt = f"""
+Dựa vào smart contract '{self.contract_name}' với các hàm: {list(self.interface_mapper.keys()) if self.interface_mapper else list(self.interface.keys())},
+hãy đề xuất một chuỗi các lời gọi hàm để tìm lỗ hổng tiềm ẩn hoặc tăng độ phủ code.
+
+Thông tin hợp đồng: {self.contract_name}
+Các hàm có sẵn: {', '.join(list(self.interface_mapper.keys()) if self.interface_mapper else list(self.interface.keys()))}
+
+Xem xét critical paths: {json.dumps(self.critical_paths, indent=2)} 
+Và các lỗ hổng tiềm ẩn: {json.dumps(self.potential_vulnerabilities, indent=2)}.
+
+Một sequence tốt sẽ:
+1. Thay đổi trạng thái contract theo cách có thể dẫn đến lỗi
+2. Kiểm tra các điều kiện biên và giá trị đặc biệt
+3. Tương tác với các hàm có quan hệ phụ thuộc dữ liệu
+4. Nhắm vào các lỗ hổng tiềm ẩn
+
+Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer", "approve", "transferFrom"])
+"""
+        response = self._fetch_rag_suggestion(prompt)
+        if response:
+            try:
+                clean_response = re.sub(r"```json\s*|\s*```", "", response).strip()
+                json_array_match = re.search(r"\[\s*.*?\s*\]", clean_response, re.DOTALL)
+                if json_array_match:
+                    clean_response = json_array_match.group(0)
+                sequence = json.loads(clean_response)
+                if isinstance(sequence, list) and all(isinstance(f, str) for f in sequence):
+                    return sequence
+            except Exception as e:
+                self.logger.warning(f"Không thể parse sequence từ RAG: {e}")
+        return None
+
     def generate_random_individual(self, func_hash=None, func_args_types=None, default_value=False):
-        """Sinh chuỗi transaction tối ưu dựa trên phân tích và RAG"""
+        """
+        Sinh chuỗi transaction thông minh dựa trên phân tích dataflow và lịch sử của các chuỗi thành công
+        nhưng giữ nguyên cách sinh giá trị từ generator gốc để đảm bảo độ phủ code cao
+        """
         # Nếu đã chỉ định hash và args, dùng chúng
         if func_hash is not None and func_args_types is not None:
             individual = []
             individual.extend(self.generate_constructor())
-            individual.extend(self.generate_individual(func_hash, func_args_types, default_value=default_value))
+            # Sử dụng phương thức từ generator gốc để sinh giá trị
+            individual.extend(super().generate_individual(func_hash, func_args_types, default_value=default_value))
             return individual
         
-        # Chọn ngẫu nhiên một trong các chiến lược sinh sequence:
-        strategy_weights = {
-            "optimal": 0.4,      # 40% xác suất dùng sequence tối ưu 
-            "vulnerability": 0.3, # 30% xác suất nhắm vào lỗ hổng
-            "critical_path": 0.2, # 20% xác suất theo critical path
-            "random": 0.1        # 10% xác suất sinh ngẫu nhiên
-        }
-        
-        strategies = list(strategy_weights.keys())
-        weights = list(strategy_weights.values())
-        
-        # Điều chỉnh trọng số dựa trên dữ liệu có sẵn
-        if not self.optimal_sequences:
-            weights[strategies.index("optimal")] = 0.1
-            weights[strategies.index("random")] = 0.4
-        if not self.potential_vulnerabilities:
-            weights[strategies.index("vulnerability")] = 0.1
-            weights[strategies.index("random")] = weights[strategies.index("random")] + 0.2
-        if not self.critical_paths:
-            weights[strategies.index("critical_path")] = 0.1
-            weights[strategies.index("random")] = weights[strategies.index("random")] + 0.1
-        
-        # Chọn chiến lược
-        strategy = random.choices(strategies, weights=weights, k=1)[0]
-        
-        self.logger.info(f"Using generation strategy: {strategy}")
-        
+        # Khởi tạo chuỗi giao dịch với constructor
         individual = []
         individual.extend(self.generate_constructor())
         
-        # Quyết định số lượng giao dịch trong chuỗi (2-5 giao dịch)
-        num_transactions = random.randint(2, min(5, settings.MAX_INDIVIDUAL_LENGTH - len(individual)))
+        # Đếm số lượng hàm sinh từ generator gốc vs từ RAG để log thông tin
+        original_functions = 0
+        rag_enhanced_functions = 0
         
-        if strategy == "optimal" and self.optimal_sequences:
-            # Chọn ngẫu nhiên một sequence tối ưu
+        # Tạo danh sách các hàm để sử dụng cho sequence để tránh lặp lại
+        available_functions = list(self.interface.keys())
+        random.shuffle(available_functions)
+        
+        # Quyết định cách sinh sequence dựa vào chiến lược
+        # Điều chỉnh weights: tránh lặp lại optimal_sequence và critical_path liên tục
+        # Tăng tỷ lệ sử dụng mutation và combined để đa dạng hóa sequence
+        strategy = random.choices(
+            ["optimal_sequence", "critical_path", "mutation", "random", "combined"],
+            weights=[0.25, 0.25, 0.2, 0.1, 0.2]
+        )[0]
+        
+        # Đếm số lần sử dụng mỗi chiến lược
+        if not hasattr(self, '_strategy_counts'):
+            self._strategy_counts = {
+                "optimal_sequence": 0, 
+                "critical_path": 0, 
+                "mutation": 0, 
+                "random": 0, 
+                "combined": 0
+            }
+        self._strategy_counts[strategy] += 1
+        
+        self.logger.info(f"Using strategy: {strategy} for transaction sequence")
+
+        # Giới hạn số lượng transaction tối đa
+        MAX_SEQUENCE_LENGTH = 5  # Đặt số lượng transaction tối đa nhỏ hơn để tối ưu độ phủ
+
+        # Đảm bảo độ đa dạng bằng cách không lặp lại sequence từ optimal/critical path
+        if (strategy == "optimal_sequence" or strategy == "critical_path") and hasattr(self, '_last_sequence'):
+            # Nếu strategy trước đó cũng là optimal hoặc critical và đã sử dụng > 5 lần liên tiếp
+            # thì chuyển sang chiến lược khác để tăng độ đa dạng
+            if self._last_sequence == strategy:
+                self._repeat_count = getattr(self, '_repeat_count', 0) + 1
+                if self._repeat_count > 5:
+                    strategy = random.choice(["mutation", "combined", "random"])
+                    self.logger.info(f"Switching to {strategy} to increase diversity")
+                    self._repeat_count = 0
+            else:
+                self._repeat_count = 1
+        
+        self._last_sequence = strategy
+
+        # Set random seed dựa trên thời gian để tăng tính ngẫu nhiên
+        random.seed(time.time() + random.random())
+
+        if strategy == "optimal_sequence" and self.optimal_sequences:
+            # Sử dụng sequence từ phân tích dataflow
             sequence_template = random.choice(self.optimal_sequences)
-            self.logger.info(f"Generated sequence from optimal template: {sequence_template}")
-            optimal_seq = self._generate_optimal_sequence(sequence_template)
-            if optimal_seq:
-                individual.extend(optimal_seq)
-                return individual
-            # Nếu không thành công, tiếp tục với chiến lược khác
-        
-        elif strategy == "vulnerability" and self.potential_vulnerabilities:
-            # Chọn ngẫu nhiên một lỗ hổng để nhắm tới
-            vulnerability = random.choice(self.potential_vulnerabilities)
-            self.logger.info(f"Generated sequence targeting vulnerability: {vulnerability.get('type')}")
-            vuln_seq = self._generate_vulnerability_targeting_sequence(vulnerability)
-            if vuln_seq:
-                individual.extend(vuln_seq)
-                return individual
-            # Nếu không thành công, tiếp tục với chiến lược khác
+            self.logger.info(f"Using optimal sequence template: {sequence_template}")
             
-        elif strategy == "critical_path" and self.critical_paths:
-            # Chọn ngẫu nhiên một critical path
-            path = random.choice(self.critical_paths)
+            # Giới hạn số lượng transaction trong template
+            sequence_template = sequence_template[:MAX_SEQUENCE_LENGTH-1]  # Để lại chỗ cho 1 hàm ngẫu nhiên
             
-            if path:
-                self.logger.info(f"Generated sequence following critical path: {path}")
+            # Sinh transaction theo template
+            for func_name in sequence_template:
+                func_hash = self._get_function_hash_by_name(func_name)
+                if func_hash and func_hash in self.interface:
+                    # Sinh giá trị từ generator gốc để đảm bảo phủ code tốt
+                    tx = super().generate_individual(func_hash, self.interface[func_hash], default_value=default_value)
+                    if tx:
+                        individual.extend(tx)
+                        rag_enhanced_functions += 1
+            
+            # Thêm một hàm ngẫu nhiên không có trong template để tăng đa dạng
+            if len(available_functions) > 0 and len(individual) < MAX_SEQUENCE_LENGTH + 1:  # +1 cho constructor
+                # Lọc ra các hàm không có trong template
+                used_hashes = set()
+                for tx in individual[1:]:  # Bỏ qua constructor
+                    if "arguments" in tx and tx["arguments"]:
+                        used_hashes.add(tx["arguments"][0])
                 
-                # Tạo chuỗi giao dịch từ critical path
-                path_transactions = []
-                for func_name in path:
+                unused_functions = [f for f in available_functions if f not in used_hashes]
+                if unused_functions:
+                    random_func = random.choice(unused_functions)
+                    tx = super().generate_individual(random_func, self.interface[random_func], default_value=default_value)
+                    if tx:
+                        individual.extend(tx)
+                        original_functions += 1
+                        self.logger.info(f"Added random function {random_func[:8]} for diversity")
+        
+        elif strategy == "critical_path" and self.critical_paths:
+            # Sử dụng critical path từ phân tích dataflow
+            path = random.choice(self.critical_paths)
+            self.logger.info(f"Following critical path: {path}")
+            
+            # Giới hạn số lượng transaction trong path
+            path = path[:MAX_SEQUENCE_LENGTH-1]  # Để lại chỗ cho 1 hàm ngẫu nhiên
+            
+            for func_name in path:
+                func_hash = self._get_function_hash_by_name(func_name)
+                if func_hash and func_hash in self.interface:
+                    # Sinh giá trị từ generator gốc để đảm bảo phủ code tốt
+                    tx = super().generate_individual(func_hash, self.interface[func_hash], default_value=default_value)
+                    if tx:
+                        individual.extend(tx)
+                        rag_enhanced_functions += 1
+            
+            # Thêm một hàm ngẫu nhiên không có trong path để tăng đa dạng
+            if len(available_functions) > 0 and len(individual) < MAX_SEQUENCE_LENGTH + 1:  # +1 cho constructor
+                # Lọc ra các hàm không có trong path
+                used_hashes = set()
+                for tx in individual[1:]:  # Bỏ qua constructor
+                    if "arguments" in tx and tx["arguments"]:
+                        used_hashes.add(tx["arguments"][0])
+                
+                unused_functions = [f for f in available_functions if f not in used_hashes]
+                if unused_functions:
+                    random_func = random.choice(unused_functions)
+                    tx = super().generate_individual(random_func, self.interface[random_func], default_value=default_value)
+                    if tx:
+                        individual.extend(tx)
+                        original_functions += 1
+                        self.logger.info(f"Added random function {random_func[:8]} for diversity")
+        
+        elif strategy == "mutation" and hasattr(self, 'population') and self.population:
+            # Đột biến một sequence tốt từ quần thể
+            if len(self.population) > 0:
+                # Chọn một sequence tốt từ quần thể
+                # Ưu tiên chọn từ top 5 nhưng đôi khi cũng chọn từ các cá thể xa hơn để đa dạng hóa
+                max_idx = len(self.population) - 1
+                if max_idx > 10 and random.random() < 0.3:  # 30% thời gian, lấy từ cá thể xa hơn
+                    best_idx = random.randint(5, min(10, max_idx))
+                else:
+                    best_idx = random.randint(0, min(5, max_idx))
+                
+                if hasattr(self.population[best_idx], "individual"):
+                    base_sequence = self.population[best_idx]["individual"]
+                elif hasattr(self.population[best_idx], "chromosome"):
+                    base_sequence = self.population[best_idx].chromosome
+                else:
+                    base_sequence = self.population[best_idx]
+                
+                if base_sequence and len(base_sequence) > 1:  # Bỏ qua constructor
+                    # Áp dụng thuật toán đột biến hoàn chỉnh từ hàm mutate() nhưng với xác suất tùy chỉnh
+                    mutated_indiv = self.mutate(base_sequence)
+                    self.logger.info(f"Applied full mutation to sequence from population index {best_idx}")
+                    return mutated_indiv
+        
+        elif strategy == "combined":
+            # Kết hợp từ nhiều nguồn để đa dạng hóa
+            num_transactions = random.randint(3, min(MAX_SEQUENCE_LENGTH, settings.MAX_INDIVIDUAL_LENGTH - len(individual)))
+            
+            # Lấy 2-3 hàm từ các nguồn khác nhau
+            sources = []
+            
+            # Thêm hàm từ optimal_sequence nếu có
+            if self.optimal_sequences and len(self.optimal_sequences) > 0:
+                seq = random.choice(self.optimal_sequences)
+                if seq and len(seq) > 0:
+                    func_name = random.choice(seq)
                     func_hash = self._get_function_hash_by_name(func_name)
                     if func_hash and func_hash in self.interface:
-                        path_transactions.extend(self.generate_individual(
-                            func_hash, 
-                            self.interface[func_hash]
-                        ))
-                
-                if path_transactions:
-                    individual.extend(path_transactions)
-                    return individual
-        
-        # Nếu các chiến lược trên không thành công hoặc chiến lược là "random"
-        self.logger.info("Generated random sequence (fallback)")
-        
-        # Tạo một chuỗi giao dịch có ý nghĩa dựa trên mối quan hệ đọc/ghi
-        # Phân tích các hàm để tìm mối quan hệ đọc/ghi
-        write_funcs = []  # Các hàm ghi dữ liệu
-        read_funcs = []   # Các hàm đọc dữ liệu
-        
-        # Tìm các hàm đọc và ghi
-        for func_name, func_hash in self.interface_mapper.items() if self.interface_mapper else {}:
-            func_name = func_name.split("(")[0]  # Lấy tên không có tham số
+                        sources.append((func_hash, self.interface[func_hash]))
             
-            # Kiểm tra xem hàm này có trong phân tích dataflow không
-            is_write_func = False
-            is_read_func = False
+            # Thêm hàm từ critical_path nếu có
+            if self.critical_paths and len(self.critical_paths) > 0:
+                path = random.choice(self.critical_paths)
+                if path and len(path) > 0:
+                    func_name = random.choice(path)
+                    func_hash = self._get_function_hash_by_name(func_name)
+                    if func_hash and func_hash in self.interface:
+                        sources.append((func_hash, self.interface[func_hash]))
             
-            # Kiểm tra trong danh sách các hàm đã phân tích
-            for contract_name, contract_info in self.dataflow_graph.items() if hasattr(self, 'dataflow_graph') else {}:
-                if contract_name == self.contract_name and "functions" in contract_info:
-                    if func_name in contract_info["functions"]:
-                        func_info = contract_info["functions"][func_name]
-                        if func_info.get("writes"):
-                            is_write_func = True
-                        if func_info.get("reads"):
-                            is_read_func = True
+            # Thêm 1-2 hàm ngẫu nhiên từ interface
+            for _ in range(2):
+                if available_functions:
+                    random_func = random.choice(available_functions)
+                    sources.append((random_func, self.interface[random_func]))
             
-            # Nếu không có thông tin dataflow, dựa vào tên hàm
-            if not (is_write_func or is_read_func):
-                if func_name.lower().startswith(("set", "add", "create", "update", "delete", "remove", "transfer", "mint", "burn")):
-                    is_write_func = True
-                elif func_name.lower().startswith(("get", "view", "is", "has", "balance", "total", "name", "symbol", "decimals")):
-                    is_read_func = True
+            # Shuffle các nguồn để đa dạng thứ tự
+            random.shuffle(sources)
             
-            if is_write_func:
-                write_funcs.append((func_name, func_hash))
-            if is_read_func:
-                read_funcs.append((func_name, func_hash))
+            # Chọn các hàm từ sources (không quá num_transactions)
+            selected_sources = sources[:num_transactions]
+            
+            # Sinh transaction từ các nguồn đã chọn
+            for func_hash, func_args_types in selected_sources:
+                tx = super().generate_individual(func_hash, func_args_types, default_value=default_value)
+                if tx:
+                    individual.extend(tx)
+                    # Đánh dấu là enhanced nếu từ optimal/critical, ngược lại là original
+                    if any(self._get_function_hash_by_name(func_name) == func_hash 
+                           for seq in self.optimal_sequences for func_name in seq) or \
+                       any(self._get_function_hash_by_name(func_name) == func_hash 
+                           for path in self.critical_paths for func_name in path):
+                        rag_enhanced_functions += 1
+                    else:
+                        original_functions += 1
         
-        # Tạo chuỗi giao dịch có mối quan hệ đọc/ghi
-        transactions = []
+        # Nếu không có transaction nào được tạo hoặc chiến lược "random", sử dụng random nhưng với số lượng nhỏ
+        if len(individual) <= (1 if self.generate_constructor() else 0) or strategy == "random":
+            # Sinh ngẫu nhiên theo cách của generator gốc nhưng giới hạn số lượng
+            num_transactions = random.randint(2, min(MAX_SEQUENCE_LENGTH, settings.MAX_INDIVIDUAL_LENGTH - len(individual)))
+            
+            # Dùng available_functions đã shuffle thay vì functions_pool để đảm bảo đa dạng
+            functions_to_use = available_functions[:num_transactions] if len(available_functions) >= num_transactions else available_functions
+            
+            for function in functions_to_use:
+                argument_types = self.interface[function]
+                tx = super().generate_individual(function, argument_types, default_value=default_value)
+                if tx:
+                    individual.extend(tx)
+                    original_functions += 1
         
-        # Thêm một số giao dịch ghi trước
-        for _ in range(min(2, num_transactions - 1)):
-            if write_funcs:
-                func_name, func_hash = random.choice(write_funcs)
-                if func_hash in self.interface:
-                    transactions.extend(self.generate_individual(
-                        func_hash,
-                        self.interface[func_hash]
-                    ))
+        # Đảm bảo không vượt quá MAX_INDIVIDUAL_LENGTH
+        if len(individual) > settings.MAX_INDIVIDUAL_LENGTH:
+            # Giữ lại constructor và cắt bớt các transactions
+            if self.generate_constructor():
+                individual = individual[:1] + individual[1:settings.MAX_INDIVIDUAL_LENGTH]
+            else:
+                individual = individual[:settings.MAX_INDIVIDUAL_LENGTH]
+
+        # Thêm chi tiết về hash của các hàm để debug
+        func_names = []
+        if len(individual) > 0:
+            for idx, tx in enumerate(individual):
+                if idx == 0 and "constructor" in tx.get("arguments", []):
+                    func_names.append("constructor")
+                    continue
+                    
+                if "arguments" in tx and len(tx["arguments"]) > 0:
+                    func_hash = tx["arguments"][0]
+                    func_name = "unknown"
+                    if self.interface_mapper:
+                        for name, hash in self.interface_mapper.items():
+                            if hash == func_hash:
+                                func_name = name.split("(")[0]  # Lấy tên hàm không kèm tham số
+                                break
+                    func_names.append(f"{func_name}({func_hash[:8]})")
         
-        # Thêm một số giao dịch đọc sau
-        for _ in range(min(2, num_transactions - len(transactions))):
-            if read_funcs:
-                func_name, func_hash = random.choice(read_funcs)
-                if func_hash in self.interface:
-                    transactions.extend(self.generate_individual(
-                        func_hash,
-                        self.interface[func_hash]
-                    ))
+        # Log thống kê để kiểm soát, bao gồm tên các hàm được gọi
+        if len(func_names) > 0:
+            self.logger.info(f"Generated sequence with {len(individual)} transactions ({rag_enhanced_functions} enhanced, {original_functions} original)")
+            self.logger.info(f"Sequence details: {' -> '.join(func_names)}")
+        else:
+            self.logger.info(f"Generated empty sequence")
         
-        # Nếu vẫn chưa đủ số lượng giao dịch, thêm các giao dịch ngẫu nhiên
-        while len(transactions) < num_transactions:
-            function, argument_types = self.get_random_function_with_argument_types()
-            transactions.extend(self.generate_individual(function, argument_types))
-        
-        # Giới hạn số lượng giao dịch
-        if len(transactions) > num_transactions:
-            transactions = transactions[:num_transactions]
-        
-        individual.extend(transactions)
-        
-        # Hiển thị thông tin về chuỗi giao dịch đã tạo
-        self.logger.info(f"Generated sequence with {len(individual)} transactions")
-        for i, tx in enumerate(individual):
-            func_name = "constructor" if i == 0 else tx["arguments"][0] if "arguments" in tx and len(tx["arguments"]) > 0 else "unknown"
-            self.logger.debug(f"Transaction {i+1}: {func_name}")
-        
+        # Lưu lại sequence tốt (chỉ khi có ít nhất một transaction ngoài constructor)
+        if hasattr(self, 'good_sequences') and len(individual) > 1:
+            if not isinstance(self.good_sequences, list):
+                self.good_sequences = []
+            if len(self.good_sequences) < 30:  # Giới hạn số lượng lưu trữ
+                self.good_sequences.append(individual)
+                    
         return individual
 
     def _fetch_rag_suggestion(self, prompt: str) -> Optional[str]:
@@ -810,6 +986,571 @@ Function code:
             self.logger.error(f"Error in fallback generation: {e}")
             return None
 
+    def initialize_population(self, size=10):
+        """Khởi tạo quần thể các chuỗi giao dịch"""
+        self.population = []
+        for _ in range(size):
+            individual = self.generate_random_individual()
+            self.population.append({
+                "individual": individual,
+                "fitness": 0,  # Sẽ được cập nhật sau khi chạy
+                "coverage": 0
+            })
+        self.logger.info(f"Initialized population with {size} individuals")
+
+    def update_fitness(self, individual_index, coverage, found_bugs=0):
+        """Cập nhật độ thích nghi của một cá thể trong quần thể sử dụng phương pháp từ CrossFuzz gốc"""
+        if hasattr(self, 'population') and individual_index < len(self.population):
+            # Lấy thông tin môi trường từ settings
+            if hasattr(settings, 'GLOBAL_ENV') and settings.GLOBAL_ENV:
+                env = settings.GLOBAL_ENV
+                indv = None
+                
+                # Lấy cá thể từ quần thể
+                if isinstance(self.population[individual_index], dict) and "individual" in self.population[individual_index]:
+                    indv = self.population[individual_index]["individual"]
+                else:
+                    indv = self.population[individual_index]
+                
+                # Xác định hash của individual (không phải mọi individual đều có hash)
+                indv_hash = None
+                if hasattr(indv, "hash"):
+                    indv_hash = indv.hash
+                
+                # Tính fitness sử dụng phương pháp của CrossFuzz
+                if indv_hash and hasattr(env, 'individual_branches') and indv_hash in env.individual_branches:
+                    # Import các phương thức tính fitness
+                    from fuzzer.engine.fitness import compute_branch_coverage_fitness, compute_data_dependency_fitness
+                    
+                    # Tính fitness theo cách của CrossFuzz (branch coverage)
+                    fitness = compute_branch_coverage_fitness(env.individual_branches[indv_hash], env.code_coverage)
+                    
+                    # Thêm data dependency nếu được bật
+                    if hasattr(env.args, 'data_dependency') and env.args.data_dependency and hasattr(env, 'data_dependencies'):
+                        fitness += compute_data_dependency_fitness(indv, env.data_dependencies)
+                    
+                    # Lưu giá trị fitness và coverage
+                    if isinstance(self.population[individual_index], dict):
+                        self.population[individual_index]["fitness"] = fitness
+                        self.population[individual_index]["coverage"] = coverage
+                    else:
+                        # Nếu cá thể không phải dict, tạo thuộc tính fitness và coverage
+                        setattr(self.population[individual_index], "fitness", fitness)
+                        setattr(self.population[individual_index], "coverage", coverage)
+                    
+                    self.logger.info(f"Updated fitness of individual {individual_index} to {fitness:.4f} using CrossFuzz algorithm")
+                    return
+            
+            # Nếu không thể dùng công thức gốc, sử dụng công thức đơn giản
+            fitness = coverage * 0.7 + found_bugs * 0.3
+            
+            # Trong CrossFuzz gốc, fitness thấp hơn là tốt hơn (số lượng nhánh CHƯA được phủ)
+            # Chuyển đổi để phù hợp: 1.0 / (1.0 + fitness)
+            normalized_fitness = 1.0 / (1.0 + fitness)
+            
+            # Lưu giá trị fitness
+            if isinstance(self.population[individual_index], dict):
+                self.population[individual_index]["fitness"] = normalized_fitness
+                self.population[individual_index]["coverage"] = coverage
+            else:
+                setattr(self.population[individual_index], "fitness", normalized_fitness)
+                setattr(self.population[individual_index], "coverage", coverage)
+            
+            self.logger.warning(f"Using alternative fitness for individual {individual_index}: {fitness:.4f} -> {normalized_fitness:.4f}")
+        else:
+            self.logger.warning(f"Cannot update fitness - invalid individual index {individual_index} or no population")
+
+    def crossover(self, parent1_index, parent2_index):
+        """Lai ghép hai cá thể để tạo cá thể mới"""
+        if not hasattr(self, 'population'):
+            return self.generate_random_individual()
+        
+        if parent1_index >= len(self.population) or parent2_index >= len(self.population):
+            return self.generate_random_individual()
+        
+        parent1 = self.population[parent1_index]["individual"]
+        parent2 = self.population[parent2_index]["individual"]
+        
+        # Bỏ qua constructor vì nó nên giữ nguyên
+        constructor = parent1[:1] if len(parent1) > 0 else []
+        
+        # Lấy phần còn lại của các cá thể cha mẹ
+        parent1_txs = parent1[1:] if len(parent1) > 1 else []
+        parent2_txs = parent2[1:] if len(parent2) > 1 else []
+        
+        if not parent1_txs or not parent2_txs:
+            return self.generate_random_individual()
+        
+        # Chọn điểm cắt
+        cut_point = random.randint(1, min(len(parent1_txs), len(parent2_txs)))
+        
+        # Tạo cá thể con bằng cách kết hợp các phần từ cha mẹ
+        child_txs = parent1_txs[:cut_point] + parent2_txs[cut_point:]
+        
+        # Giới hạn số lượng giao dịch
+        max_txs = settings.MAX_INDIVIDUAL_LENGTH - len(constructor)
+        if len(child_txs) > max_txs:
+            child_txs = child_txs[:max_txs]
+        
+        # Tạo cá thể hoàn chỉnh
+        child = constructor + child_txs
+        
+        self.logger.info(f"Created new individual via crossover with {len(child)} transactions")
+        return child
+
+    def mutate(self, individual):
+        """Đột biến một cá thể để tạo biến thể mới với độ đa dạng cao hơn"""
+        # Giữ nguyên constructor
+        constructor = individual[:1] if len(individual) > 0 else []
+        transactions = individual[1:] if len(individual) > 1 else []
+        
+        if not transactions:
+            return self.generate_random_individual()
+        
+        # Chọn ngẫu nhiên một số lượng giao dịch để đột biến
+        # Tăng cường đột biến nhiều transaction hơn cho độ đa dạng cao
+        num_mutations = random.randint(1, max(2, len(transactions) // 2))
+        
+        # Theo dõi các đột biến đã thực hiện để debug
+        mutations_applied = []
+        
+        for _ in range(num_mutations):
+            # Tùy chỉnh phân phối của các loại đột biến 
+            # Ưu tiên "replace" và "swap" nhiều hơn để tăng độ đa dạng
+            mutation_weights = [40, 20, 15, 25]  # Tỷ lệ % cho replace, insert, remove, swap
+            mutation_type = random.choices(
+                ["replace", "insert", "remove", "swap"],
+                weights=mutation_weights
+            )[0]
+            
+            if mutation_type == "replace" and transactions:
+                # Thay thế một giao dịch bằng giao dịch mới
+                idx = random.randint(0, len(transactions) - 1)
+                
+                # Lấy danh sách hàm hiện có để tránh lặp lại
+                existing_functions = set()
+                for tx in transactions:
+                    if "arguments" in tx and tx["arguments"]:
+                        existing_functions.add(tx["arguments"][0])
+                
+                # Ưu tiên chọn một hàm mới chưa có trong sequence
+                available_functions = [f for f in self.interface.keys() if f not in existing_functions]
+                
+                if available_functions and random.random() < 0.8:  # 80% thời gian chọn hàm mới
+                    function = random.choice(available_functions)
+                    argument_types = self.interface[function]
+                else:
+                    function, argument_types = self.get_random_function_with_argument_types()
+                
+                new_tx = self.generate_individual(function, argument_types)
+                if new_tx:
+                    old_func = transactions[idx].get("arguments", ["unknown"])[0]
+                    transactions[idx] = new_tx[0]
+                    mutations_applied.append(f"Replaced tx {idx+1}: {old_func[:8]} -> {function[:8]}")
+            
+            elif mutation_type == "insert" and len(transactions) < settings.MAX_INDIVIDUAL_LENGTH - 1:
+                # Chèn một giao dịch mới
+                # Ưu tiên chèn hàm mới chưa có trong sequence
+                existing_functions = set()
+                for tx in transactions:
+                    if "arguments" in tx and tx["arguments"]:
+                        existing_functions.add(tx["arguments"][0])
+                
+                available_functions = [f for f in self.interface.keys() if f not in existing_functions]
+                
+                if available_functions and random.random() < 0.8:  # 80% thời gian chọn hàm mới
+                    function = random.choice(available_functions)
+                    argument_types = self.interface[function]
+                else:
+                    function, argument_types = self.get_random_function_with_argument_types()
+                
+                new_tx = self.generate_individual(function, argument_types)
+                if new_tx:
+                    idx = random.randint(0, len(transactions))
+                    transactions.insert(idx, new_tx[0])
+                    mutations_applied.append(f"Inserted tx at position {idx+1}: {function[:8]}")
+            
+            elif mutation_type == "remove" and len(transactions) > 1:
+                # Xóa một giao dịch
+                idx = random.randint(0, len(transactions) - 1)
+                func_to_remove = transactions[idx].get("arguments", ["unknown"])[0]
+                transactions.pop(idx)
+                mutations_applied.append(f"Removed tx {idx+1}: {func_to_remove[:8]}")
+            
+            elif mutation_type == "swap" and len(transactions) > 1:
+                # Đổi vị trí hai giao dịch
+                idx1 = random.randint(0, len(transactions) - 1)
+                idx2 = random.randint(0, len(transactions) - 1)
+                while idx1 == idx2:  # Đảm bảo hai vị trí khác nhau
+                    idx2 = random.randint(0, len(transactions) - 1)
+                    
+                func1 = transactions[idx1].get("arguments", ["unknown"])[0]
+                func2 = transactions[idx2].get("arguments", ["unknown"])[0]
+                
+                transactions[idx1], transactions[idx2] = transactions[idx2], transactions[idx1]
+                mutations_applied.append(f"Swapped tx {idx1+1}:{func1[:8]} <-> tx {idx2+1}:{func2[:8]}")
+            
+            # Thêm thuật toán đột biến tham số - đột biến giá trị của transaction
+            elif mutation_type == "param_mutate" and transactions and random.random() < 0.3:
+                idx = random.randint(0, len(transactions) - 1)
+                if "arguments" in transactions[idx]:
+                    func_hash = transactions[idx]["arguments"][0]
+                    func_args_types = self.interface.get(func_hash, [])
+                    
+                    # Sinh lại transaction với tham số mới
+                    new_tx = self.generate_individual(func_hash, func_args_types)
+                    if new_tx:
+                        transactions[idx] = new_tx[0]
+                        mutations_applied.append(f"Mutated params of tx {idx+1}: {func_hash[:8]}")
+        
+        # Tạo cá thể mới sau đột biến
+        mutated_individual = constructor + transactions
+        
+        # Log thông tin chi tiết về quá trình đột biến
+        if mutations_applied:
+            self.logger.info(f"Applied {len(mutations_applied)} mutations: {'; '.join(mutations_applied)}")
+        
+        return mutated_individual
+
+    def select_parents(self):
+        """Chọn cha mẹ để lai ghép dựa trên độ thích nghi"""
+        if not hasattr(self, 'population') or len(self.population) < 2:
+            return 0, 0
+        
+        # Tính tổng độ thích nghi
+        total_fitness = sum(item["fitness"] for item in self.population)
+        
+        # Nếu tổng độ thích nghi là 0, chọn ngẫu nhiên
+        if total_fitness == 0:
+            return random.randint(0, len(self.population) - 1), random.randint(0, len(self.population) - 1)
+        
+        # Chọn cha mẹ dựa trên độ thích nghi (roulette wheel selection)
+        probabilities = [item["fitness"] / total_fitness for item in self.population]
+        parent1_idx = random.choices(range(len(self.population)), weights=probabilities)[0]
+        
+        # Đảm bảo parent2 khác parent1
+        remaining_indices = list(range(len(self.population)))
+        remaining_indices.remove(parent1_idx)
+        remaining_probs = [probabilities[i] for i in remaining_indices]
+        
+        # Chuẩn hóa lại xác suất
+        total_remaining = sum(remaining_probs)
+        if total_remaining > 0:
+            remaining_probs = [p / total_remaining for p in remaining_probs]
+        else:
+            remaining_probs = [1.0 / len(remaining_indices)] * len(remaining_indices)
+        
+        parent2_idx = random.choices(remaining_indices, weights=remaining_probs)[0]
+        
+        return parent1_idx, parent2_idx
+
+    def evolve_population(self):
+        """Phát triển quần thể qua một thế hệ"""
+        if not hasattr(self, 'population') or len(self.population) < 2:
+            self.initialize_population()
+            return self.generate_random_individual()
+        
+        # Sắp xếp quần thể theo độ thích nghi
+        self.population.sort(key=lambda x: x["fitness"], reverse=True)
+        
+        # Chọn chiến lược: lai ghép, đột biến hoặc giữ nguyên cá thể tốt nhất
+        strategy = random.choices(
+            ["elite", "crossover", "mutate", "random"], 
+            weights=[0.1, 0.5, 0.3, 0.1]
+        )[0]
+        
+        if strategy == "elite":
+            # Giữ nguyên cá thể tốt nhất
+            self.logger.info("Using elite individual")
+            return self.population[0]["individual"]
+        
+        elif strategy == "crossover":
+            # Lai ghép hai cá thể
+            parent1_idx, parent2_idx = self.select_parents()
+            return self.crossover(parent1_idx, parent2_idx)
+        
+        elif strategy == "mutate":
+            # Đột biến một cá thể tốt
+            elite_idx = random.randint(0, min(3, len(self.population) - 1))
+            return self.mutate(self.population[elite_idx]["individual"])
+        
+        else:
+            # Tạo cá thể hoàn toàn mới
+            return self.generate_random_individual()
+
+    def log_generation_summary(self, generation_number, coverage, branch_coverage, transactions_count):
+        """
+        Ghi log tóm tắt thông tin của generation hiện tại
+        """
+        if not hasattr(self, '_last_log_time'):
+            self._last_log_time = time.time()
+            self._last_transactions_count = 0
+        
+        # Tính tốc độ transaction/giây
+        current_time = time.time()
+        time_diff = current_time - self._last_log_time
+        trans_diff = transactions_count - self._last_transactions_count
+        
+        tps = trans_diff / time_diff if time_diff > 0 else 0
+        
+        # Tạo dòng phân cách
+        separator = "=" * 40
+        
+        # Tạo bảng thống kê nhỏ gọn
+        self.logger.info(f"\n{separator}")
+        self.logger.info(f"GENERATION {generation_number} SUMMARY")
+        self.logger.info(f"Code Coverage:    {coverage:.2f}%")
+        self.logger.info(f"Branch Coverage:  {branch_coverage:.2f}%")
+        self.logger.info(f"Transactions:     {transactions_count} (+{trans_diff})")
+        self.logger.info(f"Speed:            {tps:.2f} tx/s")
+        self.logger.info(f"{separator}")
+        
+        # Cập nhật giá trị lần log trước
+        self._last_log_time = current_time
+        self._last_transactions_count = transactions_count
+        
+        # Thực hiện trace các chiến lược đang được sử dụng
+        strategy_counts = getattr(self, '_strategy_counts', {
+            "optimal_sequence": 0, 
+            "critical_path": 0, 
+            "mutation": 0, 
+            "random": 0, 
+            "combined": 0
+        })
+        
+        self.logger.info("Strategy usage:")
+        for strategy, count in strategy_counts.items():
+            self.logger.info(f"  - {strategy}: {count}")
+        
+        # Ghi thông tin về transaction lengths
+        if hasattr(self, 'population') and len(self.population) > 0:
+            trans_lengths = []
+            for i in range(min(5, len(self.population))):
+                if hasattr(self.population[i], "individual"):
+                    seq = self.population[i]["individual"] 
+                elif hasattr(self.population[i], "chromosome"):
+                    seq = self.population[i].chromosome
+                else:
+                    seq = self.population[i]
+                
+                if seq:
+                    trans_lengths.append(len(seq))
+            
+            if trans_lengths:
+                avg_length = sum(trans_lengths) / len(trans_lengths)
+                self.logger.info(f"Avg sequence length (top 5): {avg_length:.2f}")
+        
+        return
+
+    def save_detector_results(self, detector_results, output_file="detector_results.json"):
+        """
+        Lưu kết quả từ detector vào file JSON
+        
+        :param detector_results: Kết quả từ detector
+        :param output_file: Đường dẫn file để lưu kết quả
+        """
+        try:
+            # Định dạng dữ liệu cho file JSON
+            results_to_save = []
+            
+            # Sắp xếp các lỗi theo loại
+            vulnerabilities_by_type = {}
+            
+            for vuln_type, vulnerabilities in detector_results.items():
+                if not isinstance(vulnerabilities, list):
+                    continue
+                    
+                for vuln in vulnerabilities:
+                    # Lấy thông tin về swc_id và severity nếu có
+                    swc_id = vuln.get("swc_id", "Unknown")
+                    severity = vuln.get("severity", "Unknown")
+                    
+                    # Lấy thông tin về sequence gây ra lỗi
+                    transaction_sequence = []
+                    if "transaction_sequence" in vuln:
+                        for tx in vuln["transaction_sequence"]:
+                            tx_info = {
+                                "function": tx.get("function", "Unknown"),
+                                "from": tx.get("from", "Unknown"),
+                                "to": tx.get("to", "Unknown"),
+                                "value": tx.get("value", 0),
+                                "arguments": tx.get("arguments", [])
+                            }
+                            transaction_sequence.append(tx_info)
+                    
+                    # Chuẩn bị entry để lưu
+                    entry = {
+                        "vulnerability_type": vuln_type,
+                        "swc_id": swc_id,
+                        "severity": severity,
+                        "description": vuln.get("description", ""),
+                        "transaction_sequence": transaction_sequence,
+                        "code_location": vuln.get("code_location", {})
+                    }
+                    
+                    # Thêm vào danh sách theo loại
+                    if vuln_type not in vulnerabilities_by_type:
+                        vulnerabilities_by_type[vuln_type] = []
+                    vulnerabilities_by_type[vuln_type].append(entry)
+            
+            # Thêm tổng kết
+            summary = {
+                "total_vulnerabilities": sum(len(vulns) for vulns in vulnerabilities_by_type.values()),
+                "vulnerabilities_by_type": {k: len(v) for k, v in vulnerabilities_by_type.items()},
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            }
+            
+            # Cấu trúc cuối cùng để lưu
+            final_result = {
+                "summary": summary,
+                "vulnerabilities": vulnerabilities_by_type
+            }
+            
+            # Ghi vào file
+            with open(output_file, 'w') as f:
+                json.dump(final_result, f, indent=2, default=str)
+            
+            self.logger.info(f"Detector results saved to {output_file}")
+            
+            return True
+        except Exception as e:
+            self.logger.error(f"Error saving detector results: {e}")
+            return False
+
+    def finalize_fuzzing(self, results, output_dir="./results"):
+        """
+        Thực hiện các tác vụ cuối cùng khi hoàn thành quá trình fuzzing
+        
+        :param results: Kết quả từ fuzzing engine
+        :param output_dir: Thư mục lưu kết quả
+        """
+        import os
+        
+        # Tạo thư mục kết quả nếu chưa tồn tại
+        os.makedirs(output_dir, exist_ok=True)
+        
+        # Lưu kết quả detector 
+        detector_file = os.path.join(output_dir, "detector_results.json")
+        if "errors" in results:
+            self.save_detector_results(results["errors"], detector_file)
+        
+        # Lưu thống kê tổng quan
+        stats_file = os.path.join(output_dir, "fuzzing_stats.json")
+        try:
+            statistics = {
+                "contract_name": self.contract_name,
+                "fuzzer_type": "RAGEnhanced",
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "coverage": {
+                    "code_coverage": results.get("code_coverage", 0),
+                    "branch_coverage": results.get("branch_coverage", 0)
+                },
+                "transactions": {
+                    "total": results.get("total_transactions", 0),
+                    "unique": results.get("unique_transactions", 0)
+                },
+                "execution_time": results.get("execution_time", 0),
+                "memory_usage": results.get("memory_usage", 0),
+                "strategy_usage": getattr(self, '_strategy_counts', {})
+            }
+            
+            # Ghi vào file
+            with open(stats_file, 'w') as f:
+                json.dump(statistics, f, indent=2, default=str)
+                
+            self.logger.info(f"Fuzzing statistics saved to {stats_file}")
+            
+        except Exception as e:
+            self.logger.error(f"Error saving fuzzing statistics: {e}")
+        
+        # In tóm tắt cuối cùng
+        self._print_final_summary(results)
+        
+        return True
+    
+    def _print_final_summary(self, results):
+        """
+        In tóm tắt kết quả cuối cùng
+        
+        :param results: Kết quả fuzzing
+        """
+        # Tạo đường viền
+        border = "=" * 50
+        
+        # In header
+        self.logger.info(f"\n{border}")
+        self.logger.info(f"RAG ENHANCED FUZZING SUMMARY FOR {self.contract_name}")
+        self.logger.info(f"{border}")
+        
+        # In thông tin độ phủ
+        code_coverage = results.get("code_coverage", 0)
+        branch_coverage = results.get("branch_coverage", 0)
+        self.logger.info(f"CODE COVERAGE:     {code_coverage:.2f}%")
+        self.logger.info(f"BRANCH COVERAGE:   {branch_coverage:.2f}%")
+        
+        # In thông tin giao dịch
+        total_txs = results.get("total_transactions", 0)
+        unique_txs = results.get("unique_transactions", 0)
+        self.logger.info(f"TOTAL TRANSACTIONS:   {total_txs}")
+        self.logger.info(f"UNIQUE TRANSACTIONS:  {unique_txs}")
+        self.logger.info(f"TRANSACTION DIVERSITY: {(unique_txs/total_txs)*100:.2f}% unique")
+        
+        # In thông tin sử dụng chiến lược
+        if hasattr(self, '_strategy_counts'):
+            self.logger.info(f"{border}")
+            self.logger.info("STRATEGY USAGE:")
+            total_usage = sum(self._strategy_counts.values())
+            for strategy, count in self._strategy_counts.items():
+                percentage = (count / total_usage) * 100 if total_usage > 0 else 0
+                self.logger.info(f"  - {strategy.upper()}: {count} ({percentage:.1f}%)")
+        
+        # In thông tin về lỗi phát hiện được
+        if "errors" in results:
+            error_count = sum(1 for error_list in results["errors"].values() 
+                             if isinstance(error_list, list) for _ in error_list)
+            self.logger.info(f"{border}")
+            self.logger.info(f"DETECTED VULNERABILITIES: {error_count}")
+            
+            for error_type, errors in results["errors"].items():
+                if isinstance(errors, list) and errors:
+                    self.logger.info(f"  - {error_type}: {len(errors)}")
+        
+        # In footer
+        self.logger.info(f"{border}")
+        self.logger.info(f"FUZZING COMPLETED SUCCESSFULLY")
+        self.logger.info(f"{border}\n")
+
+    def generate_constructor(self):
+        """
+        Tạo constructor cho contract hiện tại trong sequence
+        """
+        if not self.interface or 'constructor' not in self.interface:
+            return []
+
+        # Sử dụng cách triển khai từ lớp gốc 
+        return super().generate_constructor()
+    
+    def create_fake_accounts(self, instrumented_evm):
+        """
+        Tạo các tài khoản giả cho quá trình testing
+        """
+        # Thêm một số địa chỉ thường được sử dụng
+        accounts = [
+            "0xcafebabecafebabecafebabecafebabecafebabe",
+            "0x1111111111111111111111111111111111111111",
+            "0x2222222222222222222222222222222222222222",
+            "0x3333333333333333333333333333333333333333",
+            "0x4444444444444444444444444444444444444444"
+        ]
+        
+        # Tạo các tài khoản giả
+        for address in accounts:
+            instrumented_evm.create_fake_account(address)
+            
+        self.logger.info(f"Created {len(accounts)} fake accounts for testing")
+        
+        return accounts
+
 def create_rag_enhanced_generator(
         interface: Dict, 
         bytecode: str,
@@ -822,8 +1563,7 @@ def create_rag_enhanced_generator(
         other_generators=None,
         interface_mapper=None) -> RAGEnhancedGenerator:
     """
-    Hàm tiện ích để tạo RAGEnhancedGenerator
-    """
+    Hàm tiện ích để tạo RAGEnhanced"""
     return RAGEnhancedGenerator(
         interface=interface,
         bytecode=bytecode,
@@ -835,4 +1575,4 @@ def create_rag_enhanced_generator(
         sol_path=sol_path,
         other_generators=other_generators,
         interface_mapper=interface_mapper
-    ) 
+    )

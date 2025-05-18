@@ -1,5 +1,45 @@
 {
-  "dataflow_graph": {},
+  "dataflow_graph": {
+    "ABC": {
+      "name": "ABC",
+      "functions": {
+        "owner": {
+          "name": "owner",
+          "visibility": "public",
+          "state_mutability": "nonpayable",
+          "reads": [
+            "_owner"
+          ],
+          "writes": [],
+          "calls": [],
+          "parameters": []
+        },
+        "increaseAllowance": {
+          "name": "increaseAllowance",
+          "visibility": "public",
+          "state_mutability": "nonpayable",
+          "reads": [
+            "_allowances"
+          ],
+          "writes": [],
+          "calls": [
+            "_approve",
+            "_msgSender"
+          ],
+          "parameters": [
+            {
+              "name": "spender",
+              "type": "address"
+            },
+            {
+              "name": "addedValue",
+              "type": "uint256"
+            }
+          ]
+        }
+      }
+    }
+  },
   "analysis_result": {
     "critical_paths": [
       [

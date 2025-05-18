@@ -174,7 +174,7 @@ class SmartContractAnalyzer:
                 
                 try:
                     # Thử gọi API đơn giản để kiểm tra quota
-                    test_model = genai.GenerativeModel("gemini-1.5-pro")
+                    test_model = genai.GenerativeModel("gemini-2.0-flash-lite")
                     test_response = test_model.generate_content("Hello, are you available?")
                     if not hasattr(test_response, 'text') and not hasattr(test_response, 'parts'):
                         skip_llm = True
@@ -247,7 +247,7 @@ class SmartContractAnalyzer:
                     
                     try:
                         self.logger.info("Sending minimal dataflow analysis to LLM")
-                        model = genai.GenerativeModel("gemini-1.5-pro")
+                        model = genai.GenerativeModel("gemini-2.0-flash-lite")
                         response = model.generate_content(minimal_prompt)
                         
                         # Lấy text từ response
