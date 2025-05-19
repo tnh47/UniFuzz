@@ -1,5 +1,4 @@
 {
-    "solc_version": "0.8.26",
     "success": true,
     "error": null,
     "results": {
@@ -8,427 +7,272 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "isContract",
-                        "source_mapping": {
-                            "start": 2079,
-                            "length": 174,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                70,
-                                71,
-                                72,
-                                73,
-                                74
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "name": "transfer_",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "Address",
-                                "source_mapping": {
-                                    "start": 2056,
-                                    "length": 200,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        69,
-                                        70,
-                                        71,
-                                        72,
-                                        73,
-                                        74,
-                                        75
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
+                                "name": "ABE",
+                                "source_mapping": {}
                             },
-                            "signature": "isContract(address)"
+                            "signature": "transfer_(uint256)"
                         }
                     },
                     {
                         "type": "node",
-                        "name": "",
-                        "source_mapping": {
-                            "start": 2179,
-                            "length": 41,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                72
-                            ],
-                            "starting_column": 9,
-                            "ending_column": 50
-                        },
+                        "name": "true",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "function",
-                                "name": "isContract",
-                                "source_mapping": {
-                                    "start": 2079,
-                                    "length": 174,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        70,
-                                        71,
-                                        72,
-                                        73,
-                                        74
-                                    ],
-                                    "starting_column": 5,
-                                    "ending_column": 6
-                                },
+                                "name": "transfer_",
+                                "source_mapping": {},
                                 "type_specific_fields": {
                                     "parent": {
                                         "type": "contract",
-                                        "name": "Address",
-                                        "source_mapping": {
-                                            "start": 2056,
-                                            "length": 200,
-                                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                            "filename_relative": "SmartContract/ABC.sol",
-                                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                            "filename_short": "SmartContract/ABC.sol",
-                                            "is_dependency": false,
-                                            "lines": [
-                                                69,
-                                                70,
-                                                71,
-                                                72,
-                                                73,
-                                                74,
-                                                75
-                                            ],
-                                            "starting_column": 1,
-                                            "ending_column": 2
-                                        }
+                                        "name": "ABE",
+                                        "source_mapping": {}
                                     },
-                                    "signature": "isContract(address)"
+                                    "signature": "transfer_(uint256)"
                                 }
                             }
                         }
                     }
                 ],
-                "description": "Address.isContract(address) (SmartContract/ABC.sol#70-74) uses assembly\n\t- INLINE ASM (SmartContract/ABC.sol#72)\n",
-                "markdown": "[Address.isContract(address)](SmartContract/ABC.sol#L70-L74) uses assembly\n\t- [INLINE ASM](SmartContract/ABC.sol#L72)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L70-L74",
-                "id": "6eef15a12e40de9c5c598e6b04866be68e19535e0dec16370060a77e78d18cba",
-                "check": "assembly",
-                "impact": "Informational",
+                "description": "ABE.transfer_(uint256) (SmartContract/ABE.sol#376-396) uses a Boolean constant improperly:\n\t-true (SmartContract/ABE.sol#379)\n",
+                "markdown": "[ABE.transfer_(uint256)](SmartContract/ABE.sol#L376-L396) uses a Boolean constant improperly:\n\t-[true](SmartContract/ABE.sol#L379)\n",
+                "check": "boolean-cst",
+                "impact": "Medium",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "transfer_",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            },
+                            "signature": "transfer_(uint256)"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "false",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transfer_",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ABE",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transfer_(uint256)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "ABE.transfer_(uint256) (SmartContract/ABE.sol#376-396) uses a Boolean constant improperly:\n\t-false (SmartContract/ABE.sol#377)\n",
+                "markdown": "[ABE.transfer_(uint256)](SmartContract/ABE.sol#L376-L396) uses a Boolean constant improperly:\n\t-[false](SmartContract/ABE.sol#L377)\n",
+                "check": "boolean-cst",
+                "impact": "Medium",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "_spendAllowance",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ABE",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "_spendAllowance(address,address,uint256)"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "function",
+                        "name": "owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "Ownable",
+                                "source_mapping": {}
+                            },
+                            "signature": "owner()"
+                        }
+                    }
+                ],
+                "description": "ABE._spendAllowance(address,address,uint256).owner (SmartContract/ABE.sol#347) shadows:\n\t- Ownable.owner() (SmartContract/ABE.sol#33-35) (function)\n",
+                "markdown": "[ABE._spendAllowance(address,address,uint256).owner](SmartContract/ABE.sol#L347) shadows:\n\t- [Ownable.owner()](SmartContract/ABE.sol#L33-L35) (function)\n",
+                "check": "shadowing-local",
+                "impact": "Low",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "allowance",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ABE",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "allowance(address,address)"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "function",
+                        "name": "owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "Ownable",
+                                "source_mapping": {}
+                            },
+                            "signature": "owner()"
+                        }
+                    }
+                ],
+                "description": "ABE.allowance(address,address).owner (SmartContract/ABE.sol#229) shadows:\n\t- Ownable.owner() (SmartContract/ABE.sol#33-35) (function)\n",
+                "markdown": "[ABE.allowance(address,address).owner](SmartContract/ABE.sol#L229) shadows:\n\t- [Ownable.owner()](SmartContract/ABE.sol#L33-L35) (function)\n",
+                "check": "shadowing-local",
+                "impact": "Low",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "_approve",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ABE",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "_approve(address,address,uint256)"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "function",
+                        "name": "owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "Ownable",
+                                "source_mapping": {}
+                            },
+                            "signature": "owner()"
+                        }
+                    }
+                ],
+                "description": "ABE._approve(address,address,uint256).owner (SmartContract/ABE.sol#326) shadows:\n\t- Ownable.owner() (SmartContract/ABE.sol#33-35) (function)\n",
+                "markdown": "[ABE._approve(address,address,uint256).owner](SmartContract/ABE.sol#L326) shadows:\n\t- [Ownable.owner()](SmartContract/ABE.sol#L33-L35) (function)\n",
+                "check": "shadowing-local",
+                "impact": "Low",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "decreaseAllowance",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ABE",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "decreaseAllowance(address,uint256)"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "function",
+                        "name": "owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "Ownable",
+                                "source_mapping": {}
+                            },
+                            "signature": "owner()"
+                        }
+                    }
+                ],
+                "description": "ABE.decreaseAllowance(address,uint256).owner (SmartContract/ABE.sol#416) shadows:\n\t- Ownable.owner() (SmartContract/ABE.sol#33-35) (function)\n",
+                "markdown": "[ABE.decreaseAllowance(address,uint256).owner](SmartContract/ABE.sol#L416) shadows:\n\t- [Ownable.owner()](SmartContract/ABE.sol#L33-L35) (function)\n",
+                "check": "shadowing-local",
+                "impact": "Low",
                 "confidence": "High"
             },
             {
                 "elements": [
                     {
                         "type": "function",
-                        "name": "_beforeTokenTransfer",
-                        "source_mapping": {
-                            "start": 6839,
-                            "length": 153,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                202,
-                                203,
-                                204
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ABC",
-                                "source_mapping": {
-                                    "start": 6694,
-                                    "length": 301,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        197,
-                                        198,
-                                        199,
-                                        200,
-                                        201,
-                                        202,
-                                        203,
-                                        204,
-                                        205,
-                                        206
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 0
-                                }
-                            },
-                            "signature": "_beforeTokenTransfer(address,address,uint256)"
-                        }
-                    }
-                ],
-                "description": "ABC._beforeTokenTransfer(address,address,uint256) (SmartContract/ABC.sol#202-204) is never used and should be removed\n",
-                "markdown": "[ABC._beforeTokenTransfer(address,address,uint256)](SmartContract/ABC.sol#L202-L204) is never used and should be removed\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L202-L204",
-                "id": "6b16fd9d09a144a5186da2410be10ed9438950dd2c65241f8d5724cf40580bc3",
-                "check": "dead-code",
-                "impact": "Informational",
-                "confidence": "Medium"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "_burn",
-                        "source_mapping": {
-                            "start": 5765,
-                            "length": 468,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                173,
-                                174,
-                                175,
-                                176,
-                                177,
-                                178,
-                                179,
-                                180,
-                                181,
-                                182,
-                                183,
-                                184
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
-                            },
-                            "signature": "_burn(address,uint256)"
-                        }
-                    }
-                ],
-                "description": "ERC20._burn(address,uint256) (SmartContract/ABC.sol#173-184) is never used and should be removed\n",
-                "markdown": "[ERC20._burn(address,uint256)](SmartContract/ABC.sol#L173-L184) is never used and should be removed\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L173-L184",
-                "id": "70b4280aa93f6eb2c97f92406a75cd9ba30bac85d7bf7a71e8eb4369d74cc422",
-                "check": "dead-code",
-                "impact": "Informational",
-                "confidence": "Medium"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
                         "name": "_msgData",
-                        "source_mapping": {
-                            "start": 200,
-                            "length": 101,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                9,
-                                10,
-                                11
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "Context",
-                                "source_mapping": {
-                                    "start": 61,
-                                    "length": 243,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        4,
-                                        5,
-                                        6,
-                                        7,
-                                        8,
-                                        9,
-                                        10,
-                                        11,
-                                        12
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
+                                "name": "Ownable",
+                                "source_mapping": {}
                             },
                             "signature": "_msgData()"
                         }
                     }
                 ],
-                "description": "Context._msgData() (SmartContract/ABC.sol#9-11) is never used and should be removed\n",
-                "markdown": "[Context._msgData()](SmartContract/ABC.sol#L9-L11) is never used and should be removed\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L9-L11",
-                "id": "93bd23634a3bf022810e43138345cf58db61248a704a7d277c8ec3d68c3ad188",
+                "description": "Ownable._msgData() (SmartContract/ABE.sol#29-31) is never used and should be removed\n",
+                "markdown": "[Ownable._msgData()](SmartContract/ABE.sol#L29-L31) is never used and should be removed\n",
                 "check": "dead-code",
                 "impact": "Informational",
                 "confidence": "Medium"
@@ -436,237 +280,49 @@
             {
                 "elements": [
                     {
-                        "type": "function",
-                        "name": "isContract",
-                        "source_mapping": {
-                            "start": 2079,
-                            "length": 174,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                70,
-                                71,
-                                72,
-                                73,
-                                74
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "type": "variable",
+                        "name": "user0",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "Address",
-                                "source_mapping": {
-                                    "start": 2056,
-                                    "length": 200,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        69,
-                                        70,
-                                        71,
-                                        72,
-                                        73,
-                                        74,
-                                        75
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
-                            },
-                            "signature": "isContract(address)"
+                                "name": "ABE",
+                                "source_mapping": {}
+                            }
                         }
                     }
                 ],
-                "description": "Address.isContract(address) (SmartContract/ABC.sol#70-74) is never used and should be removed\n",
-                "markdown": "[Address.isContract(address)](SmartContract/ABC.sol#L70-L74) is never used and should be removed\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L70-L74",
-                "id": "de7443462f44ab8c4d96b5210d641361c6ca8e94ba96c9d8f16c12ec08844a9d",
-                "check": "dead-code",
+                "description": "ABE.user0 (SmartContract/ABE.sol#109) is set pre-construction with a non-constant function or state variable:\n\t- _totalSupply\n",
+                "markdown": "[ABE.user0](SmartContract/ABE.sol#L109) is set pre-construction with a non-constant function or state variable:\n\t- _totalSupply\n",
+                "check": "function-init-state",
                 "impact": "Informational",
-                "confidence": "Medium"
+                "confidence": "High"
             },
             {
                 "elements": [
                     {
-                        "type": "function",
-                        "name": "_beforeTokenTransfer",
-                        "source_mapping": {
-                            "start": 6595,
-                            "length": 92,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                194
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 97
-                        },
+                        "type": "variable",
+                        "name": "_totalSupply",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
-                            },
-                            "signature": "_beforeTokenTransfer(address,address,uint256)"
+                                "name": "ABE",
+                                "source_mapping": {}
+                            }
                         }
                     }
                 ],
-                "description": "ERC20._beforeTokenTransfer(address,address,uint256) (SmartContract/ABC.sol#194) is never used and should be removed\n",
-                "markdown": "[ERC20._beforeTokenTransfer(address,address,uint256)](SmartContract/ABC.sol#L194) is never used and should be removed\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L194",
-                "id": "f1d39991ed6b7e0ff3d17209821eec45cfd31c5a6fa4fa32d7941d8b166a6c2a",
-                "check": "dead-code",
+                "description": "ABE._totalSupply (SmartContract/ABE.sol#108) is set pre-construction with a non-constant function or state variable:\n\t- 35 * 10 ** 7 * 10 ** decimals()\n",
+                "markdown": "[ABE._totalSupply](SmartContract/ABE.sol#L108) is set pre-construction with a non-constant function or state variable:\n\t- 35 * 10 ** 7 * 10 ** decimals()\n",
+                "check": "function-init-state",
                 "impact": "Informational",
-                "confidence": "Medium"
+                "confidence": "High"
             },
             {
                 "elements": [],
                 "description": "solc-0.8.29 is not recommended for deployment\n",
                 "markdown": "solc-0.8.29 is not recommended for deployment\n",
-                "first_markdown_element": "",
-                "id": "8a9b042ee69375aae6baf706afcdcdf676a8ace10a33d1ec24af5993beebd9f0",
                 "check": "solc-version",
                 "impact": "Informational",
                 "confidence": "High"
@@ -675,35 +331,20 @@
                 "elements": [
                     {
                         "type": "pragma",
-                        "name": "^0.8.26",
-                        "source_mapping": {
-                            "start": 33,
-                            "length": 24,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                2
-                            ],
-                            "starting_column": 1,
-                            "ending_column": 25
-                        },
+                        "name": "^0.8.0",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "directive": [
                                 "solidity",
                                 "^",
                                 "0.8",
-                                ".26"
+                                ".0"
                             ]
                         }
                     }
                 ],
-                "description": "Pragma version^0.8.26 (SmartContract/ABC.sol#2) necessitates a version too recent to be trusted. Consider deploying with 0.6.12/0.7.6/0.8.7\n",
-                "markdown": "Pragma version[^0.8.26](SmartContract/ABC.sol#L2) necessitates a version too recent to be trusted. Consider deploying with 0.6.12/0.7.6/0.8.7\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L2",
-                "id": "cb3b3edfd59fc3ff687d905706b6d3ac4e2391821402723692f48a072c95fb75",
+                "description": "Pragma version^0.8.0 (SmartContract/ABE.sol#3) allows old versions\n",
+                "markdown": "Pragma version[^0.8.0](SmartContract/ABE.sol#L3) allows old versions\n",
                 "check": "solc-version",
                 "impact": "Informational",
                 "confidence": "High"
@@ -712,305 +353,187 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "constructor",
-                        "source_mapping": {
-                            "start": 6732,
-                            "length": 99,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                198,
-                                199,
-                                200
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "name": "_HoldersAddress",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABC",
-                                "source_mapping": {
-                                    "start": 6694,
-                                    "length": 301,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        197,
-                                        198,
-                                        199,
-                                        200,
-                                        201,
-                                        202,
-                                        203,
-                                        204,
-                                        205,
-                                        206
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 0
-                                }
+                                "name": "ABE",
+                                "source_mapping": {}
                             },
-                            "signature": "constructor()"
-                        }
-                    },
-                    {
-                        "type": "node",
-                        "name": "_mint(msg.sender,1000000 * 10 ** decimals())",
-                        "source_mapping": {
-                            "start": 6778,
-                            "length": 45,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                199
-                            ],
-                            "starting_column": 9,
-                            "ending_column": 54
+                            "signature": "_HoldersAddress(address)"
                         },
+                        "additional_fields": {
+                            "target": "function",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Function ABE._HoldersAddress(address) (SmartContract/ABE.sol#161-166) is not in mixedCase\n",
+                "markdown": "Function [ABE._HoldersAddress(address)](SmartContract/ABE.sol#L161-L166) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "Holders",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "variable",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Variable ABE.Holders (SmartContract/ABE.sol#113) is not in mixedCase\n",
+                "markdown": "Variable [ABE.Holders](SmartContract/ABE.sol#L113) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_address",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "function",
-                                "name": "constructor",
-                                "source_mapping": {
-                                    "start": 6732,
-                                    "length": 99,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        198,
-                                        199,
-                                        200
-                                    ],
-                                    "starting_column": 5,
-                                    "ending_column": 6
-                                },
+                                "name": "_HoldersAddress",
+                                "source_mapping": {},
                                 "type_specific_fields": {
                                     "parent": {
                                         "type": "contract",
-                                        "name": "ABC",
-                                        "source_mapping": {
-                                            "start": 6694,
-                                            "length": 301,
-                                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                            "filename_relative": "SmartContract/ABC.sol",
-                                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                            "filename_short": "SmartContract/ABC.sol",
-                                            "is_dependency": false,
-                                            "lines": [
-                                                197,
-                                                198,
-                                                199,
-                                                200,
-                                                201,
-                                                202,
-                                                203,
-                                                204,
-                                                205,
-                                                206
-                                            ],
-                                            "starting_column": 1,
-                                            "ending_column": 0
-                                        }
+                                        "name": "ABE",
+                                        "source_mapping": {}
                                     },
-                                    "signature": "constructor()"
+                                    "signature": "_HoldersAddress(address)"
                                 }
                             }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
                         }
                     }
                 ],
-                "description": "ABC.constructor() (SmartContract/ABC.sol#198-200) uses literals with too many digits:\n\t- _mint(msg.sender,1000000 * 10 ** decimals()) (SmartContract/ABC.sol#199)\n",
-                "markdown": "[ABC.constructor()](SmartContract/ABC.sol#L198-L200) uses literals with too many digits:\n\t- [_mint(msg.sender,1000000 * 10 ** decimals())](SmartContract/ABC.sol#L199)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L198-L200",
-                "id": "30489564affaf91547a7842b04fdd0902c4a7c8daa4dcf323fe40ca3d2761384",
-                "check": "too-many-digits",
+                "description": "Parameter ABE._HoldersAddress(address)._address (SmartContract/ABE.sol#161) is not in mixedCase\n",
+                "markdown": "Parameter [ABE._HoldersAddress(address)._address](SmartContract/ABE.sol#L161) is not in mixedCase\n",
+                "check": "naming-convention",
                 "impact": "Informational",
-                "confidence": "Medium"
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_user1",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transfer_",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ABE",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transfer_(uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter ABE.transfer_(uint256)._user1 (SmartContract/ABE.sol#376) is not in mixedCase\n",
+                "markdown": "Parameter [ABE.transfer_(uint256)._user1](SmartContract/ABE.sol#L376) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_totalSupply",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "variable",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Variable ABE._totalSupply (SmartContract/ABE.sol#108) is not in mixedCase\n",
+                "markdown": "Variable [ABE._totalSupply](SmartContract/ABE.sol#L108) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_Holders",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "variable",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Variable ABE._Holders (SmartContract/ABE.sol#114) is not in mixedCase\n",
+                "markdown": "Variable [ABE._Holders](SmartContract/ABE.sol#L114) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
             },
             {
                 "elements": [
                     {
                         "type": "function",
-                        "name": "transferFrom",
-                        "source_mapping": {
-                            "start": 3789,
-                            "length": 454,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                127,
-                                128,
-                                129,
-                                130,
-                                131,
-                                132,
-                                133,
-                                134,
-                                135
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "name": "transfer",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
+                                "name": "ABE",
+                                "source_mapping": {}
                             },
-                            "signature": "transferFrom(address,address,uint256)"
+                            "signature": "transfer(address,uint256)"
                         }
                     }
                 ],
-                "description": "transferFrom(address,address,uint256) should be declared external:\n\t- ERC20.transferFrom(address,address,uint256) (SmartContract/ABC.sol#127-135)\n",
-                "markdown": "transferFrom(address,address,uint256) should be declared external:\n\t- [ERC20.transferFrom(address,address,uint256)](SmartContract/ABC.sol#L127-L135)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L127-L135",
-                "id": "131b8f7fe1775baa4c2a5d5adbb3c438055e94b926d9cd180b008b06a3e3b805",
+                "description": "transfer(address,uint256) should be declared external:\n\t- ABE.transfer(address,uint256) (SmartContract/ABE.sol#224-227)\n",
+                "markdown": "transfer(address,uint256) should be declared external:\n\t- [ABE.transfer(address,uint256)](SmartContract/ABE.sol#L224-L227)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -1019,343 +542,20 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "decreaseAllowance",
-                        "source_mapping": {
-                            "start": 4474,
-                            "length": 411,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                142,
-                                143,
-                                144,
-                                145,
-                                146,
-                                147,
-                                148,
-                                149
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "name": "getTokenHolders",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
+                                "name": "ABE",
+                                "source_mapping": {}
                             },
-                            "signature": "decreaseAllowance(address,uint256)"
+                            "signature": "getTokenHolders()"
                         }
                     }
                 ],
-                "description": "decreaseAllowance(address,uint256) should be declared external:\n\t- ERC20.decreaseAllowance(address,uint256) (SmartContract/ABC.sol#142-149)\n",
-                "markdown": "decreaseAllowance(address,uint256) should be declared external:\n\t- [ERC20.decreaseAllowance(address,uint256)](SmartContract/ABC.sol#L142-L149)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L142-L149",
-                "id": "5d933a241c76a857bc695d3d7d7dab6c5852798ef5197ef28717554984ebf34f",
-                "check": "external-function",
-                "impact": "Optimization",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "symbol",
-                        "source_mapping": {
-                            "start": 2806,
-                            "length": 104,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                97,
-                                98,
-                                99
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
-                            },
-                            "signature": "symbol()"
-                        }
-                    }
-                ],
-                "description": "symbol() should be declared external:\n\t- ERC20.symbol() (SmartContract/ABC.sol#97-99)\n",
-                "markdown": "symbol() should be declared external:\n\t- [ERC20.symbol()](SmartContract/ABC.sol#L97-L99)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L97-L99",
-                "id": "641056a7d4219063aa0f9a27e68b3b28c94bb0c2ab6bdb37054fc8964e3dc097",
+                "description": "getTokenHolders() should be declared external:\n\t- ABE.getTokenHolders() (SmartContract/ABE.sol#167-169)\n",
+                "markdown": "getTokenHolders() should be declared external:\n\t- [ABE.getTokenHolders()](SmartContract/ABE.sol#L167-L169)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -1365,760 +565,19 @@
                     {
                         "type": "function",
                         "name": "balanceOf",
-                        "source_mapping": {
-                            "start": 3135,
-                            "length": 127,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                109,
-                                110,
-                                111
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
+                                "name": "ABE",
+                                "source_mapping": {}
                             },
                             "signature": "balanceOf(address)"
                         }
                     }
                 ],
-                "description": "balanceOf(address) should be declared external:\n\t- ERC20.balanceOf(address) (SmartContract/ABC.sol#109-111)\n",
-                "markdown": "balanceOf(address) should be declared external:\n\t- [ERC20.balanceOf(address)](SmartContract/ABC.sol#L109-L111)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L109-L111",
-                "id": "65bc6b7b7be3d1d046f54ea3e07fb7bd7f10415b973d001e8eb15cb65a14d89f",
-                "check": "external-function",
-                "impact": "Optimization",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "transfer",
-                        "source_mapping": {
-                            "start": 3270,
-                            "length": 175,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                113,
-                                114,
-                                115,
-                                116
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
-                            },
-                            "signature": "transfer(address,uint256)"
-                        }
-                    }
-                ],
-                "description": "transfer(address,uint256) should be declared external:\n\t- ERC20.transfer(address,uint256) (SmartContract/ABC.sol#113-116)\n",
-                "markdown": "transfer(address,uint256) should be declared external:\n\t- [ERC20.transfer(address,uint256)](SmartContract/ABC.sol#L113-L116)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L113-L116",
-                "id": "65c0bed2eaf5bdd4972acc62dd5f416a55f5df9f23946d5be1d9c4a748348131",
-                "check": "external-function",
-                "impact": "Optimization",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "increaseAllowance",
-                        "source_mapping": {
-                            "start": 4251,
-                            "length": 215,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                137,
-                                138,
-                                139,
-                                140
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
-                            },
-                            "signature": "increaseAllowance(address,uint256)"
-                        }
-                    }
-                ],
-                "description": "increaseAllowance(address,uint256) should be declared external:\n\t- ERC20.increaseAllowance(address,uint256) (SmartContract/ABC.sol#137-140)\n",
-                "markdown": "increaseAllowance(address,uint256) should be declared external:\n\t- [ERC20.increaseAllowance(address,uint256)](SmartContract/ABC.sol#L137-L140)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L137-L140",
-                "id": "6d16763f9f6cdde055f7f029af514840adcac2395d044827858bf83ca5258703",
-                "check": "external-function",
-                "impact": "Optimization",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "transferOwnership",
-                        "source_mapping": {
-                            "start": 1676,
-                            "length": 192,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                57,
-                                58,
-                                59,
-                                60
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "Ownable",
-                                "source_mapping": {
-                                    "start": 1222,
-                                    "length": 830,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        39,
-                                        40,
-                                        41,
-                                        42,
-                                        43,
-                                        44,
-                                        45,
-                                        46,
-                                        47,
-                                        48,
-                                        49,
-                                        50,
-                                        51,
-                                        52,
-                                        53,
-                                        54,
-                                        55,
-                                        56,
-                                        57,
-                                        58,
-                                        59,
-                                        60,
-                                        61,
-                                        62,
-                                        63,
-                                        64,
-                                        65,
-                                        66,
-                                        67
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
-                            },
-                            "signature": "transferOwnership(address)"
-                        }
-                    }
-                ],
-                "description": "transferOwnership(address) should be declared external:\n\t- Ownable.transferOwnership(address) (SmartContract/ABC.sol#57-60)\n",
-                "markdown": "transferOwnership(address) should be declared external:\n\t- [Ownable.transferOwnership(address)](SmartContract/ABC.sol#L57-L60)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L57-L60",
-                "id": "8e314f2a323babe2cac9b74075db6feca763f3d608c292445109dfc6938d81f5",
-                "check": "external-function",
-                "impact": "Optimization",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "name",
-                        "source_mapping": {
-                            "start": 2698,
-                            "length": 100,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                93,
-                                94,
-                                95
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
-                            },
-                            "signature": "name()"
-                        }
-                    }
-                ],
-                "description": "name() should be declared external:\n\t- ERC20.name() (SmartContract/ABC.sol#93-95)\n",
-                "markdown": "name() should be declared external:\n\t- [ERC20.name()](SmartContract/ABC.sol#L93-L95)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L93-L95",
-                "id": "9dfc73be5a25e563bdfa930030a68030ca2fc233e007152b4d60eec5fb57a7b4",
+                "description": "balanceOf(address) should be declared external:\n\t- ABE.balanceOf(address) (SmartContract/ABE.sol#179-181)\n",
+                "markdown": "balanceOf(address) should be declared external:\n\t- [ABE.balanceOf(address)](SmartContract/ABE.sol#L179-L181)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -2128,167 +587,85 @@
                     {
                         "type": "function",
                         "name": "totalSupply",
-                        "source_mapping": {
-                            "start": 3019,
-                            "length": 108,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                105,
-                                106,
-                                107
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
+                                "name": "ABE",
+                                "source_mapping": {}
                             },
                             "signature": "totalSupply()"
                         }
                     }
                 ],
-                "description": "totalSupply() should be declared external:\n\t- ERC20.totalSupply() (SmartContract/ABC.sol#105-107)\n",
-                "markdown": "totalSupply() should be declared external:\n\t- [ERC20.totalSupply()](SmartContract/ABC.sol#L105-L107)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L105-L107",
-                "id": "cc636f25c5cd6309cbdbab4ddb2343fa51586ce21a88c6ea71c2440849ddc0dd",
+                "description": "totalSupply() should be declared external:\n\t- ABE.totalSupply() (SmartContract/ABE.sol#154-156)\n",
+                "markdown": "totalSupply() should be declared external:\n\t- [ABE.totalSupply()](SmartContract/ABE.sol#L154-L156)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "decreaseAllowance",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            },
+                            "signature": "decreaseAllowance(address,uint256)"
+                        }
+                    }
+                ],
+                "description": "decreaseAllowance(address,uint256) should be declared external:\n\t- ABE.decreaseAllowance(address,uint256) (SmartContract/ABE.sol#415-421)\n",
+                "markdown": "decreaseAllowance(address,uint256) should be declared external:\n\t- [ABE.decreaseAllowance(address,uint256)](SmartContract/ABE.sol#L415-L421)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "renounceOwnership",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "Ownable",
+                                "source_mapping": {}
+                            },
+                            "signature": "renounceOwnership()"
+                        }
+                    }
+                ],
+                "description": "renounceOwnership() should be declared external:\n\t- Ownable.renounceOwnership() (SmartContract/ABE.sol#52-54)\n",
+                "markdown": "renounceOwnership() should be declared external:\n\t- [Ownable.renounceOwnership()](SmartContract/ABE.sol#L52-L54)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "approver",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            },
+                            "signature": "approver(address,bool)"
+                        }
+                    }
+                ],
+                "description": "approver(address,bool) should be declared external:\n\t- ABE.approver(address,bool) (SmartContract/ABE.sol#206-212)\n",
+                "markdown": "approver(address,bool) should be declared external:\n\t- [ABE.approver(address,bool)](SmartContract/ABE.sol#L206-L212)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -2298,168 +675,19 @@
                     {
                         "type": "function",
                         "name": "approve",
-                        "source_mapping": {
-                            "start": 3612,
-                            "length": 169,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                122,
-                                123,
-                                124,
-                                125
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
+                                "name": "ABE",
+                                "source_mapping": {}
                             },
                             "signature": "approve(address,uint256)"
                         }
                     }
                 ],
-                "description": "approve(address,uint256) should be declared external:\n\t- ERC20.approve(address,uint256) (SmartContract/ABC.sol#122-125)\n",
-                "markdown": "approve(address,uint256) should be declared external:\n\t- [ERC20.approve(address,uint256)](SmartContract/ABC.sol#L122-L125)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L122-L125",
-                "id": "cdf05bf59e91a730b1646e7bb8bfd9dcbe6cb9969e7df7eb38b8c5b4ddf67601",
+                "description": "approve(address,uint256) should be declared external:\n\t- ABE.approve(address,uint256) (SmartContract/ABE.sol#247-250)\n",
+                "markdown": "approve(address,uint256) should be declared external:\n\t- [ABE.approve(address,uint256)](SmartContract/ABE.sol#L247-L250)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -2468,173 +696,112 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "allowance",
-                        "source_mapping": {
-                            "start": 3453,
-                            "length": 151,
-                            "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_relative": "SmartContract/ABC.sol",
-                            "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                            "filename_short": "SmartContract/ABC.sol",
-                            "is_dependency": false,
-                            "lines": [
-                                118,
-                                119,
-                                120
-                            ],
-                            "starting_column": 5,
-                            "ending_column": 6
-                        },
+                        "name": "name",
+                        "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ERC20",
-                                "source_mapping": {
-                                    "start": 2260,
-                                    "length": 4430,
-                                    "filename_used": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_relative": "SmartContract/ABC.sol",
-                                    "filename_absolute": "/home/ngonhat/Desktop/UniFuzz/SmartContract/ABC.sol",
-                                    "filename_short": "SmartContract/ABC.sol",
-                                    "is_dependency": false,
-                                    "lines": [
-                                        77,
-                                        78,
-                                        79,
-                                        80,
-                                        81,
-                                        82,
-                                        83,
-                                        84,
-                                        85,
-                                        86,
-                                        87,
-                                        88,
-                                        89,
-                                        90,
-                                        91,
-                                        92,
-                                        93,
-                                        94,
-                                        95,
-                                        96,
-                                        97,
-                                        98,
-                                        99,
-                                        100,
-                                        101,
-                                        102,
-                                        103,
-                                        104,
-                                        105,
-                                        106,
-                                        107,
-                                        108,
-                                        109,
-                                        110,
-                                        111,
-                                        112,
-                                        113,
-                                        114,
-                                        115,
-                                        116,
-                                        117,
-                                        118,
-                                        119,
-                                        120,
-                                        121,
-                                        122,
-                                        123,
-                                        124,
-                                        125,
-                                        126,
-                                        127,
-                                        128,
-                                        129,
-                                        130,
-                                        131,
-                                        132,
-                                        133,
-                                        134,
-                                        135,
-                                        136,
-                                        137,
-                                        138,
-                                        139,
-                                        140,
-                                        141,
-                                        142,
-                                        143,
-                                        144,
-                                        145,
-                                        146,
-                                        147,
-                                        148,
-                                        149,
-                                        150,
-                                        151,
-                                        152,
-                                        153,
-                                        154,
-                                        155,
-                                        156,
-                                        157,
-                                        158,
-                                        159,
-                                        160,
-                                        161,
-                                        162,
-                                        163,
-                                        164,
-                                        165,
-                                        166,
-                                        167,
-                                        168,
-                                        169,
-                                        170,
-                                        171,
-                                        172,
-                                        173,
-                                        174,
-                                        175,
-                                        176,
-                                        177,
-                                        178,
-                                        179,
-                                        180,
-                                        181,
-                                        182,
-                                        183,
-                                        184,
-                                        185,
-                                        186,
-                                        187,
-                                        188,
-                                        189,
-                                        190,
-                                        191,
-                                        192,
-                                        193,
-                                        194,
-                                        195
-                                    ],
-                                    "starting_column": 1,
-                                    "ending_column": 2
-                                }
+                                "name": "ABE",
+                                "source_mapping": {}
                             },
-                            "signature": "allowance(address,address)"
+                            "signature": "name()"
                         }
                     }
                 ],
-                "description": "allowance(address,address) should be declared external:\n\t- ERC20.allowance(address,address) (SmartContract/ABC.sol#118-120)\n",
-                "markdown": "allowance(address,address) should be declared external:\n\t- [ERC20.allowance(address,address)](SmartContract/ABC.sol#L118-L120)\n",
-                "first_markdown_element": "SmartContract/ABC.sol#L118-L120",
-                "id": "fd3b4cd1542bfc8c06295b6b47997f1b3ce1b81bddbc710aa62d45c8a7d0b7a4",
+                "description": "name() should be declared external:\n\t- ABE.name() (SmartContract/ABE.sol#188-190)\n",
+                "markdown": "name() should be declared external:\n\t- [ABE.name()](SmartContract/ABE.sol#L188-L190)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "transfer_",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            },
+                            "signature": "transfer_(uint256)"
+                        }
+                    }
+                ],
+                "description": "transfer_(uint256) should be declared external:\n\t- ABE.transfer_(uint256) (SmartContract/ABE.sol#376-396)\n",
+                "markdown": "transfer_(uint256) should be declared external:\n\t- [ABE.transfer_(uint256)](SmartContract/ABE.sol#L376-L396)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "symbol",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            },
+                            "signature": "symbol()"
+                        }
+                    }
+                ],
+                "description": "symbol() should be declared external:\n\t- ABE.symbol() (SmartContract/ABE.sol#138-140)\n",
+                "markdown": "symbol() should be declared external:\n\t- [ABE.symbol()](SmartContract/ABE.sol#L138-L140)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "transfernew_",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            },
+                            "signature": "transfernew_(address,bool)"
+                        }
+                    }
+                ],
+                "description": "transfernew_(address,bool) should be declared external:\n\t- ABE.transfernew_(address,bool) (SmartContract/ABE.sol#171-177)\n",
+                "markdown": "transfernew_(address,bool) should be declared external:\n\t- [ABE.transfernew_(address,bool)](SmartContract/ABE.sol#L171-L177)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "transferFrom",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ABE",
+                                "source_mapping": {}
+                            },
+                            "signature": "transferFrom(address,address,uint256)"
+                        }
+                    }
+                ],
+                "description": "transferFrom(address,address,uint256) should be declared external:\n\t- ABE.transferFrom(address,address,uint256) (SmartContract/ABE.sol#268-277)\n",
+                "markdown": "transferFrom(address,address,uint256) should be declared external:\n\t- [ABE.transferFrom(address,address,uint256)](SmartContract/ABE.sol#L268-L277)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
             }
         ]
-    },
-    "constructor_args": []
+    }
 }

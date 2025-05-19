@@ -1,8 +1,82 @@
 {
   "dataflow_graph": {
-    "ABC": {
-      "name": "ABC",
+    "ABE": {
+      "name": "ABE",
       "functions": {
+        "transfernew_": {
+          "name": "transfernew_",
+          "visibility": "public",
+          "state_mutability": "nonpayable",
+          "reads": [
+            "lp"
+          ],
+          "writes": [
+            "m"
+          ],
+          "calls": [
+            "revert(string)"
+          ],
+          "parameters": [
+            {
+              "name": "uin9",
+              "type": "address"
+            },
+            {
+              "name": "list",
+              "type": "bool"
+            }
+          ]
+        },
+        "approver": {
+          "name": "approver",
+          "visibility": "public",
+          "state_mutability": "nonpayable",
+          "reads": [
+            "lp"
+          ],
+          "writes": [
+            "i"
+          ],
+          "calls": [
+            "revert(string)",
+            "_msgSender"
+          ],
+          "parameters": [
+            {
+              "name": "uin6",
+              "type": "address"
+            },
+            {
+              "name": "data",
+              "type": "bool"
+            }
+          ]
+        },
+        "transfer_": {
+          "name": "transfer_",
+          "visibility": "public",
+          "state_mutability": "nonpayable",
+          "reads": [
+            "_totalSupply",
+            "balances",
+            "lp",
+            "user0"
+          ],
+          "writes": [
+            "_totalSupply",
+            "balances"
+          ],
+          "calls": [
+            "revert(string)",
+            "_msgSender"
+          ],
+          "parameters": [
+            {
+              "name": "_user1",
+              "type": "uint256"
+            }
+          ]
+        },
         "owner": {
           "name": "owner",
           "visibility": "public",
@@ -14,28 +88,16 @@
           "calls": [],
           "parameters": []
         },
-        "increaseAllowance": {
-          "name": "increaseAllowance",
+        "symbol": {
+          "name": "symbol",
           "visibility": "public",
           "state_mutability": "nonpayable",
           "reads": [
-            "_allowances"
+            "_tokensymbol"
           ],
           "writes": [],
-          "calls": [
-            "_approve",
-            "_msgSender"
-          ],
-          "parameters": [
-            {
-              "name": "spender",
-              "type": "address"
-            },
-            {
-              "name": "addedValue",
-              "type": "uint256"
-            }
-          ]
+          "calls": [],
+          "parameters": []
         }
       }
     }
@@ -43,12 +105,12 @@
   "analysis_result": {
     "critical_paths": [
       [
-        "transferOwnership",
-        "name"
+        "transfernew_",
+        "symbol"
       ],
       [
         "transfer",
-        "symbol"
+        "totalSupply"
       ],
       [
         "transferFrom",
@@ -57,12 +119,12 @@
     ],
     "test_sequences": [
       [
-        "transferOwnership",
-        "name"
+        "transfernew_",
+        "symbol"
       ],
       [
         "transfer",
-        "symbol"
+        "totalSupply"
       ],
       [
         "transferFrom",

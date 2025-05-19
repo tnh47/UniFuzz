@@ -1000,8 +1000,24 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
 
     def update_fitness(self, individual_index, coverage, found_bugs=0):
         """Cập nhật độ thích nghi của một cá thể trong quần thể sử dụng phương pháp từ CrossFuzz gốc"""
+        # Tạo một file log riêng cho quá trình đánh giá fitness
+        log_dir = os.path.join(os.getcwd(), "fuzzing_logs")
+        os.makedirs(log_dir, exist_ok=True)
+        fitness_log_file = os.path.join(log_dir, "fitness_evolution.txt")
+        
         if hasattr(self, 'population') and individual_index < len(self.population):
             # Lấy thông tin môi trường từ settings
+            old_fitness = None
+            old_coverage = None
+            
+            # Lưu giá trị fitness và coverage cũ để so sánh
+            if isinstance(self.population[individual_index], dict):
+                old_fitness = self.population[individual_index].get("fitness", None)
+                old_coverage = self.population[individual_index].get("coverage", None)
+            else:
+                old_fitness = getattr(self.population[individual_index], "fitness", None)
+                old_coverage = getattr(self.population[individual_index], "coverage", None)
+                
             if hasattr(settings, 'GLOBAL_ENV') and settings.GLOBAL_ENV:
                 env = settings.GLOBAL_ENV
                 indv = None
@@ -1024,10 +1040,13 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     
                     # Tính fitness theo cách của CrossFuzz (branch coverage)
                     fitness = compute_branch_coverage_fitness(env.individual_branches[indv_hash], env.code_coverage)
+                    fitness_type = "branch_coverage_fitness"
                     
                     # Thêm data dependency nếu được bật
                     if hasattr(env.args, 'data_dependency') and env.args.data_dependency and hasattr(env, 'data_dependencies'):
-                        fitness += compute_data_dependency_fitness(indv, env.data_dependencies)
+                        data_dependency_fitness = compute_data_dependency_fitness(indv, env.data_dependencies)
+                        fitness += data_dependency_fitness
+                        fitness_type = "branch_coverage + data_dependency"
                     
                     # Lưu giá trị fitness và coverage
                     if isinstance(self.population[individual_index], dict):
@@ -1037,6 +1056,20 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                         # Nếu cá thể không phải dict, tạo thuộc tính fitness và coverage
                         setattr(self.population[individual_index], "fitness", fitness)
                         setattr(self.population[individual_index], "coverage", coverage)
+                    
+                    # Ghi log sự thay đổi fitness
+                    with open(fitness_log_file, "a", encoding="utf-8") as f:
+                        f.write(f"[{datetime.now()}] Individual {individual_index} fitness updated:\n")
+                        f.write(f"  - Fitness type: {fitness_type}\n")
+                        f.write(f"  - Old fitness: {old_fitness}\n")
+                        f.write(f"  - New fitness: {fitness}\n")
+                        f.write(f"  - Coverage: {coverage}\n")
+                        f.write(f"  - Found bugs: {found_bugs}\n")
+                        f.write(f"  - Individual hash: {indv_hash}\n")
+                        # Ghi thông tin về sequence length nếu có
+                        if hasattr(indv, "__len__"):
+                            f.write(f"  - Sequence length: {len(indv)}\n")
+                        f.write("\n")
                     
                     self.logger.info(f"Updated fitness of individual {individual_index} to {fitness:.4f} using CrossFuzz algorithm")
                     return
@@ -1055,6 +1088,15 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
             else:
                 setattr(self.population[individual_index], "fitness", normalized_fitness)
                 setattr(self.population[individual_index], "coverage", coverage)
+            
+            # Ghi log sự thay đổi fitness
+            with open(fitness_log_file, "a", encoding="utf-8") as f:
+                f.write(f"[{datetime.now()}] Individual {individual_index} fitness updated (alternative method):\n")
+                f.write(f"  - Raw fitness components: coverage={coverage}, found_bugs={found_bugs}\n")
+                f.write(f"  - Old fitness: {old_fitness}\n")
+                f.write(f"  - New fitness: {normalized_fitness}\n")
+                f.write(f"  - Coverage change: {old_coverage} -> {coverage}\n")
+                f.write("\n")
             
             self.logger.warning(f"Using alternative fitness for individual {individual_index}: {fitness:.4f} -> {normalized_fitness:.4f}")
         else:
@@ -1100,21 +1142,84 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
 
     def mutate(self, individual):
         """Đột biến một cá thể để tạo biến thể mới với độ đa dạng cao hơn"""
+        # Tạo một file log riêng cho quá trình đột biến
+        log_dir = os.path.join(os.getcwd(), "fuzzing_logs")
+        os.makedirs(log_dir, exist_ok=True)
+        mutation_log_file = os.path.join(log_dir, "mutation_statistics.txt")
+        
+        # Khởi tạo hoặc cập nhật biến theo dõi số lượng đột biến tổng cộng
+        if not hasattr(self, '_mutation_stats_total'):
+            self._mutation_stats_total = {
+                "replace": 0,
+                "insert": 0,
+                "remove": 0,
+                "swap": 0,
+                "param_mutate": 0,
+                "total_mutations": 0,
+                "successful_mutations": 0
+            }
+        
+        # Khởi tạo hoặc cập nhật số lượng cá thể đã đột biến
+        if not hasattr(self, '_mutated_individuals_count'):
+            self._mutated_individuals_count = 0
+        self._mutated_individuals_count += 1
+        
         # Giữ nguyên constructor
         constructor = individual[:1] if len(individual) > 0 else []
         transactions = individual[1:] if len(individual) > 1 else []
         
         if not transactions:
+            # Ghi log khi không có transaction để đột biến
+            with open(mutation_log_file, "a", encoding="utf-8") as f:
+                f.write(f"[{datetime.now()}] MUTATION STOPPED: No transactions to mutate. Creating random individual instead.\n")
+            self.logger.warning("Mutation stopped: No transactions to mutate. Creating random individual instead.")
             return self.generate_random_individual()
+        
+        # Ghi log bắt đầu quá trình đột biến
+        original_tx_count = len(transactions)
+        with open(mutation_log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now()}] MUTATION STARTED: Original sequence has {original_tx_count} transactions\n")
+        
+        # Lưu fitness trước khi đột biến nếu có
+        original_fitness = None
+        original_coverage = None
+        if hasattr(self, 'population'):
+            for item in self.population:
+                if isinstance(item, dict) and "individual" in item and item["individual"] == individual:
+                    original_fitness = item.get("fitness", None)
+                    original_coverage = item.get("coverage", None)
+                    break
         
         # Chọn ngẫu nhiên một số lượng giao dịch để đột biến
         # Tăng cường đột biến nhiều transaction hơn cho độ đa dạng cao
-        num_mutations = random.randint(1, max(2, len(transactions) // 2))
+        max_possible_mutations = max(2, len(transactions) // 2)
+        num_mutations = random.randint(1, max_possible_mutations)
+        
+        # Cập nhật số lượng đột biến dự kiến trong thống kê tổng thể
+        self._mutation_stats_total["total_mutations"] += num_mutations
+        
+        # Ghi log số lượng đột biến sẽ thực hiện
+        with open(mutation_log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now()}] Planning to apply {num_mutations} mutations out of maximum {max_possible_mutations}\n")
+        
+        self.logger.info(f"Mutation process: Planning to apply {num_mutations} mutations on sequence of {len(transactions)} transactions")
+        
+        # Khởi tạo thống kê đột biến
+        mutation_stats = {
+            "replace": 0,
+            "insert": 0,
+            "remove": 0, 
+            "swap": 0,
+            "param_mutate": 0
+        }
         
         # Theo dõi các đột biến đã thực hiện để debug
         mutations_applied = []
         
-        for _ in range(num_mutations):
+        # Đếm số lần đột biến đã thực hiện
+        mutations_performed = 0
+        
+        for i in range(num_mutations):
             # Tùy chỉnh phân phối của các loại đột biến 
             # Ưu tiên "replace" và "swap" nhiều hơn để tăng độ đa dạng
             mutation_weights = [40, 20, 15, 25]  # Tỷ lệ % cho replace, insert, remove, swap
@@ -1122,6 +1227,8 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                 ["replace", "insert", "remove", "swap"],
                 weights=mutation_weights
             )[0]
+            
+            mutation_success = False
             
             if mutation_type == "replace" and transactions:
                 # Thay thế một giao dịch bằng giao dịch mới
@@ -1147,6 +1254,9 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     old_func = transactions[idx].get("arguments", ["unknown"])[0]
                     transactions[idx] = new_tx[0]
                     mutations_applied.append(f"Replaced tx {idx+1}: {old_func[:8]} -> {function[:8]}")
+                    mutation_stats["replace"] += 1
+                    self._mutation_stats_total["replace"] += 1
+                    mutation_success = True
             
             elif mutation_type == "insert" and len(transactions) < settings.MAX_INDIVIDUAL_LENGTH - 1:
                 # Chèn một giao dịch mới
@@ -1169,6 +1279,9 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     idx = random.randint(0, len(transactions))
                     transactions.insert(idx, new_tx[0])
                     mutations_applied.append(f"Inserted tx at position {idx+1}: {function[:8]}")
+                    mutation_stats["insert"] += 1
+                    self._mutation_stats_total["insert"] += 1
+                    mutation_success = True
             
             elif mutation_type == "remove" and len(transactions) > 1:
                 # Xóa một giao dịch
@@ -1176,6 +1289,9 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                 func_to_remove = transactions[idx].get("arguments", ["unknown"])[0]
                 transactions.pop(idx)
                 mutations_applied.append(f"Removed tx {idx+1}: {func_to_remove[:8]}")
+                mutation_stats["remove"] += 1
+                self._mutation_stats_total["remove"] += 1
+                mutation_success = True
             
             elif mutation_type == "swap" and len(transactions) > 1:
                 # Đổi vị trí hai giao dịch
@@ -1189,6 +1305,9 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                 
                 transactions[idx1], transactions[idx2] = transactions[idx2], transactions[idx1]
                 mutations_applied.append(f"Swapped tx {idx1+1}:{func1[:8]} <-> tx {idx2+1}:{func2[:8]}")
+                mutation_stats["swap"] += 1
+                self._mutation_stats_total["swap"] += 1
+                mutation_success = True
             
             # Thêm thuật toán đột biến tham số - đột biến giá trị của transaction
             elif mutation_type == "param_mutate" and transactions and random.random() < 0.3:
@@ -1202,13 +1321,60 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     if new_tx:
                         transactions[idx] = new_tx[0]
                         mutations_applied.append(f"Mutated params of tx {idx+1}: {func_hash[:8]}")
+                        mutation_stats["param_mutate"] += 1
+                        self._mutation_stats_total["param_mutate"] += 1
+                        mutation_success = True
+            
+            if mutation_success:
+                mutations_performed += 1
+                self._mutation_stats_total["successful_mutations"] += 1
+            else:
+                # Ghi log khi đột biến thất bại
+                with open(mutation_log_file, "a", encoding="utf-8") as f:
+                    f.write(f"[{datetime.now()}] Mutation attempt {i+1} failed: Type={mutation_type}\n")
+            
+            # Kiểm tra điều kiện dừng: nếu không còn transaction sau khi xóa
+            if len(transactions) == 0:
+                with open(mutation_log_file, "a", encoding="utf-8") as f:
+                    f.write(f"[{datetime.now()}] MUTATION STOPPED: All transactions were removed\n")
+                self.logger.warning("Mutation stopped: All transactions were removed")
+                # Thêm lại ít nhất một transaction mới
+                function, argument_types = self.get_random_function_with_argument_types()
+                new_tx = self.generate_individual(function, argument_types)
+                if new_tx:
+                    transactions.extend(new_tx)
+                break
         
         # Tạo cá thể mới sau đột biến
         mutated_individual = constructor + transactions
         
+        # So sánh số lượng transaction sau khi đột biến
+        final_tx_count = len(transactions)
+        tx_change = final_tx_count - original_tx_count
+        
+        # Ghi log tổng kết đột biến
+        with open(mutation_log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now()}] MUTATION COMPLETED:\n")
+            f.write(f"  - Planned mutations: {num_mutations}\n")
+            f.write(f"  - Mutations performed: {mutations_performed}\n")
+            f.write(f"  - Transaction count: {original_tx_count} -> {final_tx_count} ({tx_change:+d})\n")
+            f.write(f"  - Mutation statistics: {json.dumps(mutation_stats)}\n")
+            f.write(f"  - Applied mutations: {'; '.join(mutations_applied)}\n")
+            if original_fitness is not None:
+                f.write(f"  - Original fitness: {original_fitness}\n")
+            if original_coverage is not None:
+                f.write(f"  - Original coverage: {original_coverage}\n")
+            f.write("\n")
+        
         # Log thông tin chi tiết về quá trình đột biến
         if mutations_applied:
             self.logger.info(f"Applied {len(mutations_applied)} mutations: {'; '.join(mutations_applied)}")
+            self.logger.info(f"Mutation statistics: Replace={mutation_stats['replace']}, Insert={mutation_stats['insert']}, "
+                            f"Remove={mutation_stats['remove']}, Swap={mutation_stats['swap']}, "
+                            f"ParamMutate={mutation_stats['param_mutate']}")
+            self.logger.info(f"Transaction count changed from {original_tx_count} to {final_tx_count} ({tx_change:+d})")
+        else:
+            self.logger.warning("No mutations were applied")
         
         return mutated_individual
 
@@ -1246,12 +1412,27 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
 
     def evolve_population(self):
         """Phát triển quần thể qua một thế hệ"""
+        # Tạo một file log riêng cho quá trình tiến hóa
+        log_dir = os.path.join(os.getcwd(), "fuzzing_logs")
+        os.makedirs(log_dir, exist_ok=True)
+        evolution_log_file = os.path.join(log_dir, "evolution_process.txt")
+        
         if not hasattr(self, 'population') or len(self.population) < 2:
+            with open(evolution_log_file, "a", encoding="utf-8") as f:
+                f.write(f"[{datetime.now()}] EVOLUTION: Population not initialized or too small. Initializing new population.\n")
             self.initialize_population()
             return self.generate_random_individual()
         
         # Sắp xếp quần thể theo độ thích nghi
         self.population.sort(key=lambda x: x["fitness"], reverse=True)
+        
+        # Lưu thông tin về fitness của quần thể hiện tại
+        population_stats = {
+            "best_fitness": self.population[0]["fitness"] if isinstance(self.population[0], dict) else getattr(self.population[0], "fitness", 0),
+            "worst_fitness": self.population[-1]["fitness"] if isinstance(self.population[-1], dict) else getattr(self.population[-1], "fitness", 0),
+            "avg_fitness": sum(x["fitness"] if isinstance(x, dict) else getattr(x, "fitness", 0) for x in self.population) / len(self.population),
+            "population_size": len(self.population)
+        }
         
         # Chọn chiến lược: lai ghép, đột biến hoặc giữ nguyên cá thể tốt nhất
         strategy = random.choices(
@@ -1259,24 +1440,67 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
             weights=[0.1, 0.5, 0.3, 0.1]
         )[0]
         
+        # Ghi log bắt đầu quá trình tiến hóa
+        with open(evolution_log_file, "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now()}] EVOLUTION STARTED:\n")
+            f.write(f"  - Strategy: {strategy}\n")
+            f.write(f"  - Population size: {len(self.population)}\n")
+            f.write(f"  - Best fitness: {population_stats['best_fitness']}\n")
+            f.write(f"  - Worst fitness: {population_stats['worst_fitness']}\n")
+            f.write(f"  - Average fitness: {population_stats['avg_fitness']}\n")
+        
+        # Đếm số lần sử dụng mỗi chiến lược
+        if not hasattr(self, '_evolution_strategy_counts'):
+            self._evolution_strategy_counts = {
+                "elite": 0, 
+                "crossover": 0, 
+                "mutate": 0, 
+                "random": 0
+            }
+        self._evolution_strategy_counts[strategy] += 1
+        
+        result_individual = None
+        
         if strategy == "elite":
             # Giữ nguyên cá thể tốt nhất
             self.logger.info("Using elite individual")
-            return self.population[0]["individual"]
+            result_individual = self.population[0]["individual"]
+            with open(evolution_log_file, "a", encoding="utf-8") as f:
+                f.write(f"  - Elite strategy: Selected individual with fitness {self.population[0]['fitness']}\n")
         
         elif strategy == "crossover":
             # Lai ghép hai cá thể
             parent1_idx, parent2_idx = self.select_parents()
-            return self.crossover(parent1_idx, parent2_idx)
+            with open(evolution_log_file, "a", encoding="utf-8") as f:
+                parent1_fitness = self.population[parent1_idx]["fitness"] if isinstance(self.population[parent1_idx], dict) else getattr(self.population[parent1_idx], "fitness", 0)
+                parent2_fitness = self.population[parent2_idx]["fitness"] if isinstance(self.population[parent2_idx], dict) else getattr(self.population[parent2_idx], "fitness", 0)
+                f.write(f"  - Crossover strategy: Selected parents {parent1_idx} (fitness: {parent1_fitness}) and {parent2_idx} (fitness: {parent2_fitness})\n")
+            
+            result_individual = self.crossover(parent1_idx, parent2_idx)
         
         elif strategy == "mutate":
             # Đột biến một cá thể tốt
             elite_idx = random.randint(0, min(3, len(self.population) - 1))
-            return self.mutate(self.population[elite_idx]["individual"])
+            with open(evolution_log_file, "a", encoding="utf-8") as f:
+                elite_fitness = self.population[elite_idx]["fitness"] if isinstance(self.population[elite_idx], dict) else getattr(self.population[elite_idx], "fitness", 0)
+                f.write(f"  - Mutation strategy: Selected elite individual {elite_idx} (fitness: {elite_fitness}) for mutation\n")
+            
+            result_individual = self.mutate(self.population[elite_idx]["individual"])
         
         else:
             # Tạo cá thể hoàn toàn mới
-            return self.generate_random_individual()
+            with open(evolution_log_file, "a", encoding="utf-8") as f:
+                f.write(f"  - Random strategy: Creating completely new individual\n")
+            
+            result_individual = self.generate_random_individual()
+        
+        # Ghi log kết thúc quá trình tiến hóa
+        with open(evolution_log_file, "a", encoding="utf-8") as f:
+            f.write(f"  - Result: Individual created with {len(result_individual) if result_individual else 0} transactions\n")
+            f.write(f"  - Evolution statistics: {json.dumps(self._evolution_strategy_counts)}\n")
+            f.write("\n")
+        
+        return result_individual
 
     def log_generation_summary(self, generation_number, coverage, branch_coverage, transactions_count):
         """
@@ -1303,6 +1527,16 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
         self.logger.info(f"Branch Coverage:  {branch_coverage:.2f}%")
         self.logger.info(f"Transactions:     {transactions_count} (+{trans_diff})")
         self.logger.info(f"Speed:            {tps:.2f} tx/s")
+        
+        # Thêm thống kê về đột biến
+        try:
+            mutation_stats = self.log_mutation_stats(generation_number)
+            if mutation_stats:
+                success_rate = (mutation_stats["successful_mutations"] / mutation_stats["total_mutations"] * 100) if mutation_stats["total_mutations"] > 0 else 0
+                self.logger.info(f"Mutations:        {mutation_stats['successful_mutations']}/{mutation_stats['total_mutations']} ({success_rate:.2f}%)")
+        except Exception as e:
+            self.logger.warning(f"Error logging mutation stats: {e}")
+        
         self.logger.info(f"{separator}")
         
         # Cập nhật giá trị lần log trước
@@ -1550,6 +1784,47 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
         self.logger.info(f"Created {len(accounts)} fake accounts for testing")
         
         return accounts
+
+    def log_mutation_stats(self, generation_number):
+        """
+        Ghi log thống kê về các đột biến đã thực hiện trong mỗi thế hệ
+        
+        :param generation_number: Số thứ tự của thế hệ hiện tại
+        """
+        # Tạo đường dẫn để lưu log
+        log_dir = os.path.join(os.getcwd(), "fuzzing_logs")
+        os.makedirs(log_dir, exist_ok=True)
+        mutation_stats_file = os.path.join(log_dir, "mutation_stats_by_generation.txt")
+        
+        # Thu thập dữ liệu thống kê nếu có
+        mutation_stats = getattr(self, '_mutation_stats_total', {
+            "replace": 0,
+            "insert": 0,
+            "remove": 0,
+            "swap": 0,
+            "param_mutate": 0,
+            "total_mutations": 0,
+            "successful_mutations": 0
+        })
+        
+        # Đếm số cá thể đã đột biến
+        mutated_individuals = getattr(self, '_mutated_individuals_count', 0)
+        
+        # Ghi thống kê vào file
+        with open(mutation_stats_file, "a", encoding="utf-8") as f:
+            f.write(f"[{datetime.now()}] GENERATION {generation_number} MUTATION STATISTICS:\n")
+            f.write(f"  - Total individuals mutated: {mutated_individuals}\n")
+            f.write(f"  - Total mutations attempted: {mutation_stats['total_mutations']}\n")
+            f.write(f"  - Successful mutations: {mutation_stats['successful_mutations']} ({(mutation_stats['successful_mutations']/mutation_stats['total_mutations']*100) if mutation_stats['total_mutations'] > 0 else 0:.2f}%)\n")
+            f.write(f"  - Replace operations: {mutation_stats['replace']}\n")
+            f.write(f"  - Insert operations: {mutation_stats['insert']}\n")
+            f.write(f"  - Remove operations: {mutation_stats['remove']}\n")
+            f.write(f"  - Swap operations: {mutation_stats['swap']}\n")
+            f.write(f"  - Parameter mutations: {mutation_stats['param_mutate']}\n")
+            f.write("\n")
+        
+        self.logger.info(f"Generation {generation_number} mutation stats: {mutation_stats['successful_mutations']}/{mutation_stats['total_mutations']} successful mutations")
+        return mutation_stats
 
 def create_rag_enhanced_generator(
         interface: Dict, 

@@ -124,5 +124,5 @@ def cli():
 if __name__ == "__main__":
     PYTHON = "python"  # your python3 path
     FUZZER = "fuzzer/main.py"  # your fuzzer path in this repo
-    #cli()
-    test_run()
+    cli()
+    #test_run()

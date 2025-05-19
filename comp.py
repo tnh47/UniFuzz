@@ -135,7 +135,11 @@ def analysis_main_contract_constructor(file_path: str, _contract_name: str, sl: 
             p_value = ["YA_DO_NOT_KNOW"]
         p_value = list(set(p_value))
         assert len(p_value) == 1, "Theo lý thuyết, mỗi tham số chỉ có một giá trị mong đợi"
-        ret.append(f"{p_name} {p_type} {p_value[0]}")
+        ret.append({
+            "name": p_name,
+            "type": p_type,
+            "value": p_value[0]
+        })
         logger.info(f"Tham số: {p_name}")
         logger.info(f"  Kiểu: {p_type}")
         logger.info(f"  Giá trị: {p_value[0]}")

@@ -27,11 +27,9 @@ class RAGEnhancedPopulation(Population):
         Initialize population with individuals.
         """
         self.logger.info(f"Initializing population with {self.size} individuals")
-        for i in range(self.size):
-            indv = self.indv_template.clone()
-            self.append(indv)
-
-            if init_seed:
-                self[-1].seed()
-                
-        return self 
+        
+        # Sử dụng phương thức init từ lớp cơ sở
+        result = super().init(init_seed=init_seed)
+        
+        self.logger.info(f"RAGEnhancedPopulation initialized with {len(self.individuals)} individuals")
+        return result 

@@ -154,53 +154,136 @@ class InstrumentedEVM:
     def deploy_contract(self, creator, bin_code, amount=0, gas=settings.GAS_LIMIT, gas_price=settings.GAS_PRICE,
                         debug=False, deploy_args: List[str] = None, deploy_mode=1):
         """
-        部署合约
+        部署合约 - Triển khai hợp đồng
         """
         if deploy_args is not None:
             assert len(deploy_args) % 3 == 0, "deploy_args必须是3的倍数, [name, type, name对应的contract或者YA_DO_NOT_KNOW]"
             encode_types = []
             encode_values = []
+            
+            self.logger.info(f"Processing constructor args: {deploy_args}")
+            
             for i in range(0, len(deploy_args), 3):
                 param_name, param_type, param_value = deploy_args[i:i + 3]
-                if (param_type == "address" or param_type == "contract") and param_value != "YA_DO_NOT_KNOW":
+                self.logger.info(f"Processing parameter: name={param_name}, type={param_type}, value={param_value}")
+                
+                # Xử lý địa chỉ và hợp đồng
+                if (param_type == "address" or param_type == "contract"):
                     encode_types.append("address")
-                    if deploy_mode == 1:
-                        encode_values.append(settings.TRANS_INFO[param_value])
-                    if deploy_mode == 2:
-                        encode_values.append(random.choice(self.accounts))
-                    if deploy_mode == 3:
-                        encode_values.append(0x0000000000000000000000000000000000000000)
-                elif param_type == "address" and param_value == "YA_DO_NOT_KNOW":
-                    encode_types.append(param_type)
-                    if deploy_mode == 1:
-                        encode_values.append(creator)
-                    if deploy_mode == 2:
-                        encode_values.append(random.choice(self.accounts))
-                    if deploy_mode == 3:
-                        encode_values.append(0x0000000000000000000000000000000000000000)
-                elif param_type.startswith("uint") and param_value == "YA_DO_NOT_KNOW":
-                    encode_types.append(param_type)
-                    encode_values.append(0)
-                elif param_type == "bool" and param_value == "YA_DO_NOT_KNOW":
-                    encode_types.append(param_type)
-                    # encode_values.append(random.choice([True, False]))
-                    encode_values.append(False)
-                elif param_type == "string" and param_value == "YA_DO_NOT_KNOW":
-                    encode_types.append(param_type)
-                    # encode_values.append("".join(random.sample(string.ascii_letters + string.digits, 8)))
-                    encode_values.append("")
-                elif param_type.startswith("bytes") and param_value == "YA_DO_NOT_KNOW":
-                    if param_type == "bytes":
-                        bytes_size = random.randint(1, 32)
+                    if param_value == "YA_DO_NOT_KNOW":
+                        # Giá trị mặc định
+                        if deploy_mode == 1:
+                            encode_values.append(creator)
+                        elif deploy_mode == 2:
+                            encode_values.append(random.choice(self.accounts))
+                        else:
+                            encode_values.append("0x0000000000000000000000000000000000000000")
                     else:
-                        bytes_size = int(param_type[5:])
+                        # Giá trị cụ thể
+                        if deploy_mode == 1 and param_value in settings.TRANS_INFO:
+                            encode_values.append(settings.TRANS_INFO[param_value])
+                        else:
+                            encode_values.append(param_value)
+                
+                # Xử lý số nguyên uint
+                elif param_type.startswith("uint"):
                     encode_types.append(param_type)
-                    encode_values.append(bytearray(0 for _ in range(bytes_size)))
-                elif param_type.startswith("int") and param_value == "YA_DO_NOT_KNOW":
+                    if param_value == "YA_DO_NOT_KNOW":
+                        encode_values.append(0)
+                    else:
+                        try:
+                            encode_values.append(int(param_value))
+                        except ValueError:
+                            self.logger.warning(f"Could not convert {param_value} to int, using 0 instead")
+                            encode_values.append(0)
+                
+                # Xử lý boolean
+                elif param_type == "bool":
                     encode_types.append(param_type)
-                    encode_values.append(0)
+                    if param_value == "YA_DO_NOT_KNOW":
+                        encode_values.append(False)
+                    else:
+                        encode_values.append(param_value.lower() in ['true', '1', 'yes'])
+                
+                # Xử lý string - quan trọng cho ABE.sol
+                elif param_type == "string":
+                    encode_types.append(param_type)
+                    if param_value == "YA_DO_NOT_KNOW":
+                        encode_values.append("")
+                    else:
+                        # Sử dụng giá trị string trực tiếp
+                        encode_values.append(param_value)
+                
+                # Xử lý bytes và byte arrays
+                elif param_type.startswith("bytes"):
+                    encode_types.append(param_type)
+                    if param_value == "YA_DO_NOT_KNOW":
+                        if param_type == "bytes":
+                            bytes_size = random.randint(1, 32)
+                        else:
+                            bytes_size = int(param_type[5:])
+                        encode_values.append(bytearray(0 for _ in range(bytes_size)))
+                    else:
+                        if param_value.startswith('0x'):
+                            encode_values.append(bytearray.fromhex(param_value[2:]))
+                        else:
+                            encode_values.append(param_value.encode('utf-8'))
+                
+                # Xử lý số nguyên có dấu int
+                elif param_type.startswith("int"):
+                    encode_types.append(param_type)
+                    if param_value == "YA_DO_NOT_KNOW":
+                        encode_values.append(0)
+                    else:
+                        try:
+                            encode_values.append(int(param_value))
+                        except ValueError:
+                            self.logger.warning(f"Could not convert {param_value} to int, using 0 instead")
+                            encode_values.append(0)
+                            
+                # Kiểu dữ liệu không được hỗ trợ            
+                else:
+                    self.logger.warning(f"Unsupported parameter type: {param_type}, defaulting to string")
+                    encode_types.append("string")
+                    encode_values.append(str(param_value))
+                    
+            self.logger.info(f"encode_types: {encode_types}")
             self.logger.info(f"encode_values: {encode_values}")
-            bin_code += encode_abi(encode_types, encode_values).hex()
+            
+            # Mã hóa constructor params
+            if encode_types and encode_values and len(encode_types) == len(encode_values):
+                try:
+                    encoded_data = encode_abi(encode_types, encode_values).hex()
+                    bin_code += encoded_data
+                    self.logger.info(f"Encoded constructor arguments: {encoded_data[:100]}...")
+                except Exception as e:
+                    self.logger.error(f"Error encoding constructor arguments: {e}")
+                    for i, (t, v) in enumerate(zip(encode_types, encode_values)):
+                        self.logger.error(f"  Param {i}: Type={t}, Value={v}, Value type={type(v)}")
+                    # Thử điều chỉnh dữ liệu và mã hóa lại
+                    try:
+                        fixed_values = []
+                        for i, (t, v) in enumerate(zip(encode_types, encode_values)):
+                            if t == "string" and isinstance(v, str):
+                                fixed_values.append(v)
+                            elif t.startswith("uint") and not isinstance(v, int):
+                                try:
+                                    fixed_values.append(int(v))
+                                except:
+                                    fixed_values.append(0)
+                            elif t == "address" and isinstance(v, str):
+                                fixed_values.append(v)
+                            else:
+                                fixed_values.append(v)
+                        self.logger.info(f"Retrying with fixed values: {fixed_values}")
+                        encoded_data = encode_abi(encode_types, fixed_values).hex()
+                        bin_code += encoded_data
+                        self.logger.info(f"Successfully encoded constructor arguments after fixing: {encoded_data[:100]}...")
+                    except Exception as e2:
+                        self.logger.error(f"Still failed to encode constructor arguments after fixing: {e2}")
+                        # Nếu vẫn thất bại, không thêm tham số vào bytecode
+        
+        # Triển khai hợp đồng với bytecode đã chuẩn bị
         nonce = self.vm.state.get_nonce(decode_hex(creator))
         tx = self.vm.create_unsigned_transaction(
             nonce=nonce,
@@ -212,8 +295,15 @@ class InstrumentedEVM:
         )
         tx = SpoofTransaction(tx, from_=decode_hex(creator))
         result = self.execute(tx, debug=debug)
-        address = to_canonical_address(encode_hex(result.msg.storage_address))
-        self.storage_emulator.set_balance(address, 1)
+        
+        # Xử lý kết quả deploy
+        if result.is_error:
+            self.logger.error(f"Error deploying contract: {result._error}")
+        else:
+            address = to_canonical_address(encode_hex(result.msg.storage_address))
+            self.storage_emulator.set_balance(address, 1)
+            self.logger.info(f"Contract deployed at: {encode_hex(result.msg.storage_address)}")
+            
         return result
 
     def deploy_transaction(self, input, gas_price=settings.GAS_PRICE, debug=False):
@@ -294,6 +384,32 @@ class InstrumentedEVM:
             raise Exception("Unknown EVM version, please choose either 'homestead', 'byzantium' or 'petersburg'.")
 
     def create_fake_accounts(self):
-        self.accounts.append(self.create_fake_account("0xcafebabecafebabecafebabecafebabecafebabe"))
+        """
+        Tạo các tài khoản giả cho fuzzing với số dư đủ lớn
+        """
+        # Tạo tài khoản chính (cafebabe)
+        main_account = "0xcafebabecafebabecafebabecafebabecafebabe"
+        self.accounts.append(self.create_fake_account(main_account, balance=10**30))
+        self.logger.info(f"Created main fake account {main_account}")
+        
+        # Tạo tài khoản từ danh sách ATTACKER_ACCOUNTS
         for address in settings.ATTACKER_ACCOUNTS:
-            self.accounts.append(self.create_fake_account(address))
+            self.accounts.append(self.create_fake_account(address, balance=10**30))
+            self.logger.info(f"Created attacker account {address}")
+        
+        # Tạo thêm các tài khoản ngẫu nhiên
+        additional_accounts = [
+            "0x1111111111111111111111111111111111111111",
+            "0x2222222222222222222222222222222222222222",
+            "0x3333333333333333333333333333333333333333",
+            "0x4444444444444444444444444444444444444444",
+            "0x5555555555555555555555555555555555555555",
+            "0x6666666666666666666666666666666666666666"
+        ]
+        
+        for address in additional_accounts:
+            self.accounts.append(self.create_fake_account(address, balance=10**20))
+            self.logger.info(f"Created additional account {address}")
+            
+        self.logger.info(f"Created {len(self.accounts)} fake accounts for fuzzing")
+        return self.accounts
