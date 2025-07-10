@@ -24,7 +24,7 @@ logger = logging.getLogger("RAGServer")
 
 # Configuration
 RAG_SCRIPT_PATH = "RAG/rag_googleapi.py"
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "AIzaSyB3P2COlotMu-3RR-ehwZXZk60wOWJvfEA")
 REQUEST_TIMEOUT = 120        # seconds
 CACHE_SIZE = 100             # max cache entries
 PERFORMANCE_LOG_FILE = "rag_performance.csv"

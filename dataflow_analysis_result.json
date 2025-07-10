@@ -1,149 +1,34 @@
 {
-  "dataflow_graph": {
-    "ABE": {
-      "name": "ABE",
-      "functions": {
-        "transfernew_": {
-          "name": "transfernew_",
-          "visibility": "public",
-          "state_mutability": "nonpayable",
-          "reads": [
-            "lp"
-          ],
-          "writes": [
-            "m"
-          ],
-          "calls": [
-            "revert(string)"
-          ],
-          "parameters": [
-            {
-              "name": "uin9",
-              "type": "address"
-            },
-            {
-              "name": "list",
-              "type": "bool"
-            }
-          ]
-        },
-        "approver": {
-          "name": "approver",
-          "visibility": "public",
-          "state_mutability": "nonpayable",
-          "reads": [
-            "lp"
-          ],
-          "writes": [
-            "i"
-          ],
-          "calls": [
-            "revert(string)",
-            "_msgSender"
-          ],
-          "parameters": [
-            {
-              "name": "uin6",
-              "type": "address"
-            },
-            {
-              "name": "data",
-              "type": "bool"
-            }
-          ]
-        },
-        "transfer_": {
-          "name": "transfer_",
-          "visibility": "public",
-          "state_mutability": "nonpayable",
-          "reads": [
-            "_totalSupply",
-            "balances",
-            "lp",
-            "user0"
-          ],
-          "writes": [
-            "_totalSupply",
-            "balances"
-          ],
-          "calls": [
-            "revert(string)",
-            "_msgSender"
-          ],
-          "parameters": [
-            {
-              "name": "_user1",
-              "type": "uint256"
-            }
-          ]
-        },
-        "owner": {
-          "name": "owner",
-          "visibility": "public",
-          "state_mutability": "nonpayable",
-          "reads": [
-            "_owner"
-          ],
-          "writes": [],
-          "calls": [],
-          "parameters": []
-        },
-        "symbol": {
-          "name": "symbol",
-          "visibility": "public",
-          "state_mutability": "nonpayable",
-          "reads": [
-            "_tokensymbol"
-          ],
-          "writes": [],
-          "calls": [],
-          "parameters": []
-        }
-      }
-    }
-  },
+  "dataflow_graph": {},
   "analysis_result": {
     "critical_paths": [
       [
-        "transfernew_",
-        "symbol"
+        "transferOwnership",
+        "getRate"
       ],
       [
-        "transfer",
-        "totalSupply"
+        "updateRate",
+        "getRate"
       ],
       [
-        "transferFrom",
-        "decimals"
+        "updateRates",
+        "getRate"
       ]
     ],
     "test_sequences": [
       [
-        "transfernew_",
-        "symbol"
+        "transferOwnership",
+        "getRate"
       ],
       [
-        "transfer",
-        "totalSupply"
+        "updateRate",
+        "getRate"
       ],
       [
-        "transferFrom",
-        "decimals"
+        "updateRates",
+        "getRate"
       ]
     ],
-    "vulnerabilities": [
-      {
-        "type": "reentrancy",
-        "functions": [
-          "transfer"
-        ]
-      },
-      {
-        "type": "front-running",
-        "functions": [
-          "approve"
-        ]
-      }
-    ]
+    "vulnerabilities": []
   }
 }

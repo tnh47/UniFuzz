@@ -9,6 +9,7 @@ from typing import Dict, List, Any, Optional
 from fuzzer.utils.utils import initialize_logger
 
 class SmartContractAnalyzer:
+    
     """
     Phân tích smart contract để xác định dataflow và mối quan hệ phụ thuộc giữa các hàm
     """
@@ -174,7 +175,7 @@ class SmartContractAnalyzer:
                 
                 try:
                     # Thử gọi API đơn giản để kiểm tra quota
-                    test_model = genai.GenerativeModel("gemini-2.0-flash-lite")
+                    test_model = genai.GenerativeModel("gemini-2.5-flash-lite")
                     test_response = test_model.generate_content("Hello, are you available?")
                     if not hasattr(test_response, 'text') and not hasattr(test_response, 'parts'):
                         skip_llm = True
@@ -229,7 +230,7 @@ class SmartContractAnalyzer:
                     minimal_prompt = f"""
                     Analyze this contract and suggest:
                     1. 2-3 critical test sequences
-                    2. 1-2 potential vulnerabilities to check
+                    2. 1-3 potential vulnerabilities to check
                     
                     Contract: {main_contract_name}
                     Functions: {list(simplified_dataflow.get(main_contract_name, {}).get("functions", {}).keys())}
@@ -247,7 +248,7 @@ class SmartContractAnalyzer:
                     
                     try:
                         self.logger.info("Sending minimal dataflow analysis to LLM")
-                        model = genai.GenerativeModel("gemini-2.0-flash-lite")
+                        model = genai.GenerativeModel("gemini-2.5-flash-preview")
                         response = model.generate_content(minimal_prompt)
                         
                         # Lấy text từ response

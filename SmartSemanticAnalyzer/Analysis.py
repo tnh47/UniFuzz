@@ -250,8 +250,9 @@ def main():
         slither_json_str = slither_json_str[:max_chars]
     prompt = f"""
     You are a security analyst. The following is a JSON output from Slither's static analysis of a Solidity smart contract located at {args.contract_path}:
-
+    
     {slither_json_str}
+    
 
     Based on this data, return a concise JSON object with these keys only:
     - contract_name

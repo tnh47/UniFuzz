@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 
 # Ethereum VM ('homestead', 'byzantium' or 'petersburg')
-EVM_VERSION = "petersburg"
+EVM_VERSION = "homestead"
 # Size of population
 POPULATION_SIZE = None
 # Number of generations

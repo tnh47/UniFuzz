@@ -29,7 +29,8 @@ class RAGEnhancedGenerator(Generator):
                  contract_name: Optional[str] = None, 
                  sol_path: Optional[str] = None,
                  other_generators=None, 
-                 interface_mapper=None):
+                 interface_mapper=None,
+                 max_individual_length: int = 10):
         """
         Khởi tạo RAGEnhancedGenerator với các tham số bổ sung
         """
@@ -74,8 +75,10 @@ class RAGEnhancedGenerator(Generator):
         self.rag_successes = 0
         self.rag_failures = 0
         self.rag_cache_hits = 0
+
+        self.max_individual_length = max_individual_length
         
-        self.logger.info(f"RAGEnhancedGenerator initialized with {len(self.optimal_sequences)} optimal sequences, {len(self.critical_paths)} critical paths, and {len(self.potential_vulnerabilities)} potential vulnerabilities")
+        #self.logger.info(f"RAGEnhancedGenerator initialized with {len(self.optimal_sequences)} optimal sequences, {len(self.critical_paths)} critical paths, and {len(self.potential_vulnerabilities)} potential vulnerabilities")
     
     def _get_function_hash_by_name(self, function_name: str) -> Optional[str]:
         """Tìm function hash từ tên hàm"""
@@ -608,7 +611,7 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
             }
         self._strategy_counts[strategy] += 1
         
-        self.logger.info(f"Using strategy: {strategy} for transaction sequence")
+        #self.logger.info(f"Using strategy: {strategy} for transaction sequence")
 
         # Giới hạn số lượng transaction tối đa
         MAX_SEQUENCE_LENGTH = 5  # Đặt số lượng transaction tối đa nhỏ hơn để tối ưu độ phủ
@@ -634,7 +637,7 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
         if strategy == "optimal_sequence" and self.optimal_sequences:
             # Sử dụng sequence từ phân tích dataflow
             sequence_template = random.choice(self.optimal_sequences)
-            self.logger.info(f"Using optimal sequence template: {sequence_template}")
+            #self.logger.info(f"Using optimal sequence template: {sequence_template}")
             
             # Giới hạn số lượng transaction trong template
             sequence_template = sequence_template[:MAX_SEQUENCE_LENGTH-1]  # Để lại chỗ cho 1 hàm ngẫu nhiên
@@ -664,12 +667,12 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     if tx:
                         individual.extend(tx)
                         original_functions += 1
-                        self.logger.info(f"Added random function {random_func[:8]} for diversity")
+                        #self.logger.info(f"Added random function {random_func[:8]} for diversity")
         
         elif strategy == "critical_path" and self.critical_paths:
             # Sử dụng critical path từ phân tích dataflow
             path = random.choice(self.critical_paths)
-            self.logger.info(f"Following critical path: {path}")
+            #self.logger.info(f"Following critical path: {path}")
             
             # Giới hạn số lượng transaction trong path
             path = path[:MAX_SEQUENCE_LENGTH-1]  # Để lại chỗ cho 1 hàm ngẫu nhiên
@@ -697,8 +700,8 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     tx = super().generate_individual(random_func, self.interface[random_func], default_value=default_value)
                     if tx:
                         individual.extend(tx)
-                        original_functions += 1
-                        self.logger.info(f"Added random function {random_func[:8]} for diversity")
+                        original_functions += 1 
+                        #self.logger.info(f"Added random function {random_func[:8]} for diversity")
         
         elif strategy == "mutation" and hasattr(self, 'population') and self.population:
             # Đột biến một sequence tốt từ quần thể
@@ -817,11 +820,11 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     func_names.append(f"{func_name}({func_hash[:8]})")
         
         # Log thống kê để kiểm soát, bao gồm tên các hàm được gọi
-        if len(func_names) > 0:
-            self.logger.info(f"Generated sequence with {len(individual)} transactions ({rag_enhanced_functions} enhanced, {original_functions} original)")
-            self.logger.info(f"Sequence details: {' -> '.join(func_names)}")
-        else:
-            self.logger.info(f"Generated empty sequence")
+        # if len(func_names) > 0:
+        #     self.logger.info(f"Generated sequence with {len(individual)} transactions ({rag_enhanced_functions} enhanced, {original_functions} original)")
+        #     self.logger.info(f"Sequence details: {' -> '.join(func_names)}")
+        # else:
+        #     self.logger.info(f"Generated empty sequence")
         
         # Lưu lại sequence tốt (chỉ khi có ít nhất một transaction ngoài constructor)
         if hasattr(self, 'good_sequences') and len(individual) > 1:
@@ -1836,7 +1839,8 @@ def create_rag_enhanced_generator(
         contract_name: Optional[str] = None,
         sol_path: Optional[str] = None,
         other_generators=None,
-        interface_mapper=None) -> RAGEnhancedGenerator:
+        interface_mapper=None,
+        max_individual_length:int = 10) -> RAGEnhancedGenerator:
     """
     Hàm tiện ích để tạo RAGEnhanced"""
     return RAGEnhancedGenerator(
@@ -1849,5 +1853,6 @@ def create_rag_enhanced_generator(
         contract_name=contract_name,
         sol_path=sol_path,
         other_generators=other_generators,
-        interface_mapper=interface_mapper
+        interface_mapper=interface_mapper,
+        max_individual_length=max_individual_length
     )

@@ -195,7 +195,7 @@ class Generator:
 
     def generate_individual_by_cross(self):
         """
-        根据指定的序列, 生成一个含有参数的序列
+        Tao chuoi giao dich dua tren phan tich hop dong cheo
         """
         individual = []
         for o_g in self.other_generators:
@@ -204,6 +204,7 @@ class Generator:
         if self.sol_path is not None:
             target_trans = settings.TRANS_CROSS_BAD_INDVS.pop()
             if len(target_trans[0].chromosome) >= settings.MAX_INDIVIDUAL_LENGTH:
+                self.logger.info(f"Su dung chuoi giao dich co san voi {len(target_trans[0].chromosome)} giao dich")
                 return target_trans[0].chromosome
             ret = gen_trans(target_trans, self.total_interface_mapper)
             for supply_func in ret:

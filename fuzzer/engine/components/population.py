@@ -229,32 +229,28 @@ class Population(object):
 
 def log_population_info(individuals):
     """
-    Log thông tin về quần thể một cách ngắn gọn
+    Log thông tin về quần thể một cách ngắn gọn: chỉ số lượng và các hàm trong từng sequence.
     """
     logger = initialize_logger("Population")
-    
-    # Log số lượng cá thể (sequence)
-    logger.info(f"\n===== Population: {len(individuals)} sequences =====")
-    
-    # Log thông tin về các sequence đã tạo
-    max_sequences_to_show = min(3, len(individuals))
+    logger.info(f"===== Population: {len(individuals)} sequences =====")
+    max_sequences_to_show = min(5, len(individuals))
     for i, indv in enumerate(individuals[:max_sequences_to_show]):
-        logger.info(f"Sequence {i+1}: {len(indv.chromosome)} transactions")
-        
-        # Log chi tiết về các giao dịch trong sequence
-        for j, tx in enumerate(indv.chromosome):
+        # Lấy interface_mapper nếu có
+        interface_mapper = getattr(indv.generator, "interface_mapper", None)
+        func_names = []
+        for tx in indv.chromosome:
             if "arguments" in tx and len(tx["arguments"]) > 0:
-                func_hash = tx["arguments"][0] if tx["arguments"][0] != "constructor" else "constructor"
-                contract = tx["contract_name"] if "contract_name" in tx else "Unknown"
-                
-                # Hiển thị tham số nếu có
-                params = ""
-                if len(tx["arguments"]) > 1:
-                    params = " (" + ", ".join([str(arg)[:20] + ("..." if len(str(arg)) > 20 else "") for arg in tx["arguments"][1:4]]) + ")"
-                
-                logger.info(f"    Transaction {j+1} - {func_hash}{params}")
-        
-        logger.info("") # Thêm dòng trống để ngăn cách giữa các sequence
-    
+                func_hash = tx["arguments"][0]
+                # Tìm tên hàm từ interface_mapper
+                func_name = None
+                if interface_mapper:
+                    for name, hash in interface_mapper.items():
+                        if hash == func_hash:
+                            func_name = name.split("(")[0]
+                            break
+                if not func_name:
+                    func_name = "constructor" if func_hash == "constructor" else f"{func_hash[:8]}"
+                func_names.append(func_name)
+        logger.info(f"Sequence {i+1}: {' -> '.join(func_names)}")
     if len(individuals) > max_sequences_to_show:
         logger.info(f"... và {len(individuals) - max_sequences_to_show} sequence khác")

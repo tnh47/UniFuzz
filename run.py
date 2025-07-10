@@ -9,14 +9,16 @@ import sys
 from comp import analysis_depend_contract, analysis_main_contract_constructor
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
+
+
 def run_analysis(api_key, contract_path):
     """Step 1: Chạy Analysis.py để phân tích hợp đồng thông minh."""
     analysis_cmd = [
         "python", "./SmartSemanticAnalyzer/Analysis.py",
         "--server-url", "http://localhost:5000",
         "--contract-path", contract_path,
-        "--solc-path", "/usr/bin/solc",
-        "--output", "analysis_output.txt"
+        "--solc-path", "/home/ngonhat/Desktop/UniFuzz/venv3.8/bin/solc",
+        "--output", "analysis_output.json"
     ]
     result = subprocess.run(analysis_cmd, capture_output=True, text=True)
     if result.returncode != 0:
@@ -24,7 +26,7 @@ def run_analysis(api_key, contract_path):
         return False
     
     # Kiểm tra xem file có được tạo ra không
-    if not os.path.exists("analysis_output.txt"):
+    if not os.path.exists("analysis_output.json"):
         logging.error("Analysis output file was not created")
         return False
         
@@ -184,7 +186,7 @@ def run_rag_enhanced_fuzzing(
     api_key: str,
     contract_path: str,
     solc_path: str,
-    solc_version: str = "0.8.26",
+    solc_version: str = "0.4.26",
     max_trans_length: int = 10,
     fuzz_time: int = 60,
     constructor_params_path: str = "auto",
@@ -442,7 +444,7 @@ def run_integration(
     api_key: str,
     contract_path: str,
     solc_path: str,
-    solc_version: str = "0.8.26",
+    solc_version: str = "0.4.26",
     max_trans_length: int = 10,
     fuzz_time: int = 60,
     constructor_params: str = "auto",

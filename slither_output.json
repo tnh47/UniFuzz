@@ -6,125 +6,479 @@
             {
                 "elements": [
                     {
+                        "type": "contract",
+                        "name": "HardToken",
+                        "source_mapping": {}
+                    },
+                    {
                         "type": "function",
-                        "name": "transfer_",
+                        "name": "approve",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "StandardToken",
                                 "source_mapping": {}
                             },
-                            "signature": "transfer_(uint256)"
-                        }
-                    },
-                    {
-                        "type": "node",
-                        "name": "true",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "function",
-                                "name": "transfer_",
-                                "source_mapping": {},
-                                "type_specific_fields": {
-                                    "parent": {
-                                        "type": "contract",
-                                        "name": "ABE",
-                                        "source_mapping": {}
-                                    },
-                                    "signature": "transfer_(uint256)"
-                                }
-                            }
+                            "signature": "approve(address,uint256)"
                         }
                     }
                 ],
-                "description": "ABE.transfer_(uint256) (SmartContract/ABE.sol#376-396) uses a Boolean constant improperly:\n\t-true (SmartContract/ABE.sol#379)\n",
-                "markdown": "[ABE.transfer_(uint256)](SmartContract/ABE.sol#L376-L396) uses a Boolean constant improperly:\n\t-[true](SmartContract/ABE.sol#L379)\n",
-                "check": "boolean-cst",
+                "description": "HardToken (../Source_code_SoliAudit/ExchangeRate.sol#397-439) has incorrect ERC20 function interface:StandardToken.approve(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#316-326)\n",
+                "markdown": "[HardToken](../Source_code_SoliAudit/ExchangeRate.sol#L397-L439) has incorrect ERC20 function interface:[StandardToken.approve(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L316-L326)\n",
+                "check": "erc20-interface",
                 "impact": "Medium",
-                "confidence": "Medium"
+                "confidence": "High"
             },
             {
                 "elements": [
                     {
+                        "type": "contract",
+                        "name": "HardToken",
+                        "source_mapping": {}
+                    },
+                    {
                         "type": "function",
-                        "name": "transfer_",
+                        "name": "transferFrom",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "ERC20",
                                 "source_mapping": {}
                             },
-                            "signature": "transfer_(uint256)"
-                        }
-                    },
-                    {
-                        "type": "node",
-                        "name": "false",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "function",
-                                "name": "transfer_",
-                                "source_mapping": {},
-                                "type_specific_fields": {
-                                    "parent": {
-                                        "type": "contract",
-                                        "name": "ABE",
-                                        "source_mapping": {}
-                                    },
-                                    "signature": "transfer_(uint256)"
-                                }
-                            }
+                            "signature": "transferFrom(address,address,uint256)"
                         }
                     }
                 ],
-                "description": "ABE.transfer_(uint256) (SmartContract/ABE.sol#376-396) uses a Boolean constant improperly:\n\t-false (SmartContract/ABE.sol#377)\n",
-                "markdown": "[ABE.transfer_(uint256)](SmartContract/ABE.sol#L376-L396) uses a Boolean constant improperly:\n\t-[false](SmartContract/ABE.sol#L377)\n",
-                "check": "boolean-cst",
+                "description": "HardToken (../Source_code_SoliAudit/ExchangeRate.sol#397-439) has incorrect ERC20 function interface:ERC20.transferFrom(address,address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#229)\n",
+                "markdown": "[HardToken](../Source_code_SoliAudit/ExchangeRate.sol#L397-L439) has incorrect ERC20 function interface:[ERC20.transferFrom(address,address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L229)\n",
+                "check": "erc20-interface",
                 "impact": "Medium",
-                "confidence": "Medium"
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "contract",
+                        "name": "HardToken",
+                        "source_mapping": {}
+                    },
+                    {
+                        "type": "function",
+                        "name": "transferFrom",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "HardToken",
+                                "source_mapping": {}
+                            },
+                            "signature": "transferFrom(address,address,uint256)"
+                        }
+                    }
+                ],
+                "description": "HardToken (../Source_code_SoliAudit/ExchangeRate.sol#397-439) has incorrect ERC20 function interface:HardToken.transferFrom(address,address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#435-437)\n",
+                "markdown": "[HardToken](../Source_code_SoliAudit/ExchangeRate.sol#L397-L439) has incorrect ERC20 function interface:[HardToken.transferFrom(address,address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L435-L437)\n",
+                "check": "erc20-interface",
+                "impact": "Medium",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "contract",
+                        "name": "HardToken",
+                        "source_mapping": {}
+                    },
+                    {
+                        "type": "function",
+                        "name": "approve",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ERC20",
+                                "source_mapping": {}
+                            },
+                            "signature": "approve(address,uint256)"
+                        }
+                    }
+                ],
+                "description": "HardToken (../Source_code_SoliAudit/ExchangeRate.sol#397-439) has incorrect ERC20 function interface:ERC20.approve(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#230)\n",
+                "markdown": "[HardToken](../Source_code_SoliAudit/ExchangeRate.sol#L397-L439) has incorrect ERC20 function interface:[ERC20.approve(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L230)\n",
+                "check": "erc20-interface",
+                "impact": "Medium",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "contract",
+                        "name": "HardToken",
+                        "source_mapping": {}
+                    },
+                    {
+                        "type": "function",
+                        "name": "transfer",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "BasicToken",
+                                "source_mapping": {}
+                            },
+                            "signature": "transfer(address,uint256)"
+                        }
+                    }
+                ],
+                "description": "HardToken (../Source_code_SoliAudit/ExchangeRate.sol#397-439) has incorrect ERC20 function interface:BasicToken.transfer(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#261-265)\n",
+                "markdown": "[HardToken](../Source_code_SoliAudit/ExchangeRate.sol#L397-L439) has incorrect ERC20 function interface:[BasicToken.transfer(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L261-L265)\n",
+                "check": "erc20-interface",
+                "impact": "Medium",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "contract",
+                        "name": "HardToken",
+                        "source_mapping": {}
+                    },
+                    {
+                        "type": "function",
+                        "name": "transfer",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "HardToken",
+                                "source_mapping": {}
+                            },
+                            "signature": "transfer(address,uint256)"
+                        }
+                    }
+                ],
+                "description": "HardToken (../Source_code_SoliAudit/ExchangeRate.sol#397-439) has incorrect ERC20 function interface:HardToken.transfer(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#425-427)\n",
+                "markdown": "[HardToken](../Source_code_SoliAudit/ExchangeRate.sol#L397-L439) has incorrect ERC20 function interface:[HardToken.transfer(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L425-L427)\n",
+                "check": "erc20-interface",
+                "impact": "Medium",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "contract",
+                        "name": "HardToken",
+                        "source_mapping": {}
+                    },
+                    {
+                        "type": "function",
+                        "name": "transfer",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ERC20Basic",
+                                "source_mapping": {}
+                            },
+                            "signature": "transfer(address,uint256)"
+                        }
+                    }
+                ],
+                "description": "HardToken (../Source_code_SoliAudit/ExchangeRate.sol#397-439) has incorrect ERC20 function interface:ERC20Basic.transfer(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#216)\n",
+                "markdown": "[HardToken](../Source_code_SoliAudit/ExchangeRate.sol#L397-L439) has incorrect ERC20 function interface:[ERC20Basic.transfer(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L216)\n",
+                "check": "erc20-interface",
+                "impact": "Medium",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "contract",
+                        "name": "HardToken",
+                        "source_mapping": {}
+                    },
+                    {
+                        "type": "function",
+                        "name": "transferFrom",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "StandardToken",
+                                "source_mapping": {}
+                            },
+                            "signature": "transferFrom(address,address,uint256)"
+                        }
+                    }
+                ],
+                "description": "HardToken (../Source_code_SoliAudit/ExchangeRate.sol#397-439) has incorrect ERC20 function interface:StandardToken.transferFrom(address,address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#299-309)\n",
+                "markdown": "[HardToken](../Source_code_SoliAudit/ExchangeRate.sol#L397-L439) has incorrect ERC20 function interface:[StandardToken.transferFrom(address,address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L299-L309)\n",
+                "check": "erc20-interface",
+                "impact": "Medium",
+                "confidence": "High"
             },
             {
                 "elements": [
                     {
                         "type": "variable",
-                        "name": "owner",
+                        "name": "totalSupply",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MintableToken",
+                                "source_mapping": {}
+                            }
+                        }
+                    },
+                    {
+                        "type": "variable",
+                        "name": "totalSupply",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ERC20Basic",
+                                "source_mapping": {}
+                            }
+                        }
+                    }
+                ],
+                "description": "MintableToken.totalSupply (../Source_code_SoliAudit/ExchangeRate.sol#357) shadows:\n\t- ERC20Basic.totalSupply (../Source_code_SoliAudit/ExchangeRate.sol#214)\n",
+                "markdown": "[MintableToken.totalSupply](../Source_code_SoliAudit/ExchangeRate.sol#L357) shadows:\n\t- [ERC20Basic.totalSupply](../Source_code_SoliAudit/ExchangeRate.sol#L214)\n",
+                "check": "shadowing-abstract",
+                "impact": "Medium",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "finishMinting",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "finishMinting()"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.finishMinting()",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "function",
-                                "name": "_spendAllowance",
+                                "name": "finishMinting",
                                 "source_mapping": {},
                                 "type_specific_fields": {
                                     "parent": {
                                         "type": "contract",
-                                        "name": "ABE",
+                                        "name": "MainSale",
                                         "source_mapping": {}
                                     },
-                                    "signature": "_spendAllowance(address,address,uint256)"
+                                    "signature": "finishMinting()"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "MainSale.finishMinting() (../Source_code_SoliAudit/ExchangeRate.sol#552-559) ignores return value by token.finishMinting() (../Source_code_SoliAudit/ExchangeRate.sol#556)\n",
+                "markdown": "[MainSale.finishMinting()](../Source_code_SoliAudit/ExchangeRate.sol#L552-L559) ignores return value by [token.finishMinting()](../Source_code_SoliAudit/ExchangeRate.sol#L556)\n",
+                "check": "unused-return",
+                "impact": "Medium",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "finishMinting",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "finishMinting()"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.mint(multisigVault,restrictedTokens)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "finishMinting",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "finishMinting()"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "MainSale.finishMinting() (../Source_code_SoliAudit/ExchangeRate.sol#552-559) ignores return value by token.mint(multisigVault,restrictedTokens) (../Source_code_SoliAudit/ExchangeRate.sol#555)\n",
+                "markdown": "[MainSale.finishMinting()](../Source_code_SoliAudit/ExchangeRate.sol#L552-L559) ignores return value by [token.mint(multisigVault,restrictedTokens)](../Source_code_SoliAudit/ExchangeRate.sol#L555)\n",
+                "check": "unused-return",
+                "impact": "Medium",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "authorizedCreateTokens",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "authorizedCreateTokens(address,uint256)"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.mint(recipient,tokens)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "authorizedCreateTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "authorizedCreateTokens(address,uint256)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "MainSale.authorizedCreateTokens(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#507-510) ignores return value by token.mint(recipient,tokens) (../Source_code_SoliAudit/ExchangeRate.sol#508)\n",
+                "markdown": "[MainSale.authorizedCreateTokens(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L507-L510) ignores return value by [token.mint(recipient,tokens)](../Source_code_SoliAudit/ExchangeRate.sol#L508)\n",
+                "check": "unused-return",
+                "impact": "Medium",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "createTokens",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "createTokens(address)"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.mint(recipient,tokens)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "createTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "createTokens(address)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "MainSale.createTokens(address) (../Source_code_SoliAudit/ExchangeRate.sol#485-491) ignores return value by token.mint(recipient,tokens) (../Source_code_SoliAudit/ExchangeRate.sol#488)\n",
+                "markdown": "[MainSale.createTokens(address)](../Source_code_SoliAudit/ExchangeRate.sol#L485-L491) ignores return value by [token.mint(recipient,tokens)](../Source_code_SoliAudit/ExchangeRate.sol#L488)\n",
+                "check": "unused-return",
+                "impact": "Medium",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "assert",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "SafeMath",
+                                "source_mapping": {}
+                            },
+                            "signature": "assert(bool)"
+                        }
+                    }
+                ],
+                "description": "SafeMath.assert(bool) (../Source_code_SoliAudit/ExchangeRate.sol#200-204) (function) shadows built-in symbol\"\n",
+                "markdown": "[SafeMath.assert(bool)](../Source_code_SoliAudit/ExchangeRate.sol#L200-L204) (function) shadows built-in symbol\"\n",
+                "check": "shadowing-builtin",
+                "impact": "Low",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "token",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "retrieveTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "retrieveTokens(address)"
                                 }
                             }
                         }
                     },
                     {
-                        "type": "function",
-                        "name": "owner",
+                        "type": "variable",
+                        "name": "token",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "Ownable",
+                                "name": "MainSale",
                                 "source_mapping": {}
-                            },
-                            "signature": "owner()"
+                            }
                         }
                     }
                 ],
-                "description": "ABE._spendAllowance(address,address,uint256).owner (SmartContract/ABE.sol#347) shadows:\n\t- Ownable.owner() (SmartContract/ABE.sol#33-35) (function)\n",
-                "markdown": "[ABE._spendAllowance(address,address,uint256).owner](SmartContract/ABE.sol#L347) shadows:\n\t- [Ownable.owner()](SmartContract/ABE.sol#L33-L35) (function)\n",
+                "description": "MainSale.retrieveTokens(address).token (../Source_code_SoliAudit/ExchangeRate.sol#566) shadows:\n\t- MainSale.token (../Source_code_SoliAudit/ExchangeRate.sol#455) (state variable)\n",
+                "markdown": "[MainSale.retrieveTokens(address).token](../Source_code_SoliAudit/ExchangeRate.sol#L566) shadows:\n\t- [MainSale.token](../Source_code_SoliAudit/ExchangeRate.sol#L455) (state variable)\n",
                 "check": "shadowing-local",
                 "impact": "Low",
                 "confidence": "High"
@@ -133,7 +487,830 @@
                 "elements": [
                     {
                         "type": "variable",
-                        "name": "owner",
+                        "name": "authorizerIndex",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "getAuthorizer",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "Authorizable",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "getAuthorizer(uint256)"
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "type": "variable",
+                        "name": "authorizerIndex",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "Authorizable",
+                                "source_mapping": {}
+                            }
+                        }
+                    }
+                ],
+                "description": "Authorizable.getAuthorizer(uint256).authorizerIndex (../Source_code_SoliAudit/ExchangeRate.sol#81) shadows:\n\t- Authorizable.authorizerIndex (../Source_code_SoliAudit/ExchangeRate.sol#57) (state variable)\n",
+                "markdown": "[Authorizable.getAuthorizer(uint256).authorizerIndex](../Source_code_SoliAudit/ExchangeRate.sol#L81) shadows:\n\t- [Authorizable.authorizerIndex](../Source_code_SoliAudit/ExchangeRate.sol#L57) (state variable)\n",
+                "check": "shadowing-local",
+                "impact": "Low",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "setMultisigVault",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "setMultisigVault(address)"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "multisigVault = _multisigVault",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "setMultisigVault",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "setMultisigVault(address)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "MainSale.setMultisigVault(address) (../Source_code_SoliAudit/ExchangeRate.sol#532-536) should emit an event for: \n\t- multisigVault = _multisigVault (../Source_code_SoliAudit/ExchangeRate.sol#534) \n",
+                "markdown": "[MainSale.setMultisigVault(address)](../Source_code_SoliAudit/ExchangeRate.sol#L532-L536) should emit an event for: \n\t- [multisigVault = _multisigVault](../Source_code_SoliAudit/ExchangeRate.sol#L534) \n",
+                "check": "events-access",
+                "impact": "Low",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "transferOwnership",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "Ownable",
+                                "source_mapping": {}
+                            },
+                            "signature": "transferOwnership(address)"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "owner = newOwner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transferOwnership",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "Ownable",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transferOwnership(address)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Ownable.transferOwnership(address) (../Source_code_SoliAudit/ExchangeRate.sol#37-41) should emit an event for: \n\t- owner = newOwner (../Source_code_SoliAudit/ExchangeRate.sol#39) \n",
+                "markdown": "[Ownable.transferOwnership(address)](../Source_code_SoliAudit/ExchangeRate.sol#L37-L41) should emit an event for: \n\t- [owner = newOwner](../Source_code_SoliAudit/ExchangeRate.sol#L39) \n",
+                "check": "events-access",
+                "impact": "Low",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "finishMinting",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "finishMinting()"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "issuedTokenSupply = token.totalSupply()",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "finishMinting",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "finishMinting()"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.mint(multisigVault,restrictedTokens)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "finishMinting",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "finishMinting()"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.finishMinting()",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "finishMinting",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "finishMinting()"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.transferOwnership(owner)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "finishMinting",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "finishMinting()"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "MainSaleClosed()",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "finishMinting",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "finishMinting()"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "event"
+                        }
+                    }
+                ],
+                "description": "Reentrancy in MainSale.finishMinting() (../Source_code_SoliAudit/ExchangeRate.sol#552-559):\n\tExternal calls:\n\t- issuedTokenSupply = token.totalSupply() (../Source_code_SoliAudit/ExchangeRate.sol#553)\n\t- token.mint(multisigVault,restrictedTokens) (../Source_code_SoliAudit/ExchangeRate.sol#555)\n\t- token.finishMinting() (../Source_code_SoliAudit/ExchangeRate.sol#556)\n\t- token.transferOwnership(owner) (../Source_code_SoliAudit/ExchangeRate.sol#557)\n\tEvent emitted after the call(s):\n\t- MainSaleClosed() (../Source_code_SoliAudit/ExchangeRate.sol#558)\n",
+                "markdown": "Reentrancy in [MainSale.finishMinting()](../Source_code_SoliAudit/ExchangeRate.sol#L552-L559):\n\tExternal calls:\n\t- [issuedTokenSupply = token.totalSupply()](../Source_code_SoliAudit/ExchangeRate.sol#L553)\n\t- [token.mint(multisigVault,restrictedTokens)](../Source_code_SoliAudit/ExchangeRate.sol#L555)\n\t- [token.finishMinting()](../Source_code_SoliAudit/ExchangeRate.sol#L556)\n\t- [token.transferOwnership(owner)](../Source_code_SoliAudit/ExchangeRate.sol#L557)\n\tEvent emitted after the call(s):\n\t- [MainSaleClosed()](../Source_code_SoliAudit/ExchangeRate.sol#L558)\n",
+                "check": "reentrancy-events",
+                "impact": "Low",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "authorizedCreateTokens",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "authorizedCreateTokens(address,uint256)"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.mint(recipient,tokens)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "authorizedCreateTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "authorizedCreateTokens(address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "AuthorizedCreate(recipient,tokens)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "authorizedCreateTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "authorizedCreateTokens(address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "event"
+                        }
+                    }
+                ],
+                "description": "Reentrancy in MainSale.authorizedCreateTokens(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#507-510):\n\tExternal calls:\n\t- token.mint(recipient,tokens) (../Source_code_SoliAudit/ExchangeRate.sol#508)\n\tEvent emitted after the call(s):\n\t- AuthorizedCreate(recipient,tokens) (../Source_code_SoliAudit/ExchangeRate.sol#509)\n",
+                "markdown": "Reentrancy in [MainSale.authorizedCreateTokens(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L507-L510):\n\tExternal calls:\n\t- [token.mint(recipient,tokens)](../Source_code_SoliAudit/ExchangeRate.sol#L508)\n\tEvent emitted after the call(s):\n\t- [AuthorizedCreate(recipient,tokens)](../Source_code_SoliAudit/ExchangeRate.sol#L509)\n",
+                "check": "reentrancy-events",
+                "impact": "Low",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "createTokens",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "createTokens(address)"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "rate = exchangeRate.getRate(ETH)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "createTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "createTokens(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "token.mint(recipient,tokens)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "createTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "createTokens(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "require(bool)(multisigVault.send(msg.value))",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "createTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "createTokens(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls_sending_eth"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "TokenSold(recipient,msg.value,tokens,rate)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "createTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "createTokens(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "event"
+                        }
+                    }
+                ],
+                "description": "Reentrancy in MainSale.createTokens(address) (../Source_code_SoliAudit/ExchangeRate.sol#485-491):\n\tExternal calls:\n\t- rate = exchangeRate.getRate(ETH) (../Source_code_SoliAudit/ExchangeRate.sol#486)\n\t- token.mint(recipient,tokens) (../Source_code_SoliAudit/ExchangeRate.sol#488)\n\tExternal calls sending eth:\n\t- require(bool)(multisigVault.send(msg.value)) (../Source_code_SoliAudit/ExchangeRate.sol#489)\n\tEvent emitted after the call(s):\n\t- TokenSold(recipient,msg.value,tokens,rate) (../Source_code_SoliAudit/ExchangeRate.sol#490)\n",
+                "markdown": "Reentrancy in [MainSale.createTokens(address)](../Source_code_SoliAudit/ExchangeRate.sol#L485-L491):\n\tExternal calls:\n\t- [rate = exchangeRate.getRate(ETH)](../Source_code_SoliAudit/ExchangeRate.sol#L486)\n\t- [token.mint(recipient,tokens)](../Source_code_SoliAudit/ExchangeRate.sol#L488)\n\tExternal calls sending eth:\n\t- [require(bool)(multisigVault.send(msg.value))](../Source_code_SoliAudit/ExchangeRate.sol#L489)\n\tEvent emitted after the call(s):\n\t- [TokenSold(recipient,msg.value,tokens,rate)](../Source_code_SoliAudit/ExchangeRate.sol#L490)\n",
+                "check": "reentrancy-events",
+                "impact": "Low",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "min256",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "SafeMath",
+                                "source_mapping": {}
+                            },
+                            "signature": "min256(uint256,uint256)"
+                        }
+                    }
+                ],
+                "description": "SafeMath.min256(uint256,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#196-198) is never used and should be removed\n",
+                "markdown": "[SafeMath.min256(uint256,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L196-L198) is never used and should be removed\n",
+                "check": "dead-code",
+                "impact": "Informational",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "max256",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "SafeMath",
+                                "source_mapping": {}
+                            },
+                            "signature": "max256(uint256,uint256)"
+                        }
+                    }
+                ],
+                "description": "SafeMath.max256(uint256,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#192-194) is never used and should be removed\n",
+                "markdown": "[SafeMath.max256(uint256,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L192-L194) is never used and should be removed\n",
+                "check": "dead-code",
+                "impact": "Informational",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "min64",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "SafeMath",
+                                "source_mapping": {}
+                            },
+                            "signature": "min64(uint64,uint64)"
+                        }
+                    }
+                ],
+                "description": "SafeMath.min64(uint64,uint64) (../Source_code_SoliAudit/ExchangeRate.sol#188-190) is never used and should be removed\n",
+                "markdown": "[SafeMath.min64(uint64,uint64)](../Source_code_SoliAudit/ExchangeRate.sol#L188-L190) is never used and should be removed\n",
+                "check": "dead-code",
+                "impact": "Informational",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "max64",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "SafeMath",
+                                "source_mapping": {}
+                            },
+                            "signature": "max64(uint64,uint64)"
+                        }
+                    }
+                ],
+                "description": "SafeMath.max64(uint64,uint64) (../Source_code_SoliAudit/ExchangeRate.sol#184-186) is never used and should be removed\n",
+                "markdown": "[SafeMath.max64(uint64,uint64)](../Source_code_SoliAudit/ExchangeRate.sol#L184-L186) is never used and should be removed\n",
+                "check": "dead-code",
+                "impact": "Informational",
+                "confidence": "Medium"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "rates[sha3()(_symbol)]",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "getRate",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ExchangeRate",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "getRate(string)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected rates[sha3()(_symbol)] (../Source_code_SoliAudit/ExchangeRate.sol#151):\n\t- Usage of \"sha3()\" should be replaced with \"keccak256()\"\n",
+                "markdown": "Deprecated standard detected [rates[sha3()(_symbol)]](../Source_code_SoliAudit/ExchangeRate.sol#L151):\n\t- Usage of \"sha3()\" should be replaced with \"keccak256()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "rates[sha3()(_symbol)] = _rate",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "updateRate",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ExchangeRate",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "updateRate(string,uint256)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected rates[sha3()(_symbol)] = _rate (../Source_code_SoliAudit/ExchangeRate.sol#125):\n\t- Usage of \"sha3()\" should be replaced with \"keccak256()\"\n",
+                "markdown": "Deprecated standard detected [rates[sha3()(_symbol)] = _rate](../Source_code_SoliAudit/ExchangeRate.sol#L125):\n\t- Usage of \"sha3()\" should be replaced with \"keccak256()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "updateRates",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ExchangeRate",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "updateRates(uint256[])"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected THROW (../Source_code_SoliAudit/ExchangeRate.sol#135):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "markdown": "Deprecated standard detected [THROW](../Source_code_SoliAudit/ExchangeRate.sol#L135):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "onlyPayloadSize",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "BasicToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "onlyPayloadSize(uint256)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected THROW (../Source_code_SoliAudit/ExchangeRate.sol#251):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "markdown": "Deprecated standard detected [THROW](../Source_code_SoliAudit/ExchangeRate.sol#L251):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "canMint",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MintableToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "canMint()"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected THROW (../Source_code_SoliAudit/ExchangeRate.sol#361):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "markdown": "Deprecated standard detected [THROW](../Source_code_SoliAudit/ExchangeRate.sol#L361):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "assert",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "SafeMath",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "assert(bool)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected THROW (../Source_code_SoliAudit/ExchangeRate.sol#202):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "markdown": "Deprecated standard detected [THROW](../Source_code_SoliAudit/ExchangeRate.sol#L202):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "RateUpdated(now,sha3()(_symbol),_rate)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "updateRate",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ExchangeRate",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "updateRate(string,uint256)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected RateUpdated(now,sha3()(_symbol),_rate) (../Source_code_SoliAudit/ExchangeRate.sol#126):\n\t- Usage of \"sha3()\" should be replaced with \"keccak256()\"\n",
+                "markdown": "Deprecated standard detected [RateUpdated(now,sha3()(_symbol),_rate)](../Source_code_SoliAudit/ExchangeRate.sol#L126):\n\t- Usage of \"sha3()\" should be replaced with \"keccak256()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "approve",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "StandardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "approve(address,uint256)"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected THROW (../Source_code_SoliAudit/ExchangeRate.sol#322):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "markdown": "Deprecated standard detected [THROW](../Source_code_SoliAudit/ExchangeRate.sol#L322):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "node",
+                        "name": "",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "onlyOwner",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "Ownable",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "onlyOwner()"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "description": "Deprecated standard detected THROW (../Source_code_SoliAudit/ExchangeRate.sol#27):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "markdown": "Deprecated standard detected [THROW](../Source_code_SoliAudit/ExchangeRate.sol#L27):\n\t- Usage of \"throw\" should be replaced with \"revert()\"\n",
+                "check": "deprecated-standards",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "pragma",
+                        "name": "^0.4.11",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "directive": [
+                                "solidity",
+                                "^",
+                                "0.4",
+                                ".11"
+                            ]
+                        }
+                    }
+                ],
+                "description": "Pragma version^0.4.11 (../Source_code_SoliAudit/ExchangeRate.sol#1) allows old versions\n",
+                "markdown": "Pragma version[^0.4.11](../Source_code_SoliAudit/ExchangeRate.sol#L1) allows old versions\n",
+                "check": "solc-version",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [],
+                "description": "solc-0.4.26 is not recommended for deployment\n",
+                "markdown": "solc-0.4.26 is not recommended for deployment\n",
+                "check": "solc-version",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_spender",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
@@ -143,137 +1320,948 @@
                                 "type_specific_fields": {
                                     "parent": {
                                         "type": "contract",
-                                        "name": "ABE",
+                                        "name": "StandardToken",
                                         "source_mapping": {}
                                     },
                                     "signature": "allowance(address,address)"
                                 }
                             }
-                        }
-                    },
-                    {
-                        "type": "function",
-                        "name": "owner",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "Ownable",
-                                "source_mapping": {}
-                            },
-                            "signature": "owner()"
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
                         }
                     }
                 ],
-                "description": "ABE.allowance(address,address).owner (SmartContract/ABE.sol#229) shadows:\n\t- Ownable.owner() (SmartContract/ABE.sol#33-35) (function)\n",
-                "markdown": "[ABE.allowance(address,address).owner](SmartContract/ABE.sol#L229) shadows:\n\t- [Ownable.owner()](SmartContract/ABE.sol#L33-L35) (function)\n",
-                "check": "shadowing-local",
-                "impact": "Low",
+                "description": "Parameter StandardToken.allowance(address,address)._spender (../Source_code_SoliAudit/ExchangeRate.sol#334) is not in mixedCase\n",
+                "markdown": "Parameter [StandardToken.allowance(address,address)._spender](../Source_code_SoliAudit/ExchangeRate.sol#L334) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
                 "confidence": "High"
             },
             {
                 "elements": [
                     {
                         "type": "variable",
-                        "name": "owner",
+                        "name": "_value",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "function",
-                                "name": "_approve",
+                                "name": "approve",
                                 "source_mapping": {},
                                 "type_specific_fields": {
                                     "parent": {
                                         "type": "contract",
-                                        "name": "ABE",
+                                        "name": "StandardToken",
                                         "source_mapping": {}
                                     },
-                                    "signature": "_approve(address,address,uint256)"
+                                    "signature": "approve(address,uint256)"
                                 }
                             }
-                        }
-                    },
-                    {
-                        "type": "function",
-                        "name": "owner",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "Ownable",
-                                "source_mapping": {}
-                            },
-                            "signature": "owner()"
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
                         }
                     }
                 ],
-                "description": "ABE._approve(address,address,uint256).owner (SmartContract/ABE.sol#326) shadows:\n\t- Ownable.owner() (SmartContract/ABE.sol#33-35) (function)\n",
-                "markdown": "[ABE._approve(address,address,uint256).owner](SmartContract/ABE.sol#L326) shadows:\n\t- [Ownable.owner()](SmartContract/ABE.sol#L33-L35) (function)\n",
-                "check": "shadowing-local",
-                "impact": "Low",
+                "description": "Parameter StandardToken.approve(address,uint256)._value (../Source_code_SoliAudit/ExchangeRate.sol#316) is not in mixedCase\n",
+                "markdown": "Parameter [StandardToken.approve(address,uint256)._value](../Source_code_SoliAudit/ExchangeRate.sol#L316) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
                 "confidence": "High"
             },
             {
                 "elements": [
                     {
                         "type": "variable",
-                        "name": "owner",
+                        "name": "_value",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "function",
-                                "name": "decreaseAllowance",
+                                "name": "transfer",
                                 "source_mapping": {},
                                 "type_specific_fields": {
                                     "parent": {
                                         "type": "contract",
-                                        "name": "ABE",
+                                        "name": "BasicToken",
                                         "source_mapping": {}
                                     },
-                                    "signature": "decreaseAllowance(address,uint256)"
+                                    "signature": "transfer(address,uint256)"
                                 }
                             }
-                        }
-                    },
-                    {
-                        "type": "function",
-                        "name": "owner",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "Ownable",
-                                "source_mapping": {}
-                            },
-                            "signature": "owner()"
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
                         }
                     }
                 ],
-                "description": "ABE.decreaseAllowance(address,uint256).owner (SmartContract/ABE.sol#416) shadows:\n\t- Ownable.owner() (SmartContract/ABE.sol#33-35) (function)\n",
-                "markdown": "[ABE.decreaseAllowance(address,uint256).owner](SmartContract/ABE.sol#L416) shadows:\n\t- [Ownable.owner()](SmartContract/ABE.sol#L33-L35) (function)\n",
-                "check": "shadowing-local",
-                "impact": "Low",
+                "description": "Parameter BasicToken.transfer(address,uint256)._value (../Source_code_SoliAudit/ExchangeRate.sol#261) is not in mixedCase\n",
+                "markdown": "Parameter [BasicToken.transfer(address,uint256)._value](../Source_code_SoliAudit/ExchangeRate.sol#L261) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_rate",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "updateRate",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ExchangeRate",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "updateRate(string,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter ExchangeRate.updateRate(string,uint256)._rate (../Source_code_SoliAudit/ExchangeRate.sol#124) is not in mixedCase\n",
+                "markdown": "Parameter [ExchangeRate.updateRate(string,uint256)._rate](../Source_code_SoliAudit/ExchangeRate.sol#L124) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "allowance",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "StandardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "allowance(address,address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter StandardToken.allowance(address,address)._owner (../Source_code_SoliAudit/ExchangeRate.sol#334) is not in mixedCase\n",
+                "markdown": "Parameter [StandardToken.allowance(address,address)._owner](../Source_code_SoliAudit/ExchangeRate.sol#L334) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_addr",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "isAuthorized",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "Authorizable",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "isAuthorized(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter Authorizable.isAuthorized(address)._addr (../Source_code_SoliAudit/ExchangeRate.sol#90) is not in mixedCase\n",
+                "markdown": "Parameter [Authorizable.isAuthorized(address)._addr](../Source_code_SoliAudit/ExchangeRate.sol#L90) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_to",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "mint",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MintableToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "mint(address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter MintableToken.mint(address,uint256)._to (../Source_code_SoliAudit/ExchangeRate.sol#371) is not in mixedCase\n",
+                "markdown": "Parameter [MintableToken.mint(address,uint256)._to](../Source_code_SoliAudit/ExchangeRate.sol#L371) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_multisigVault",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "setMultisigVault",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "setMultisigVault(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter MainSale.setMultisigVault(address)._multisigVault (../Source_code_SoliAudit/ExchangeRate.sol#532) is not in mixedCase\n",
+                "markdown": "Parameter [MainSale.setMultisigVault(address)._multisigVault](../Source_code_SoliAudit/ExchangeRate.sol#L532) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_symbol",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "updateRate",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ExchangeRate",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "updateRate(string,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter ExchangeRate.updateRate(string,uint256)._symbol (../Source_code_SoliAudit/ExchangeRate.sol#124) is not in mixedCase\n",
+                "markdown": "Parameter [ExchangeRate.updateRate(string,uint256)._symbol](../Source_code_SoliAudit/ExchangeRate.sol#L124) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_exchangeRate",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "setExchangeRate",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "setExchangeRate(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter MainSale.setExchangeRate(address)._exchangeRate (../Source_code_SoliAudit/ExchangeRate.sol#542) is not in mixedCase\n",
+                "markdown": "Parameter [MainSale.setExchangeRate(address)._exchangeRate](../Source_code_SoliAudit/ExchangeRate.sol#L542) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_from",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transferFrom",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "StandardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transferFrom(address,address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter StandardToken.transferFrom(address,address,uint256)._from (../Source_code_SoliAudit/ExchangeRate.sol#299) is not in mixedCase\n",
+                "markdown": "Parameter [StandardToken.transferFrom(address,address,uint256)._from](../Source_code_SoliAudit/ExchangeRate.sol#L299) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_value",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transferFrom",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "HardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transferFrom(address,address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter HardToken.transferFrom(address,address,uint256)._value (../Source_code_SoliAudit/ExchangeRate.sol#435) is not in mixedCase\n",
+                "markdown": "Parameter [HardToken.transferFrom(address,address,uint256)._value](../Source_code_SoliAudit/ExchangeRate.sol#L435) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_to",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transfer",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "HardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transfer(address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter HardToken.transfer(address,uint256)._to (../Source_code_SoliAudit/ExchangeRate.sol#425) is not in mixedCase\n",
+                "markdown": "Parameter [HardToken.transfer(address,uint256)._to](../Source_code_SoliAudit/ExchangeRate.sol#L425) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_to",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transferFrom",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "StandardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transferFrom(address,address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter StandardToken.transferFrom(address,address,uint256)._to (../Source_code_SoliAudit/ExchangeRate.sol#299) is not in mixedCase\n",
+                "markdown": "Parameter [StandardToken.transferFrom(address,address,uint256)._to](../Source_code_SoliAudit/ExchangeRate.sol#L299) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_start",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "setStart",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "setStart(uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter MainSale.setStart(uint256)._start (../Source_code_SoliAudit/ExchangeRate.sol#524) is not in mixedCase\n",
+                "markdown": "Parameter [MainSale.setStart(uint256)._start](../Source_code_SoliAudit/ExchangeRate.sol#L524) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_spender",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "approve",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "StandardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "approve(address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter StandardToken.approve(address,uint256)._spender (../Source_code_SoliAudit/ExchangeRate.sol#316) is not in mixedCase\n",
+                "markdown": "Parameter [StandardToken.approve(address,uint256)._spender](../Source_code_SoliAudit/ExchangeRate.sol#L316) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_value",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transfer",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "HardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transfer(address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter HardToken.transfer(address,uint256)._value (../Source_code_SoliAudit/ExchangeRate.sol#425) is not in mixedCase\n",
+                "markdown": "Parameter [HardToken.transfer(address,uint256)._value](../Source_code_SoliAudit/ExchangeRate.sol#L425) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_addr",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "addAuthorized",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "Authorizable",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "addAuthorized(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter Authorizable.addAuthorized(address)._addr (../Source_code_SoliAudit/ExchangeRate.sol#98) is not in mixedCase\n",
+                "markdown": "Parameter [Authorizable.addAuthorized(address)._addr](../Source_code_SoliAudit/ExchangeRate.sol#L98) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_to",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transfer",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "BasicToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transfer(address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter BasicToken.transfer(address,uint256)._to (../Source_code_SoliAudit/ExchangeRate.sol#261) is not in mixedCase\n",
+                "markdown": "Parameter [BasicToken.transfer(address,uint256)._to](../Source_code_SoliAudit/ExchangeRate.sol#L261) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_token",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "retrieveTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "retrieveTokens(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter MainSale.retrieveTokens(address)._token (../Source_code_SoliAudit/ExchangeRate.sol#565) is not in mixedCase\n",
+                "markdown": "Parameter [MainSale.retrieveTokens(address)._token](../Source_code_SoliAudit/ExchangeRate.sol#L565) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_to",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transferFrom",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "HardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transferFrom(address,address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter HardToken.transferFrom(address,address,uint256)._to (../Source_code_SoliAudit/ExchangeRate.sol#435) is not in mixedCase\n",
+                "markdown": "Parameter [HardToken.transferFrom(address,address,uint256)._to](../Source_code_SoliAudit/ExchangeRate.sol#L435) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_owner",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "balanceOf",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "BasicToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "balanceOf(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter BasicToken.balanceOf(address)._owner (../Source_code_SoliAudit/ExchangeRate.sol#272) is not in mixedCase\n",
+                "markdown": "Parameter [BasicToken.balanceOf(address)._owner](../Source_code_SoliAudit/ExchangeRate.sol#L272) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_amount",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "mint",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MintableToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "mint(address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter MintableToken.mint(address,uint256)._amount (../Source_code_SoliAudit/ExchangeRate.sol#371) is not in mixedCase\n",
+                "markdown": "Parameter [MintableToken.mint(address,uint256)._amount](../Source_code_SoliAudit/ExchangeRate.sol#L371) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_from",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transferFrom",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "HardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transferFrom(address,address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter HardToken.transferFrom(address,address,uint256)._from (../Source_code_SoliAudit/ExchangeRate.sol#435) is not in mixedCase\n",
+                "markdown": "Parameter [HardToken.transferFrom(address,address,uint256)._from](../Source_code_SoliAudit/ExchangeRate.sol#L435) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_value",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "transferFrom",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "StandardToken",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "transferFrom(address,address,uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter StandardToken.transferFrom(address,address,uint256)._value (../Source_code_SoliAudit/ExchangeRate.sol#299) is not in mixedCase\n",
+                "markdown": "Parameter [StandardToken.transferFrom(address,address,uint256)._value](../Source_code_SoliAudit/ExchangeRate.sol#L299) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_hardcap",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "setHardCap",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "setHardCap(uint256)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter MainSale.setHardCap(uint256)._hardcap (../Source_code_SoliAudit/ExchangeRate.sol#516) is not in mixedCase\n",
+                "markdown": "Parameter [MainSale.setHardCap(uint256)._hardcap](../Source_code_SoliAudit/ExchangeRate.sol#L516) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "_symbol",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "getRate",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "ExchangeRate",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "getRate(string)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "target": "parameter",
+                            "convention": "mixedCase"
+                        }
+                    }
+                ],
+                "description": "Parameter ExchangeRate.getRate(string)._symbol (../Source_code_SoliAudit/ExchangeRate.sol#150) is not in mixedCase\n",
+                "markdown": "Parameter [ExchangeRate.getRate(string)._symbol](../Source_code_SoliAudit/ExchangeRate.sol#L150) is not in mixedCase\n",
+                "check": "naming-convention",
+                "impact": "Informational",
                 "confidence": "High"
             },
             {
                 "elements": [
                     {
                         "type": "function",
-                        "name": "_msgData",
+                        "name": "createTokens",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "Ownable",
+                                "name": "MainSale",
                                 "source_mapping": {}
                             },
-                            "signature": "_msgData()"
+                            "signature": "createTokens(address)"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "require(bool)(multisigVault.send(msg.value))",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "createTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "createTokens(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "external_calls"
+                        }
+                    },
+                    {
+                        "type": "node",
+                        "name": "TokenSold(recipient,msg.value,tokens,rate)",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "function",
+                                "name": "createTokens",
+                                "source_mapping": {},
+                                "type_specific_fields": {
+                                    "parent": {
+                                        "type": "contract",
+                                        "name": "MainSale",
+                                        "source_mapping": {}
+                                    },
+                                    "signature": "createTokens(address)"
+                                }
+                            }
+                        },
+                        "additional_fields": {
+                            "underlying_type": "event"
                         }
                     }
                 ],
-                "description": "Ownable._msgData() (SmartContract/ABE.sol#29-31) is never used and should be removed\n",
-                "markdown": "[Ownable._msgData()](SmartContract/ABE.sol#L29-L31) is never used and should be removed\n",
-                "check": "dead-code",
+                "description": "Reentrancy in MainSale.createTokens(address) (../Source_code_SoliAudit/ExchangeRate.sol#485-491):\n\tExternal calls:\n\t- require(bool)(multisigVault.send(msg.value)) (../Source_code_SoliAudit/ExchangeRate.sol#489)\n\tEvent emitted after the call(s):\n\t- TokenSold(recipient,msg.value,tokens,rate) (../Source_code_SoliAudit/ExchangeRate.sol#490)\n",
+                "markdown": "Reentrancy in [MainSale.createTokens(address)](../Source_code_SoliAudit/ExchangeRate.sol#L485-L491):\n\tExternal calls:\n\t- [require(bool)(multisigVault.send(msg.value))](../Source_code_SoliAudit/ExchangeRate.sol#L489)\n\tEvent emitted after the call(s):\n\t- [TokenSold(recipient,msg.value,tokens,rate)](../Source_code_SoliAudit/ExchangeRate.sol#L490)\n",
+                "check": "reentrancy-unlimited-gas",
                 "impact": "Informational",
                 "confidence": "Medium"
             },
@@ -281,259 +2269,104 @@
                 "elements": [
                     {
                         "type": "variable",
-                        "name": "user0",
+                        "name": "totalSupply",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "ERC20Basic",
                                 "source_mapping": {}
                             }
                         }
                     }
                 ],
-                "description": "ABE.user0 (SmartContract/ABE.sol#109) is set pre-construction with a non-constant function or state variable:\n\t- _totalSupply\n",
-                "markdown": "[ABE.user0](SmartContract/ABE.sol#L109) is set pre-construction with a non-constant function or state variable:\n\t- _totalSupply\n",
-                "check": "function-init-state",
-                "impact": "Informational",
+                "description": "ERC20Basic.totalSupply (../Source_code_SoliAudit/ExchangeRate.sol#214) should be constant\n",
+                "markdown": "[ERC20Basic.totalSupply](../Source_code_SoliAudit/ExchangeRate.sol#L214) should be constant\n",
+                "check": "constable-states",
+                "impact": "Optimization",
                 "confidence": "High"
             },
             {
                 "elements": [
                     {
                         "type": "variable",
-                        "name": "_totalSupply",
+                        "name": "name",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "HardToken",
                                 "source_mapping": {}
                             }
                         }
                     }
                 ],
-                "description": "ABE._totalSupply (SmartContract/ABE.sol#108) is set pre-construction with a non-constant function or state variable:\n\t- 35 * 10 ** 7 * 10 ** decimals()\n",
-                "markdown": "[ABE._totalSupply](SmartContract/ABE.sol#L108) is set pre-construction with a non-constant function or state variable:\n\t- 35 * 10 ** 7 * 10 ** decimals()\n",
-                "check": "function-init-state",
-                "impact": "Informational",
-                "confidence": "High"
-            },
-            {
-                "elements": [],
-                "description": "solc-0.8.29 is not recommended for deployment\n",
-                "markdown": "solc-0.8.29 is not recommended for deployment\n",
-                "check": "solc-version",
-                "impact": "Informational",
+                "description": "HardToken.name (../Source_code_SoliAudit/ExchangeRate.sol#399) should be constant\n",
+                "markdown": "[HardToken.name](../Source_code_SoliAudit/ExchangeRate.sol#L399) should be constant\n",
+                "check": "constable-states",
+                "impact": "Optimization",
                 "confidence": "High"
             },
             {
                 "elements": [
                     {
-                        "type": "pragma",
-                        "name": "^0.8.0",
+                        "type": "variable",
+                        "name": "decimals",
                         "source_mapping": {},
                         "type_specific_fields": {
-                            "directive": [
-                                "solidity",
-                                "^",
-                                "0.8",
-                                ".0"
-                            ]
+                            "parent": {
+                                "type": "contract",
+                                "name": "HardToken",
+                                "source_mapping": {}
+                            }
                         }
                     }
                 ],
-                "description": "Pragma version^0.8.0 (SmartContract/ABE.sol#3) allows old versions\n",
-                "markdown": "Pragma version[^0.8.0](SmartContract/ABE.sol#L3) allows old versions\n",
-                "check": "solc-version",
-                "impact": "Informational",
+                "description": "HardToken.decimals (../Source_code_SoliAudit/ExchangeRate.sol#401) should be constant\n",
+                "markdown": "[HardToken.decimals](../Source_code_SoliAudit/ExchangeRate.sol#L401) should be constant\n",
+                "check": "constable-states",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "variable",
+                        "name": "symbol",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "HardToken",
+                                "source_mapping": {}
+                            }
+                        }
+                    }
+                ],
+                "description": "HardToken.symbol (../Source_code_SoliAudit/ExchangeRate.sol#400) should be constant\n",
+                "markdown": "[HardToken.symbol](../Source_code_SoliAudit/ExchangeRate.sol#L400) should be constant\n",
+                "check": "constable-states",
+                "impact": "Optimization",
                 "confidence": "High"
             },
             {
                 "elements": [
                     {
                         "type": "function",
-                        "name": "_HoldersAddress",
+                        "name": "retrieveTokens",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "MainSale",
                                 "source_mapping": {}
                             },
-                            "signature": "_HoldersAddress(address)"
-                        },
-                        "additional_fields": {
-                            "target": "function",
-                            "convention": "mixedCase"
+                            "signature": "retrieveTokens(address)"
                         }
                     }
                 ],
-                "description": "Function ABE._HoldersAddress(address) (SmartContract/ABE.sol#161-166) is not in mixedCase\n",
-                "markdown": "Function [ABE._HoldersAddress(address)](SmartContract/ABE.sol#L161-L166) is not in mixedCase\n",
-                "check": "naming-convention",
-                "impact": "Informational",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "variable",
-                        "name": "Holders",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ABE",
-                                "source_mapping": {}
-                            }
-                        },
-                        "additional_fields": {
-                            "target": "variable",
-                            "convention": "mixedCase"
-                        }
-                    }
-                ],
-                "description": "Variable ABE.Holders (SmartContract/ABE.sol#113) is not in mixedCase\n",
-                "markdown": "Variable [ABE.Holders](SmartContract/ABE.sol#L113) is not in mixedCase\n",
-                "check": "naming-convention",
-                "impact": "Informational",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "variable",
-                        "name": "_address",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "function",
-                                "name": "_HoldersAddress",
-                                "source_mapping": {},
-                                "type_specific_fields": {
-                                    "parent": {
-                                        "type": "contract",
-                                        "name": "ABE",
-                                        "source_mapping": {}
-                                    },
-                                    "signature": "_HoldersAddress(address)"
-                                }
-                            }
-                        },
-                        "additional_fields": {
-                            "target": "parameter",
-                            "convention": "mixedCase"
-                        }
-                    }
-                ],
-                "description": "Parameter ABE._HoldersAddress(address)._address (SmartContract/ABE.sol#161) is not in mixedCase\n",
-                "markdown": "Parameter [ABE._HoldersAddress(address)._address](SmartContract/ABE.sol#L161) is not in mixedCase\n",
-                "check": "naming-convention",
-                "impact": "Informational",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "variable",
-                        "name": "_user1",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "function",
-                                "name": "transfer_",
-                                "source_mapping": {},
-                                "type_specific_fields": {
-                                    "parent": {
-                                        "type": "contract",
-                                        "name": "ABE",
-                                        "source_mapping": {}
-                                    },
-                                    "signature": "transfer_(uint256)"
-                                }
-                            }
-                        },
-                        "additional_fields": {
-                            "target": "parameter",
-                            "convention": "mixedCase"
-                        }
-                    }
-                ],
-                "description": "Parameter ABE.transfer_(uint256)._user1 (SmartContract/ABE.sol#376) is not in mixedCase\n",
-                "markdown": "Parameter [ABE.transfer_(uint256)._user1](SmartContract/ABE.sol#L376) is not in mixedCase\n",
-                "check": "naming-convention",
-                "impact": "Informational",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "variable",
-                        "name": "_totalSupply",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ABE",
-                                "source_mapping": {}
-                            }
-                        },
-                        "additional_fields": {
-                            "target": "variable",
-                            "convention": "mixedCase"
-                        }
-                    }
-                ],
-                "description": "Variable ABE._totalSupply (SmartContract/ABE.sol#108) is not in mixedCase\n",
-                "markdown": "Variable [ABE._totalSupply](SmartContract/ABE.sol#L108) is not in mixedCase\n",
-                "check": "naming-convention",
-                "impact": "Informational",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "variable",
-                        "name": "_Holders",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ABE",
-                                "source_mapping": {}
-                            }
-                        },
-                        "additional_fields": {
-                            "target": "variable",
-                            "convention": "mixedCase"
-                        }
-                    }
-                ],
-                "description": "Variable ABE._Holders (SmartContract/ABE.sol#114) is not in mixedCase\n",
-                "markdown": "Variable [ABE._Holders](SmartContract/ABE.sol#L114) is not in mixedCase\n",
-                "check": "naming-convention",
-                "impact": "Informational",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "transfer",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ABE",
-                                "source_mapping": {}
-                            },
-                            "signature": "transfer(address,uint256)"
-                        }
-                    }
-                ],
-                "description": "transfer(address,uint256) should be declared external:\n\t- ABE.transfer(address,uint256) (SmartContract/ABE.sol#224-227)\n",
-                "markdown": "transfer(address,uint256) should be declared external:\n\t- [ABE.transfer(address,uint256)](SmartContract/ABE.sol#L224-L227)\n",
+                "description": "retrieveTokens(address) should be declared external:\n\t- MainSale.retrieveTokens(address) (../Source_code_SoliAudit/ExchangeRate.sol#565-568)\n",
+                "markdown": "retrieveTokens(address) should be declared external:\n\t- [MainSale.retrieveTokens(address)](../Source_code_SoliAudit/ExchangeRate.sol#L565-L568)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -542,20 +2375,64 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "getTokenHolders",
+                        "name": "setStart",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "MainSale",
                                 "source_mapping": {}
                             },
-                            "signature": "getTokenHolders()"
+                            "signature": "setStart(uint256)"
                         }
                     }
                 ],
-                "description": "getTokenHolders() should be declared external:\n\t- ABE.getTokenHolders() (SmartContract/ABE.sol#167-169)\n",
-                "markdown": "getTokenHolders() should be declared external:\n\t- [ABE.getTokenHolders()](SmartContract/ABE.sol#L167-L169)\n",
+                "description": "setStart(uint256) should be declared external:\n\t- MainSale.setStart(uint256) (../Source_code_SoliAudit/ExchangeRate.sol#524-526)\n",
+                "markdown": "setStart(uint256) should be declared external:\n\t- [MainSale.setStart(uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L524-L526)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "getRate",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ExchangeRate",
+                                "source_mapping": {}
+                            },
+                            "signature": "getRate(string)"
+                        }
+                    }
+                ],
+                "description": "getRate(string) should be declared external:\n\t- ExchangeRate.getRate(string) (../Source_code_SoliAudit/ExchangeRate.sol#150-152)\n",
+                "markdown": "getRate(string) should be declared external:\n\t- [ExchangeRate.getRate(string)](../Source_code_SoliAudit/ExchangeRate.sol#L150-L152)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "finishMinting",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MintableToken",
+                                "source_mapping": {}
+                            },
+                            "signature": "finishMinting()"
+                        }
+                    }
+                ],
+                "description": "finishMinting() should be declared external:\n\t- MintableToken.finishMinting() (../Source_code_SoliAudit/ExchangeRate.sol#382-386)\n",
+                "markdown": "finishMinting() should be declared external:\n\t- [MintableToken.finishMinting()](../Source_code_SoliAudit/ExchangeRate.sol#L382-L386)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -569,15 +2446,28 @@
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "BasicToken",
+                                "source_mapping": {}
+                            },
+                            "signature": "balanceOf(address)"
+                        }
+                    },
+                    {
+                        "type": "function",
+                        "name": "balanceOf",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ERC20Basic",
                                 "source_mapping": {}
                             },
                             "signature": "balanceOf(address)"
                         }
                     }
                 ],
-                "description": "balanceOf(address) should be declared external:\n\t- ABE.balanceOf(address) (SmartContract/ABE.sol#179-181)\n",
-                "markdown": "balanceOf(address) should be declared external:\n\t- [ABE.balanceOf(address)](SmartContract/ABE.sol#L179-L181)\n",
+                "description": "balanceOf(address) should be declared external:\n\t- BasicToken.balanceOf(address) (../Source_code_SoliAudit/ExchangeRate.sol#272-274)\n\t- ERC20Basic.balanceOf(address) (../Source_code_SoliAudit/ExchangeRate.sol#215)\n",
+                "markdown": "balanceOf(address) should be declared external:\n\t- [BasicToken.balanceOf(address)](../Source_code_SoliAudit/ExchangeRate.sol#L272-L274)\n\t- [ERC20Basic.balanceOf(address)](../Source_code_SoliAudit/ExchangeRate.sol#L215)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -586,86 +2476,20 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "totalSupply",
+                        "name": "startTrading",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "HardToken",
                                 "source_mapping": {}
                             },
-                            "signature": "totalSupply()"
+                            "signature": "startTrading()"
                         }
                     }
                 ],
-                "description": "totalSupply() should be declared external:\n\t- ABE.totalSupply() (SmartContract/ABE.sol#154-156)\n",
-                "markdown": "totalSupply() should be declared external:\n\t- [ABE.totalSupply()](SmartContract/ABE.sol#L154-L156)\n",
-                "check": "external-function",
-                "impact": "Optimization",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "decreaseAllowance",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ABE",
-                                "source_mapping": {}
-                            },
-                            "signature": "decreaseAllowance(address,uint256)"
-                        }
-                    }
-                ],
-                "description": "decreaseAllowance(address,uint256) should be declared external:\n\t- ABE.decreaseAllowance(address,uint256) (SmartContract/ABE.sol#415-421)\n",
-                "markdown": "decreaseAllowance(address,uint256) should be declared external:\n\t- [ABE.decreaseAllowance(address,uint256)](SmartContract/ABE.sol#L415-L421)\n",
-                "check": "external-function",
-                "impact": "Optimization",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "renounceOwnership",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "Ownable",
-                                "source_mapping": {}
-                            },
-                            "signature": "renounceOwnership()"
-                        }
-                    }
-                ],
-                "description": "renounceOwnership() should be declared external:\n\t- Ownable.renounceOwnership() (SmartContract/ABE.sol#52-54)\n",
-                "markdown": "renounceOwnership() should be declared external:\n\t- [Ownable.renounceOwnership()](SmartContract/ABE.sol#L52-L54)\n",
-                "check": "external-function",
-                "impact": "Optimization",
-                "confidence": "High"
-            },
-            {
-                "elements": [
-                    {
-                        "type": "function",
-                        "name": "approver",
-                        "source_mapping": {},
-                        "type_specific_fields": {
-                            "parent": {
-                                "type": "contract",
-                                "name": "ABE",
-                                "source_mapping": {}
-                            },
-                            "signature": "approver(address,bool)"
-                        }
-                    }
-                ],
-                "description": "approver(address,bool) should be declared external:\n\t- ABE.approver(address,bool) (SmartContract/ABE.sol#206-212)\n",
-                "markdown": "approver(address,bool) should be declared external:\n\t- [ABE.approver(address,bool)](SmartContract/ABE.sol#L206-L212)\n",
+                "description": "startTrading() should be declared external:\n\t- HardToken.startTrading() (../Source_code_SoliAudit/ExchangeRate.sol#416-418)\n",
+                "markdown": "startTrading() should be declared external:\n\t- [HardToken.startTrading()](../Source_code_SoliAudit/ExchangeRate.sol#L416-L418)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -679,15 +2503,28 @@
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "ERC20",
+                                "source_mapping": {}
+                            },
+                            "signature": "approve(address,uint256)"
+                        }
+                    },
+                    {
+                        "type": "function",
+                        "name": "approve",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "StandardToken",
                                 "source_mapping": {}
                             },
                             "signature": "approve(address,uint256)"
                         }
                     }
                 ],
-                "description": "approve(address,uint256) should be declared external:\n\t- ABE.approve(address,uint256) (SmartContract/ABE.sol#247-250)\n",
-                "markdown": "approve(address,uint256) should be declared external:\n\t- [ABE.approve(address,uint256)](SmartContract/ABE.sol#L247-L250)\n",
+                "description": "approve(address,uint256) should be declared external:\n\t- ERC20.approve(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#230)\n\t- StandardToken.approve(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#316-326)\n",
+                "markdown": "approve(address,uint256) should be declared external:\n\t- [ERC20.approve(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L230)\n\t- [StandardToken.approve(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L316-L326)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -696,20 +2533,20 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "name",
+                        "name": "updateRates",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "ExchangeRate",
                                 "source_mapping": {}
                             },
-                            "signature": "name()"
+                            "signature": "updateRates(uint256[])"
                         }
                     }
                 ],
-                "description": "name() should be declared external:\n\t- ABE.name() (SmartContract/ABE.sol#188-190)\n",
-                "markdown": "name() should be declared external:\n\t- [ABE.name()](SmartContract/ABE.sol#L188-L190)\n",
+                "description": "updateRates(uint256[]) should be declared external:\n\t- ExchangeRate.updateRates(uint256[]) (../Source_code_SoliAudit/ExchangeRate.sol#133-144)\n",
+                "markdown": "updateRates(uint256[]) should be declared external:\n\t- [ExchangeRate.updateRates(uint256[])](../Source_code_SoliAudit/ExchangeRate.sol#L133-L144)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -718,20 +2555,20 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "transfer_",
+                        "name": "transferOwnership",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "Ownable",
                                 "source_mapping": {}
                             },
-                            "signature": "transfer_(uint256)"
+                            "signature": "transferOwnership(address)"
                         }
                     }
                 ],
-                "description": "transfer_(uint256) should be declared external:\n\t- ABE.transfer_(uint256) (SmartContract/ABE.sol#376-396)\n",
-                "markdown": "transfer_(uint256) should be declared external:\n\t- [ABE.transfer_(uint256)](SmartContract/ABE.sol#L376-L396)\n",
+                "description": "transferOwnership(address) should be declared external:\n\t- Ownable.transferOwnership(address) (../Source_code_SoliAudit/ExchangeRate.sol#37-41)\n",
+                "markdown": "transferOwnership(address) should be declared external:\n\t- [Ownable.transferOwnership(address)](../Source_code_SoliAudit/ExchangeRate.sol#L37-L41)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -740,20 +2577,20 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "symbol",
+                        "name": "authorizedCreateTokens",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "MainSale",
                                 "source_mapping": {}
                             },
-                            "signature": "symbol()"
+                            "signature": "authorizedCreateTokens(address,uint256)"
                         }
                     }
                 ],
-                "description": "symbol() should be declared external:\n\t- ABE.symbol() (SmartContract/ABE.sol#138-140)\n",
-                "markdown": "symbol() should be declared external:\n\t- [ABE.symbol()](SmartContract/ABE.sol#L138-L140)\n",
+                "description": "authorizedCreateTokens(address,uint256) should be declared external:\n\t- MainSale.authorizedCreateTokens(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#507-510)\n",
+                "markdown": "authorizedCreateTokens(address,uint256) should be declared external:\n\t- [MainSale.authorizedCreateTokens(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L507-L510)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -762,20 +2599,20 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "transfernew_",
+                        "name": "setMultisigVault",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "MainSale",
                                 "source_mapping": {}
                             },
-                            "signature": "transfernew_(address,bool)"
+                            "signature": "setMultisigVault(address)"
                         }
                     }
                 ],
-                "description": "transfernew_(address,bool) should be declared external:\n\t- ABE.transfernew_(address,bool) (SmartContract/ABE.sol#171-177)\n",
-                "markdown": "transfernew_(address,bool) should be declared external:\n\t- [ABE.transfernew_(address,bool)](SmartContract/ABE.sol#L171-L177)\n",
+                "description": "setMultisigVault(address) should be declared external:\n\t- MainSale.setMultisigVault(address) (../Source_code_SoliAudit/ExchangeRate.sol#532-536)\n",
+                "markdown": "setMultisigVault(address) should be declared external:\n\t- [MainSale.setMultisigVault(address)](../Source_code_SoliAudit/ExchangeRate.sol#L532-L536)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
@@ -784,20 +2621,165 @@
                 "elements": [
                     {
                         "type": "function",
-                        "name": "transferFrom",
+                        "name": "setAltDeposit",
                         "source_mapping": {},
                         "type_specific_fields": {
                             "parent": {
                                 "type": "contract",
-                                "name": "ABE",
+                                "name": "MainSale",
                                 "source_mapping": {}
                             },
-                            "signature": "transferFrom(address,address,uint256)"
+                            "signature": "setAltDeposit(uint256)"
                         }
                     }
                 ],
-                "description": "transferFrom(address,address,uint256) should be declared external:\n\t- ABE.transferFrom(address,address,uint256) (SmartContract/ABE.sol#268-277)\n",
-                "markdown": "transferFrom(address,address,uint256) should be declared external:\n\t- [ABE.transferFrom(address,address,uint256)](SmartContract/ABE.sol#L268-L277)\n",
+                "description": "setAltDeposit(uint256) should be declared external:\n\t- MainSale.setAltDeposit(uint256) (../Source_code_SoliAudit/ExchangeRate.sol#498-500)\n",
+                "markdown": "setAltDeposit(uint256) should be declared external:\n\t- [MainSale.setAltDeposit(uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L498-L500)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "mint",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MintableToken",
+                                "source_mapping": {}
+                            },
+                            "signature": "mint(address,uint256)"
+                        }
+                    }
+                ],
+                "description": "mint(address,uint256) should be declared external:\n\t- MintableToken.mint(address,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#371-376)\n",
+                "markdown": "mint(address,uint256) should be declared external:\n\t- [MintableToken.mint(address,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L371-L376)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "setHardCap",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "setHardCap(uint256)"
+                        }
+                    }
+                ],
+                "description": "setHardCap(uint256) should be declared external:\n\t- MainSale.setHardCap(uint256) (../Source_code_SoliAudit/ExchangeRate.sol#516-518)\n",
+                "markdown": "setHardCap(uint256) should be declared external:\n\t- [MainSale.setHardCap(uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L516-L518)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "finishMinting",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "finishMinting()"
+                        }
+                    }
+                ],
+                "description": "finishMinting() should be declared external:\n\t- MainSale.finishMinting() (../Source_code_SoliAudit/ExchangeRate.sol#552-559)\n",
+                "markdown": "finishMinting() should be declared external:\n\t- [MainSale.finishMinting()](../Source_code_SoliAudit/ExchangeRate.sol#L552-L559)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "updateRate",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ExchangeRate",
+                                "source_mapping": {}
+                            },
+                            "signature": "updateRate(string,uint256)"
+                        }
+                    }
+                ],
+                "description": "updateRate(string,uint256) should be declared external:\n\t- ExchangeRate.updateRate(string,uint256) (../Source_code_SoliAudit/ExchangeRate.sol#124-127)\n",
+                "markdown": "updateRate(string,uint256) should be declared external:\n\t- [ExchangeRate.updateRate(string,uint256)](../Source_code_SoliAudit/ExchangeRate.sol#L124-L127)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "allowance",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "ERC20",
+                                "source_mapping": {}
+                            },
+                            "signature": "allowance(address,address)"
+                        }
+                    },
+                    {
+                        "type": "function",
+                        "name": "allowance",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "StandardToken",
+                                "source_mapping": {}
+                            },
+                            "signature": "allowance(address,address)"
+                        }
+                    }
+                ],
+                "description": "allowance(address,address) should be declared external:\n\t- ERC20.allowance(address,address) (../Source_code_SoliAudit/ExchangeRate.sol#228)\n\t- StandardToken.allowance(address,address) (../Source_code_SoliAudit/ExchangeRate.sol#334-336)\n",
+                "markdown": "allowance(address,address) should be declared external:\n\t- [ERC20.allowance(address,address)](../Source_code_SoliAudit/ExchangeRate.sol#L228)\n\t- [StandardToken.allowance(address,address)](../Source_code_SoliAudit/ExchangeRate.sol#L334-L336)\n",
+                "check": "external-function",
+                "impact": "Optimization",
+                "confidence": "High"
+            },
+            {
+                "elements": [
+                    {
+                        "type": "function",
+                        "name": "setExchangeRate",
+                        "source_mapping": {},
+                        "type_specific_fields": {
+                            "parent": {
+                                "type": "contract",
+                                "name": "MainSale",
+                                "source_mapping": {}
+                            },
+                            "signature": "setExchangeRate(address)"
+                        }
+                    }
+                ],
+                "description": "setExchangeRate(address) should be declared external:\n\t- MainSale.setExchangeRate(address) (../Source_code_SoliAudit/ExchangeRate.sol#542-544)\n",
+                "markdown": "setExchangeRate(address) should be declared external:\n\t- [MainSale.setExchangeRate(address)](../Source_code_SoliAudit/ExchangeRate.sol#L542-L544)\n",
                 "check": "external-function",
                 "impact": "Optimization",
                 "confidence": "High"
