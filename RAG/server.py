@@ -12,7 +12,7 @@ import re
 
 app = Flask(__name__)
 
-# Logging chỉ ra terminal
+# Logging to terminal
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - [%(name)s] %(message)s",
@@ -24,7 +24,7 @@ logger = logging.getLogger("RAGServer")
 
 # Configuration
 RAG_SCRIPT_PATH = "RAG/rag_googleapi.py"
-GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "AIzaSyB3P2COlotMu-3RR-ehwZXZk60wOWJvfEA")
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY", "")
 REQUEST_TIMEOUT = 120        # seconds
 CACHE_SIZE = 100             # max cache entries
 PERFORMANCE_LOG_FILE = "rag_performance.csv"
@@ -51,7 +51,7 @@ def init_performance_log():
         with open(PERFORMANCE_LOG_FILE, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([
-                'timestamp', 'request_id', 'function_name', 'arg_type',
+                'timestamp', 'request_id', 'function_name', 'arg_type', 
                 'arg_index', 'response_time', 'source', 'prompt_length',
                 'response_length', 'status'
             ])
@@ -65,13 +65,13 @@ def log_performance(request_data, response_data, response_time, source, status="
         function_match = re.search(r"Function: ([^\n]+)", prompt)
         type_match     = re.search(r"Parameter type: ([^\n]+)", prompt)
         index_match    = re.search(r"Parameter index: ([^\n]+)", prompt)
-
+        
         function_name = function_match.group(1) if function_match else "unknown"
         arg_type      = type_match.group(1)     if type_match     else "unknown"
         arg_index     = index_match.group(1)    if index_match    else "-1"
-
+        
         request_id = hashlib.md5(f"{prompt}{time.time()}".encode()).hexdigest()[:8]
-
+        
         with open(PERFORMANCE_LOG_FILE, 'a', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow([
@@ -114,33 +114,33 @@ def handle_request():
     data = request.json or {}
     prompt = data.get('prompt')
     if not prompt:
-        return jsonify({"error": "Missing prompt", "response": "Không có thông tin phù hợp"}), 400
+        return jsonify({"error": "Missing prompt", "response": "No relevant information available"}), 400
 
-    # In prompt ra terminal
+    # Print prompt to terminal
     print("\n==================== REQUEST RECEIVED ====================")
-    print(f"Prompt gửi tới AI (độ dài {len(prompt)} ký tự):\n{prompt}")
+    print(f"Prompt sent to AI (length {len(prompt)} characters):\n{prompt}")
     print("========================================================\n")
 
     if not GOOGLE_API_KEY:
         logger.error("GOOGLE_API_KEY not configured")
         return jsonify({"error": "API key missing", "response": "Server error"}), 500
-
+    
     key = cache_key(prompt)
     cached = get_from_cache(key)
     if cached:
         stats["cache_hits"] += 1
         resp = {"response": cached}
         log_performance(data, resp, time.time() - start_time, "cache")
-        # In response ra terminal
+        # Print response to terminal
         print("-------------------- RESPONSE (CACHE) -------------------")
-        print(f"Giá trị trả về từ cache:\n{cached}")
+        print(f"Value returned from cache:\n{cached}")
         print("========================================================\n")
         return jsonify(resp)
 
     try:
         cmd = [
             "python", RAG_SCRIPT_PATH, "ask",
-            "--api-key", GOOGLE_API_KEY,
+                   "--api-key", GOOGLE_API_KEY,
             "--question", prompt
         ]
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -150,10 +150,10 @@ def handle_request():
             proc.kill()
             stats["timeouts"] += 1
             logger.error("RAG process timeout")
-            resp = {"response": "Timeout: Không có phản hồi trong thời gian cho phép", "error": "timeout"}
+            resp = {"response": "Timeout: No response received within the allowed time", "error": "timeout"}
             log_performance(data, resp, time.time() - start_time, "rag", status="timeout")
             print("-------------------- RESPONSE (TIMEOUT) -----------------")
-            print(f"Timeout hoặc không có phản hồi trong thời gian cho phép.")
+            print("Timeout or no response received within the allowed time.")
             print("========================================================\n")
             return jsonify(resp)
 
@@ -161,29 +161,29 @@ def handle_request():
             stats["errors"] += 1
             error_msg = stderr.decode(errors='ignore')
             logger.error(f"RAG error: {error_msg}")
-            resp = {"response": "Không có thông tin phù hợp", "error": error_msg}
+            resp = {"response": "No relevant information found", "error": error_msg}
             print("-------------------- RESPONSE (ERROR) -------------------")
-            print(f"Lỗi khi gọi AI:\n{error_msg}")
+            print(f"Error when calling AI:\n{error_msg}")
             print("========================================================\n")
         else:
             output = stdout.decode(errors='ignore').strip()
             if "Response from AI:" in output:
                 ai_resp = output.split("Response from AI:",1)[1].strip()
             else:
-                ai_resp = output or "Không có thông tin phù hợp"
+                ai_resp = output or "No relevant information found"
             resp = {"response": ai_resp}
             add_to_cache(key, ai_resp)
             stats["success"] += 1
             print("-------------------- RESPONSE (AI) ----------------------")
-            print(f"Giá trị trả về từ AI:\n{ai_resp}")
+            print(f"Value returned from AI:\n{ai_resp}")
             print("========================================================\n")
-
+            
     except Exception as e:
         stats["errors"] += 1
         logger.error(f"Server processing error: {e}")
-        resp = {"response": "Không có thông tin phù hợp do lỗi server", "error": str(e)}
+        resp = {"response": "No relevant information due to server error", "error": str(e)}
         print("-------------------- RESPONSE (EXCEPTION) ---------------")
-        print(f"Lỗi server: {e}")
+        print(f"Server error: {e}")
         print("========================================================\n")
 
     log_performance(data, resp, time.time() - start_time, "rag")
@@ -201,7 +201,7 @@ def get_stats():
         cache_hit_rate = stats["cache_hits"] / total if total else 0
         success_rate   = stats["success"] / (total - stats["cache_hits"]) if (total - stats["cache_hits"]) else 0
         error_rate     = stats["errors"] / (total - stats["cache_hits"]) if (total - stats["cache_hits"]) else 0
-
+        
         return jsonify({
             "uptime_seconds": uptime,
             "total_requests": total,
@@ -223,7 +223,7 @@ def report_vulnerability():
     for f in required:
         if f not in data:
             return jsonify({"error": f"Missing {f}"}), 400
-
+    
     log_data = {
         'timestamp': datetime.now().isoformat(),
         'transaction_id': data['transaction_id'],
@@ -233,14 +233,14 @@ def report_vulnerability():
         'source': data.get('source','unknown'),
         'description': data.get('description','')
     }
-
+    
     exists = os.path.exists(VULNERABILITY_LOG_FILE)
     with open(VULNERABILITY_LOG_FILE, 'a', newline='') as f:
         writer = csv.DictWriter(f, fieldnames=log_data.keys())
         if not exists:
             writer.writeheader()
         writer.writerow(log_data)
-
+    
     logger.info(f"Recorded vulnerability: {data['vulnerability_type']} in {data['function_name']}")
     return jsonify({"status":"success"})
 

@@ -75,10 +75,12 @@ class RAGEnhancedGenerator(Generator):
         self.rag_successes = 0
         self.rag_failures = 0
         self.rag_cache_hits = 0
-
+        
+        # Độ dài tối đa của cá thể
         self.max_individual_length = max_individual_length
         
-        #self.logger.info(f"RAGEnhancedGenerator initialized with {len(self.optimal_sequences)} optimal sequences, {len(self.critical_paths)} critical paths, and {len(self.potential_vulnerabilities)} potential vulnerabilities")
+        self.logger.info(f"RAGEnhancedGenerator initialized with {len(self.optimal_sequences)} optimal sequences, {len(self.critical_paths)} critical paths, and {len(self.potential_vulnerabilities)} potential vulnerabilities")
+        self.logger.info(f"Maximum individual length: {self.max_individual_length}")
     
     def _get_function_hash_by_name(self, function_name: str) -> Optional[str]:
         """Tìm function hash từ tên hàm"""
@@ -197,61 +199,61 @@ class RAGEnhancedGenerator(Generator):
             
             # Xây dựng prompt cải tiến cho RAG với ví dụ rõ ràng hơn
             prompt = f"""
-Phân tích hợp đồng thông minh và tạo các giá trị tham số tối ưu cho fuzzing.
+Analyze the smart contract and generate optimal parameter values for fuzzing.
 
 Contract: {self.contract_name}
 Function: {function_name}
 Parameter types: {argument_types}
 
-CONTEXT PHÂN TÍCH:
+ANALYSIS CONTEXT:
 {json.dumps(dataflow_context, indent=2) if dataflow_context else ""}
 
-TÌM HIỂU CHỨC NĂNG HÀM: 
-Hãy phân tích hàm {function_name} để hiểu:
-- Chức năng chính của hàm này là gì?
-- Các ràng buộc và điều kiện kiểm tra nào trong hàm?
-- Các biến state nào bị ảnh hưởng bởi hàm này?
-- Các hàm khác nào thường được gọi trước/sau hàm này?
+FUNCTION ANALYSIS: 
+Analyze function {function_name} to understand:
+- What is the main functionality of this function?
+- What constraints and validation checks exist in the function?
+- Which state variables are affected by this function?
+- Which other functions are typically called before/after this function?
 
-PHÂN TÍCH ĐIỂM YẾU TIỀM ẨN:
-Dựa trên các lỗ hổng phổ biến trong smart contract, xác định:
-- Có khả năng xảy ra integer overflow/underflow không?
-- Có ràng buộc access control nào có thể bị bypass không?
-- Có thể xảy ra reentrancy không?
-- Có vấn đề về logic trong điều kiện không?
+VULNERABILITY ANALYSIS:
+Based on common smart contract vulnerabilities, identify:
+- Is there potential for integer overflow/underflow?
+- Are there access control constraints that could be bypassed?
+- Is reentrancy possible?
+- Are there logical issues in conditions?
 
-SINH GIÁ TRỊ THAM SỐ:
-Đối với mỗi tham số trong {argument_types}, hãy sinh giá trị đặc biệt dựa trên loại dữ liệu và chức năng của hàm:
+PARAMETER VALUE GENERATION:
+For each parameter in {argument_types}, generate special values based on data type and function purpose:
 
-- Đối với uint/int: Tìm giá trị biên, giá trị có thể bypass điều kiện, hoặc gây tràn số
-- Đối với address: Tìm địa chỉ đặc biệt liên quan đến quyền hạn, tương tác với hợp đồng
-- Đối với bool: Xác định giá trị có thể tác động đến control flow
-- Đối với bytes/string: Xác định độ dài và nội dung có thể gây vấn đề
+- For uint/int: Find boundary values, values that could bypass conditions, or cause overflow
+- For address: Find special addresses related to permissions, contract interactions
+- For bool: Determine values that could impact control flow
+- For bytes/string: Determine length and content that could cause issues
 
-PHÂN TÍCH TRANSACTION SEQUENCE:
-Dựa trên dataflow và critical paths, xác định:
-- Các hàm nên được gọi trước {function_name}
-- Các hàm nên được gọi sau {function_name}
-- Trạng thái contract cần thiết trước khi gọi hàm này
+TRANSACTION SEQUENCE ANALYSIS:
+Based on dataflow and critical paths, identify:
+- Functions that should be called before {function_name}
+- Functions that should be called after {function_name}
+- Contract state required before calling this function
 
-CHỈ TRẢ VỀ:
-Một mảng JSON đơn giản chỉ chứa các giá trị tham số, không có cấu trúc lồng nhau, không có tên trường. Ví dụ:
+RETURN ONLY:
+A simple JSON array containing only parameter values, no nested structures, no field names. Example:
 [
-  "0x1234567890123456789012345678901234567890",  // địa chỉ
-  1000000000  // số lượng
+  "0x1234567890123456789012345678901234567890",  // address
+  1000000000  // amount
 ]
 
-KHÔNG bao gồm giải thích hoặc metadata, chỉ trả về mảng JSON với các giá trị.
+DO NOT include explanations or metadata, only return the JSON array with values.
 """
             
             # Thêm thông tin về các lỗ hổng tiềm ẩn nếu có
             if related_vulnerabilities:
                 prompt += f"""
 
-THÔNG TIN LỖ HỔNG LIÊN QUAN:
+RELATED VULNERABILITY INFORMATION:
 {json.dumps(related_vulnerabilities, indent=2)}
 
-Tập trung vào việc sinh các giá trị tham số có thể kích hoạt các lỗ hổng trên.
+Focus on generating parameter values that could trigger the above vulnerabilities.
 """
             
             # Thêm thông tin về critical paths
@@ -261,17 +263,17 @@ Tập trung vào việc sinh các giá trị tham số có thể kích hoạt c�
 CRITICAL PATHS:
 {json.dumps(self.critical_paths, indent=2)}
 
-Các paths này chỉ ra các chuỗi hàm có liên quan chặt chẽ với nhau. Sinh giá trị tham số phù hợp với các paths này.
+These paths indicate function sequences that are closely related. Generate parameter values suitable for these paths.
 """
             
             # Thêm thông tin về các sequence tối ưu đã phát hiện
             if self.optimal_sequences:
                 prompt += f"""
 
-SEQUENCES TỐI ƯU ĐÃ PHÁT HIỆN:
+DISCOVERED OPTIMAL SEQUENCES:
 {json.dumps(self.optimal_sequences, indent=2)}
 
-Tham khảo các sequences tối ưu này khi sinh giá trị tham số.
+Reference these optimal sequences when generating parameter values.
 """
             
             # Thêm thông tin từ mã nguồn nếu có
@@ -285,24 +287,24 @@ Tham khảo các sequences tối ưu này khi sinh giá trị tham số.
                     if function_matches:
                         prompt += f"""
 
-MÃ NGUỒN CỦA HÀM:
+FUNCTION SOURCE CODE:
 {function_matches[0]}
 
-Phân tích mã nguồn để hiểu chính xác các ràng buộc, điều kiện và logic của hàm, từ đó sinh giá trị tham số phù hợp.
+Analyze the source code to understand exactly the constraints, conditions and logic of the function, then generate appropriate parameter values.
 """
                 except Exception as e:
                     self.logger.warning(f"Could not read sol file: {e}")
             
             # Nhấn mạnh định dạng trả về để tránh lỗi JSON
             prompt += """
-QUAN TRỌNG: Trả về mảng JSON đơn giản, ví dụ:
+IMPORTANT: Return a simple JSON array, example:
 [
   "0x1234567890123456789012345678901234567890",
   1000000000
 ]
 
-KHÔNG bao gồm cấu trúc phức tạp hoặc metadata như "parameter_name", "description", "function", "parameters",...
-CHỈ trả về một mảng chứa các giá trị theo thứ tự tham số.
+DO NOT include complex structures or metadata like "parameter_name", "description", "function", "parameters"...
+ONLY return an array containing values in parameter order.
 """
             
             self.logger.info(f"Requesting argument values from RAG for {function_name}")
@@ -536,22 +538,22 @@ CHỈ trả về một mảng chứa các giá trị theo thứ tự tham số.
     def _get_suggested_sequence_from_rag(self) -> Optional[List[str]]:
         """Lấy gợi ý sequence từ RAG."""
         prompt = f"""
-Dựa vào smart contract '{self.contract_name}' với các hàm: {list(self.interface_mapper.keys()) if self.interface_mapper else list(self.interface.keys())},
-hãy đề xuất một chuỗi các lời gọi hàm để tìm lỗ hổng tiềm ẩn hoặc tăng độ phủ code.
+Based on smart contract '{self.contract_name}' with functions: {list(self.interface_mapper.keys()) if self.interface_mapper else list(self.interface.keys())},
+suggest a sequence of function calls to find potential vulnerabilities or increase code coverage.
 
-Thông tin hợp đồng: {self.contract_name}
-Các hàm có sẵn: {', '.join(list(self.interface_mapper.keys()) if self.interface_mapper else list(self.interface.keys()))}
+Contract information: {self.contract_name}
+Available functions: {', '.join(list(self.interface_mapper.keys()) if self.interface_mapper else list(self.interface.keys()))}
 
-Xem xét critical paths: {json.dumps(self.critical_paths, indent=2)} 
-Và các lỗ hổng tiềm ẩn: {json.dumps(self.potential_vulnerabilities, indent=2)}.
+Consider critical paths: {json.dumps(self.critical_paths, indent=2)} 
+And potential vulnerabilities: {json.dumps(self.potential_vulnerabilities, indent=2)}.
 
-Một sequence tốt sẽ:
-1. Thay đổi trạng thái contract theo cách có thể dẫn đến lỗi
-2. Kiểm tra các điều kiện biên và giá trị đặc biệt
-3. Tương tác với các hàm có quan hệ phụ thuộc dữ liệu
-4. Nhắm vào các lỗ hổng tiềm ẩn
+A good sequence will:
+1. Change contract state in ways that could lead to errors
+2. Test boundary conditions and special values
+3. Interact with functions that have data dependencies
+4. Target potential vulnerabilities
 
-Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer", "approve", "transferFrom"])
+Only return a JSON array containing function names (example: ["transfer", "approve", "transferFrom"])
 """
         response = self._fetch_rag_suggestion(prompt)
         if response:
@@ -611,7 +613,7 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
             }
         self._strategy_counts[strategy] += 1
         
-        #self.logger.info(f"Using strategy: {strategy} for transaction sequence")
+        self.logger.info(f"Using strategy: {strategy} for transaction sequence")
 
         # Giới hạn số lượng transaction tối đa
         MAX_SEQUENCE_LENGTH = 5  # Đặt số lượng transaction tối đa nhỏ hơn để tối ưu độ phủ
@@ -637,7 +639,7 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
         if strategy == "optimal_sequence" and self.optimal_sequences:
             # Sử dụng sequence từ phân tích dataflow
             sequence_template = random.choice(self.optimal_sequences)
-            #self.logger.info(f"Using optimal sequence template: {sequence_template}")
+            self.logger.info(f"Using optimal sequence template: {sequence_template}")
             
             # Giới hạn số lượng transaction trong template
             sequence_template = sequence_template[:MAX_SEQUENCE_LENGTH-1]  # Để lại chỗ cho 1 hàm ngẫu nhiên
@@ -667,12 +669,12 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     if tx:
                         individual.extend(tx)
                         original_functions += 1
-                        #self.logger.info(f"Added random function {random_func[:8]} for diversity")
+                        self.logger.info(f"Added random function {random_func[:8]} for diversity")
         
         elif strategy == "critical_path" and self.critical_paths:
             # Sử dụng critical path từ phân tích dataflow
             path = random.choice(self.critical_paths)
-            #self.logger.info(f"Following critical path: {path}")
+            self.logger.info(f"Following critical path: {path}")
             
             # Giới hạn số lượng transaction trong path
             path = path[:MAX_SEQUENCE_LENGTH-1]  # Để lại chỗ cho 1 hàm ngẫu nhiên
@@ -700,8 +702,8 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     tx = super().generate_individual(random_func, self.interface[random_func], default_value=default_value)
                     if tx:
                         individual.extend(tx)
-                        original_functions += 1 
-                        #self.logger.info(f"Added random function {random_func[:8]} for diversity")
+                        original_functions += 1
+                        self.logger.info(f"Added random function {random_func[:8]} for diversity")
         
         elif strategy == "mutation" and hasattr(self, 'population') and self.population:
             # Đột biến một sequence tốt từ quần thể
@@ -820,11 +822,11 @@ Chỉ trả về một mảng JSON chứa tên các hàm (ví dụ: ["transfer",
                     func_names.append(f"{func_name}({func_hash[:8]})")
         
         # Log thống kê để kiểm soát, bao gồm tên các hàm được gọi
-        # if len(func_names) > 0:
-        #     self.logger.info(f"Generated sequence with {len(individual)} transactions ({rag_enhanced_functions} enhanced, {original_functions} original)")
-        #     self.logger.info(f"Sequence details: {' -> '.join(func_names)}")
-        # else:
-        #     self.logger.info(f"Generated empty sequence")
+        if len(func_names) > 0:
+            self.logger.info(f"Generated sequence with {len(individual)} transactions ({rag_enhanced_functions} enhanced, {original_functions} original)")
+            self.logger.info(f"Sequence details: {' -> '.join(func_names)}")
+        else:
+            self.logger.info(f"Generated empty sequence")
         
         # Lưu lại sequence tốt (chỉ khi có ít nhất một transaction ngoài constructor)
         if hasattr(self, 'good_sequences') and len(individual) > 1:
@@ -1840,9 +1842,23 @@ def create_rag_enhanced_generator(
         sol_path: Optional[str] = None,
         other_generators=None,
         interface_mapper=None,
-        max_individual_length:int = 10) -> RAGEnhancedGenerator:
+        max_individual_length: int = 10) -> RAGEnhancedGenerator:
     """
-    Hàm tiện ích để tạo RAGEnhanced"""
+    Hàm tiện ích để tạo RAGEnhanced Generator
+    
+    :param interface: Interface của contract
+    :param bytecode: Bytecode của contract
+    :param accounts: Danh sách các tài khoản
+    :param contract: Địa chỉ contract
+    :param api_key: API key cho RAG
+    :param analysis_result: Kết quả phân tích
+    :param contract_name: Tên contract
+    :param sol_path: Đường dẫn đến file Solidity
+    :param other_generators: Các generator khác
+    :param interface_mapper: Interface mapper
+    :param max_individual_length: Độ dài tối đa của cá thể
+    :return: RAGEnhancedGenerator
+    """
     return RAGEnhancedGenerator(
         interface=interface,
         bytecode=bytecode,
